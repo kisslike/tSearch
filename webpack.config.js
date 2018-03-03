@@ -1,14 +1,20 @@
+const {DefinePlugin} = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
+
+
+const isWatch = process.argv.some(function (arg) {
+  return arg === '--watch';
+});
 
 const outputPath = path.resolve('./dist/');
 
 const config = {
   entry: {
     bg: './src/js/bg',
-    popup: './src/js/popup',
+    popup: './src/js/Popup',
     options: './src/js/options',
     sandbox: './src/js/sandbox',
     history: './src/js/history',
@@ -19,6 +25,7 @@ const config = {
     path: outputPath,
     filename: '[name].js'
   },
+  devtool: 'source-map',
   module: {
     rules: [
       {
@@ -42,13 +49,13 @@ const config = {
         }
       },
       {
-        test: /\.(css|scss)$/,
+        test: /\.(css|less)$/,
         use: [{
           loader: "style-loader"
         }, {
           loader: "css-loader"
         }, {
-          loader: "sass-loader"
+          loader: "less-loader"
         }]
       },
       {
@@ -105,5 +112,15 @@ const config = {
     }),
   ]
 };
+
+if (isWatch) {
+  config.plugins.push(
+    new DefinePlugin({
+      'process.env': {
+        'DEBUG': JSON.stringify('*')
+      }
+    })
+  );
+}
 
 module.exports = config;
