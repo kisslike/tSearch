@@ -11,6 +11,9 @@ const config = {
     popup: './src/js/popup',
     options: './src/js/options',
     sandbox: './src/js/sandbox',
+    history: './src/js/history',
+    editor: './src/js/editor',
+    magic: './src/js/magic',
   },
   output: {
     path: outputPath,
@@ -84,6 +87,21 @@ const config = {
       filename: 'sandbox.html',
       template: './src/sandbox.html',
       chunks: ['sandbox']
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'history.html',
+      template: './src/history.html',
+      chunks: ['history']
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'editor.html',
+      template: './src/editor.html',
+      chunks: ['editor']
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'magic.html',
+      template: './src/magic.html',
+      chunks: ['magic']
     }),
   ]
 };
