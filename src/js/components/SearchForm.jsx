@@ -40,7 +40,6 @@ import searchFormStyle from '../../css/searchForm.less';
       <div className="search-from">
         <form onSubmit={this.handleSubmit}>
           <Autosuggest
-            ref='input'
             theme={{
               input: 'input',
               suggestionsContainer: 'suggestions-container',
