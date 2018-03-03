@@ -15,6 +15,7 @@ const config = {
   entry: {
     bg: './src/js/bg',
     popup: './src/js/Popup',
+    index: './src/js/Index',
     options: './src/js/options',
     sandbox: './src/js/sandbox',
     history: './src/js/history',
@@ -84,6 +85,11 @@ const config = {
       filename: 'popup.html',
       template: './src/popup.html',
       chunks: ['popup']
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'index.html',
+      template: './src/index.html',
+      chunks: ['index']
     }),
     new HtmlWebpackPlugin({
       filename: 'options.html',
