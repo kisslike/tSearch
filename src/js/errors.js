@@ -10,4 +10,13 @@ class StatusCodeError extends Error {
   }
 }
 
-export {StatusCodeError};
+class AbortError extends Error {
+  constructor(message) {
+    super(message);
+
+    this.name = 'Aborted';
+    this.code = 'EABORT';
+  }
+}
+
+export {StatusCodeError, AbortError};

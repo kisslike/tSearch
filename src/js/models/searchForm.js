@@ -1,7 +1,7 @@
 const {types} = require('mobx-state-tree');
 const popsicle = require('popsicle');
 const debug = require('debug')('searchFrom');
-import {StatusCodeError} from '../errors';
+import {StatusCodeError, AbortError} from '../errors';
 import escapeRegExp from 'lodash.escaperegexp';
 
 const searchFrom = types.model('searchFrom', {
@@ -15,11 +15,12 @@ const searchFrom = types.model('searchFrom', {
     self.suggestions = results;
   }
 })).views(self => {
-  let lastRequest = null;
+  let lastFetch = null;
 
   const fetchGoogleSuggestions = value => {
-    fetchAbort();
-    lastRequest = popsicle.get({
+    let aborted = false;
+
+    const request = popsicle.get({
       url: 'http://suggestqueries.google.com/complete/search',
       query: {
         client: 'firefox',
@@ -27,19 +28,27 @@ const searchFrom = types.model('searchFrom', {
       }
     });
 
-    return lastRequest.then(response => {
+    const promise = request.then(response => {
       if (!/^2/.test('' + response.status)) {
         throw new StatusCodeError(response.status, response.body, null, response);
       }
-      return response;
-    }).then(response => {
+
+      if (aborted) {
+        throw new AbortError('fetchGoogleSuggestions aborted');
+      }
+
       return JSON.parse(response.body)[1];
     });
+    promise.abort = () => {
+      aborted = true;
+      request.abort();
+    };
+    return promise;
   };
+
   const fetchHistorySuggestions = value => {
-    fetchAbort();
     let aborted = false;
-    lastRequest = new Promise(r => chrome.storage.local.get({
+    const promise = new Promise(r => chrome.storage.local.get({
       history: []
     }, r)).then(({history}) => {
       history.sort(({count: a}, {count: b}) => {
@@ -54,22 +63,21 @@ const searchFrom = types.model('searchFrom', {
       }
 
       if (aborted) {
-        const err = new Error('Aborted');
-        err.code = 'EABORT';
-        throw err;
+        throw new AbortError('fetchHistorySuggestions aborted');
       }
 
       return suggestions;
     });
-    lastRequest.abort = () => {
+    promise.abort = () => {
       aborted = true;
     };
-    return lastRequest;
+    return promise;
   };
+
   const fetchAbort = () => {
-    if (lastRequest) {
-      lastRequest.abort();
-      lastRequest = null;
+    if (lastFetch) {
+      lastFetch.abort();
+      lastFetch = null;
     }
   };
 
@@ -78,13 +86,13 @@ const searchFrom = types.model('searchFrom', {
       return self.suggestions.slice(0);
     },
     fetchSuggestions(value) {
-      let promise = null;
+      fetchAbort();
       if (!value) {
-        promise = fetchHistorySuggestions();
+        lastFetch = fetchHistorySuggestions();
       } else {
-        promise = fetchGoogleSuggestions(value);
+        lastFetch = fetchGoogleSuggestions(value);
       }
-      promise.then(results => {
+      lastFetch.then(results => {
         self.setSuggestions(results);
       }, err => {
         if (err.code === 'EABORT') return;
