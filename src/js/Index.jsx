@@ -2,9 +2,54 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 const indexStyle = require('../css/index.css');
 import SearchForm from './components/SearchForm';
-
+import indexStore from './models/indexStore';
 
 class Index extends React.Component {
+  constructor() {
+    super();
+
+    this.state = {
+      loading: true,
+      store: null
+    };
+
+    this.store = null;
+
+    this.load();
+  }
+  load() {
+    new Promise(r => chrome.storage.local.get({
+      currentProfileId: null,
+      profiles: [],
+      trackers: [],
+    }, r)).then(storage => {
+      if (!storage.profiles.length) {
+        storage.profiles.push({
+          id: 0,
+          trackers: []
+        });
+      }
+
+      this.setState({
+        loading: false,
+        store: indexStore.create(storage)
+      });
+    });
+  }
+  render() {
+    if (this.state.loading) {
+      return (
+        'Loading...'
+      );
+    } else {
+      return (
+        <Main store={this.store}/>
+      );
+    }
+  }
+}
+
+class Main extends React.Component {
   render() {
     return ([
       <div key="head" className="body__head">
@@ -30,7 +75,7 @@ class Index extends React.Component {
               <div className="tracker__list"/>
             </div>
           </div>
-          <div className="parameter_box__right">
+          {/*<div className="parameter_box__right">
             <div className="parameter parameter-filter">
               <span className="filter__label">{chrome.i18n.getMessage('wordFilterLabel')}</span>
               <div className="input_box input_box-filter">
@@ -82,7 +127,7 @@ class Index extends React.Component {
                 <input className="input__input input__input-peer-filter input__input-range input__input-range-to" type="text" placeholder={chrome.i18n.getMessage('rangeToPlaceholder')}/>
               </div>
             </div>
-          </div>
+          </div>*/}
         </div>
         <div className="main">
           <ul className="explore explore-hide"/>
