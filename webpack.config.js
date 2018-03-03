@@ -64,11 +64,11 @@ const config = {
   },
   plugins: [
     new CleanWebpackPlugin(outputPath),
-    new CopyWebpackPlugin([{
-      from: './src/manifest.json',
-    }, {
-      from: './src/icons', to: './icons'
-    }]),
+    new CopyWebpackPlugin([
+      {from: './src/manifest.json',},
+      {from: './src/icons', to: './icons'},
+      {from: './src/trackers', to: './trackers'},
+    ]),
     new HtmlWebpackPlugin({
       filename: 'popup.html',
       template: './src/popup.html',
