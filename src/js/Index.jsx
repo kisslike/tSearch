@@ -29,6 +29,12 @@ class Index extends React.Component {
           trackers: []
         });
       }
+      const profileFound = storage.profiles.some(profile => {
+        return storage.currentProfileId === profile.id;
+      });
+      if (!profileFound) {
+        storage.currentProfileId = storage.profiles[0].id;
+      }
 
       this.setState({
         loading: false,

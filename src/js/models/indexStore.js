@@ -4,9 +4,9 @@ import tracker from './tracker';
 
 
 const indexStore = types.model('indexStore', {
-  currentProfileId: types.maybe(types.number),
-  profiles: types.optional(types.array(profile), []),
-  trackers: types.optional(types.array(tracker), []),
+  currentProfileId: types.reference(profile),
+  profiles: types.array(profile),
+  trackers: types.array(tracker),
 });
 
 export default indexStore;
