@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-const indexStyle = require('../css/index.css');
+import indexStyle from '../css/index.css';
 import SearchForm from './components/SearchForm';
 import indexStore from './models/indexStore';
 
