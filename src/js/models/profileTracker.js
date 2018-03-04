@@ -1,12 +1,42 @@
-const {types} = require('mobx-state-tree');
+const {types, resolveIdentifier} = require('mobx-state-tree');
+import tracker from './tracker';
+import {trackerMeta} from './tracker';
+import search from './search';
 
 
-const profileTracker = types.model('profileTracker', {
-  id: types.identifier(types.string),
-  meta: types.model('profileTrackerMeta', {
-    name: types.string,
-    downloadURL: types.maybe(types.string),
-  }),
+const profileTrackerMeta = types.compose(trackerMeta, types.model({
+  version: types.maybe(types.string),
+  connect: types.maybe(types.array(types.string))
+})).named('profileTrackerMeta');
+
+const profileTracker = types.compose(tracker, types.model({
+  meta: profileTrackerMeta,
+  info: types.maybe(types.model('profileTrackerInfo', {
+    lastUpdate: types.optional(types.number, 0),
+    disableAutoUpdate: types.optional(types.boolean, false),
+  })),
+  code: types.maybe(types.string),
+  search: types.maybe(search),
+})).named('profileTracker').actions(self => {
+  return {
+
+  };
+}).views(self => {
+  let worker = null;
+  return {
+    getWorker() {
+      return Promise.reject(new Error('Not implemented yet'));
+    },
+    getTracker() {
+      return resolveIdentifier(tracker, self, self.id) || self;
+    },
+    beforeDestroy() {
+      if (worker) {
+        worker.destroy();
+        worker = null;
+      }
+    }
+  };
 });
 
 export default profileTracker;

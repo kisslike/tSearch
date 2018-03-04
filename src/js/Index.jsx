@@ -1,10 +1,15 @@
+const debug = require('debug')('Index');
 import React from 'react';
 import ReactDOM from 'react-dom';
 import indexStyle from '../css/index.css';
 import SearchForm from './components/SearchForm';
 import indexStore from './models/indexStore';
+import {observer} from 'mobx-react';
+import ProfileSelect from './components/ProfileSelect';
+import Trackers from './components/Trackers';
 
-class Index extends React.Component {
+
+@observer class Index extends React.Component {
   constructor() {
     super();
 
@@ -23,19 +28,6 @@ class Index extends React.Component {
       profiles: [],
       trackers: [],
     }, r)).then(storage => {
-      if (!storage.profiles.length) {
-        storage.profiles.push({
-          id: 0,
-          trackers: []
-        });
-      }
-      const profileFound = storage.profiles.some(profile => {
-        return storage.currentProfileId === profile.id;
-      });
-      if (!profileFound) {
-        storage.currentProfileId = storage.profiles[0].id;
-      }
-
       this.setState({
         loading: false,
         store: indexStore.create(storage)
@@ -49,13 +41,13 @@ class Index extends React.Component {
       );
     } else {
       return (
-        <Main store={this.store}/>
+        <Main store={this.state.store}/>
       );
     }
   }
 }
 
-class Main extends React.Component {
+@observer class Main extends React.Component {
   render() {
     return ([
       <div key="head" className="body__head">
@@ -73,12 +65,12 @@ class Main extends React.Component {
           <div className="parameter_box__left">
             <div className="parameter parameter-profile">
               <div className="profile_box">
-                <select className="profile__select"/>
+                <ProfileSelect store={this.props.store}/>
                 <a href="#manageProfiles" title={chrome.i18n.getMessage('manageProfiles')} className="button-manage-profile"/>
               </div>
             </div>
             <div className="parameter parameter-tracker">
-              <div className="tracker__list"/>
+              <Trackers store={this.props.store}/>
             </div>
           </div>
           {/*<div className="parameter_box__right">
@@ -145,4 +137,4 @@ class Main extends React.Component {
   }
 }
 
-ReactDOM.render(<Index/>, document.getElementById('root'));
+window.app = ReactDOM.render(<Index/>, document.getElementById('root'));

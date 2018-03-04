@@ -3,9 +3,20 @@ import profileTracker from './profileTracker';
 
 
 const profile = types.model('profile', {
-  id: types.identifier(types.number),
-  name: types.optional(types.string, 'Default'),
+  name: types.identifier(types.string),
   trackers: types.optional(types.array(profileTracker), []),
+}).actions(self => {
+  return {
+    setName(value) {
+      self.name = value;
+    }
+  };
+}).views(self => {
+  return {
+    getTrackers() {
+      return self.trackers.map(tracker => tracker.getTracker());
+    }
+  };
 });
 
 export default profile;
