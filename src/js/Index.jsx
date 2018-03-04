@@ -6,8 +6,9 @@ import SearchForm from './components/SearchForm';
 import indexStore from './models/indexStore';
 import {observer} from 'mobx-react';
 import ProfileSelect from './components/ProfileSelect';
+import ScrollTop from './components/ScrollTop';
 import Trackers from './components/Trackers';
-
+import loadTrackers from './tools/loadTrackers';
 
 @observer class Index extends React.Component {
   constructor() {
@@ -28,9 +29,17 @@ import Trackers from './components/Trackers';
       profiles: [],
       trackers: [],
     }, r)).then(storage => {
-      this.setState({
-        loading: false,
-        store: indexStore.create(storage)
+      return Promise.resolve().then(() => {
+        if (storage.trackers.length === 0) {
+          return loadTrackers().then(trackers => {
+            storage.trackers.push(...trackers);
+          });
+        }
+      }).then(() => {
+        this.setState({
+          loading: false,
+          store: indexStore.create(storage)
+        });
       });
     });
   }
@@ -132,7 +141,7 @@ import Trackers from './components/Trackers';
           <div className="results"/>
         </div>
       </div>,
-      <a key="scroll-top" className="scroll_top" href="#scrollTop" title={chrome.i18n.getMessage('scrollTop')}/>
+      <ScrollTop key="scroll_top"/>
     ]);
   }
 }

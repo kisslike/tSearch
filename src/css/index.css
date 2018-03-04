@@ -215,6 +215,18 @@ a.search__submit {
     flex-direction: column;
 }
 
+.parameter_box {
+    width: 176px;
+}
+
+.profile_box {
+    display: flex;
+}
+
+.profile_box .profile__select {
+    flex-grow: 1;
+}
+
 .content-column .parameter_box {
     justify-content: space-between;
 }
@@ -307,7 +319,6 @@ a.search__submit {
 }
 
 .scroll_top {
-    display: none;
     bottom: 0;
     width: 50px;
     background: url(../img/scroll_top.svg) no-repeat center bottom;
@@ -321,10 +332,6 @@ a.search__submit {
 
 .scroll_top:hover {
     background-color: rgba(0, 0, 0, 0.1);
-}
-
-.scroll_top.scroll_top-show {
-    display: block;
 }
 
 .button {
@@ -463,8 +470,7 @@ a.simple_select__menu__item {
     cursor: pointer;
 }
 
-a.tracker {
-    text-decoration: none;
+.tracker {
     color: #000;
 }
 
@@ -531,6 +537,11 @@ a.tracker {
     padding: 0 2px;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+a.tracker__name {
+    text-decoration: none;
+    color: #000;
 }
 
 .tracker .tracker__counter {

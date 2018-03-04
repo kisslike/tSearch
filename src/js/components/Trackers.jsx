@@ -28,11 +28,11 @@ import {observer} from "mobx-react/index";
       }
 
       return (
-        <a key={tracker.id} className="tracker" href={'#' + tracker.id}>
+        <div key={tracker.id} className="tracker">
           {icon}
-          <div className="tracker__name">{tracker.meta.name}</div>
+          <a className="tracker__name" href={'#' + tracker.id}>{tracker.meta.name}</a>
           <div className="tracker__counter">{count}</div>
-        </a>
+        </div>
       );
     });
     return (
