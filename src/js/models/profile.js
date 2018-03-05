@@ -25,6 +25,9 @@ const profile = types.model('profile', {
       self.trackers.forEach(tracker => {
         tracker.destroyWorker();
       });
+    },
+    beforeDestroy() {
+      self.destroyWorkers();
     }
   };
 });
