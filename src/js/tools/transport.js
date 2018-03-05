@@ -4,11 +4,15 @@ import once from 'lodash.once';
 const emptyFn = () => {};
 
 class Transport {
-  constructor(transport) {
+  /**
+   * @param {{onMessage:function(function),postMessage:function(*)}} transport
+   * @param {Object} actions
+   **/
+  constructor(transport, actions) {
     this.transportId = Math.trunc(Math.random() * 1000);
     this.callbackIndex = 0;
-    this.listeners = [];
     this.transport = transport;
+    this.actions = actions;
 
     this.cbMap = new Map();
 
@@ -17,17 +21,25 @@ class Transport {
     this.transport.onMessage(this.onMessage);
   }
 
-  addListener(listener) {
-    this.listeners.push(listener);
-  }
-
-  removeListener(listener) {
-    const pos = this.listeners.indexOf(listener);
-    if (pos !== -1) {
-      this.listeners.splice(pos, 1);
+  /**
+   * @param {*} msg
+   * @param {{event:Object}} options
+   * @param {function(*)} response
+   * @return {boolean}
+   * @private
+   */
+  listener(msg, response) {
+    switch (msg.action) {
+      case 'callFn': {
+        this.responseFn(msg, response);
+        return true;
+      }
     }
   }
 
+  /**
+   * @param {{responseId: string, message:*, callbackId: string}} msg
+   */
   onMessage(msg) {
     const cbMap = this.cbMap;
     if (msg.responseId) {
@@ -51,16 +63,11 @@ class Transport {
       }
 
       let result = null;
-      this.listeners.forEach(cb => {
-        try {
-          const r = cb(msg.message, response);
-          if (r === true) {
-            result = true;
-          }
-        } catch (err) {
-          debug('Call listener error', err);
-        }
-      });
+      try {
+        result = this.listener(msg.message, response)
+      } catch (err) {
+        debug('Call listener error', err);
+      }
       if (result !== true) {
         response();
       }
@@ -93,8 +100,99 @@ class Transport {
     }
   }
 
+  /**
+   * @param {*} msg
+   * @return {Promise}
+   * @private
+   */
+  waitPromise(msg) {
+    return new Promise((resolve, reject) => {
+      const cb = response => {
+        if (response.err) {
+          const err = new Error();
+          Object.assign(err, response.err);
+          return reject(err);
+        } else {
+          return resolve(response.result);
+        }
+      };
+      cb.__promise = true;
+      this.sendMessage(msg, cb);
+    });
+  }
+
+  /**
+   * @param {string} fnName
+   * @param {*[]} argsArray
+   * @return {Promise}
+   */
+  callFn(fnName, argsArray = []) {
+    const self = this;
+    return self.waitPromise({
+      action: 'callFn',
+      fn: fnName,
+      args: argsArray
+    });
+  }
+
+  /**
+   * @param {Promise} promise
+   * @param {Function} response
+   * @return {boolean}
+   * @private
+   */
+  responsePromise(promise, response) {
+    promise.then(result => {
+      response({result: result});
+    }, err => {
+      response({err: {
+          name: err.name,
+          message: err.message,
+          stack: err.stack
+        }});
+    }).catch(function (err) {
+      debug('responsePromise error', err);
+    });
+    return true;
+  }
+
+  /**
+   * @param {string} path
+   * @return {{scope: Object, endPoint: *}}
+   * @private
+   */
+  resolvePath(path) {
+    const parts = path.split('.');
+    const endPoint = parts.pop();
+    let scope = this.actions;
+    while (parts.length) {
+      scope = scope[parts.shift()];
+    }
+    return {scope, endPoint};
+  }
+
+  /**
+   * @param {{fn:string,args:*[]}} msg
+   * @param {Function} response
+   * @return {boolean}
+   * @private
+   */
+  responseFn(msg, response) {
+    const promise = Promise.resolve().then(() => {
+      const {scope, endPoint: fn} = this.resolvePath(msg.fn);
+      return scope[fn].apply(scope, msg.args);
+    });
+    return this.responsePromise(promise, response);
+  }
+
   destroy() {
-    this.cbMap.clear();
+    this.cbMap.forEach(cb => {
+      if (cb.__promise) {
+        cb(new Error('Destroyed'));
+      } else {
+        cb();
+      }
+    });
   }
 }
 

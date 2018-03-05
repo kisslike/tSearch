@@ -4,8 +4,9 @@ import Transport from './transport';
 
 
 class FrameWorker {
-  constructor(id) {
+  constructor(id, actions) {
     this.id = id;
+    this.actions = actions;
     this.frame = null;
     this.isLoaded = false;
 
@@ -25,14 +26,12 @@ class FrameWorker {
       postMessage(msg) {
         self.postMessage(msg);
       }
-    });
+    }, this.actions);
 
-    this.sendMessage = this.transport.sendMessage.bind(this.transport);
-    this.addListener = this.transport.addListener.bind(this.transport);
-    this.removeListener = this.transport.removeListener.bind(this.transport);
+    this.callFn = this.transport.callFn.bind(this.transport);
   }
   onMessage(msg) {
-
+    debug('Message without listener', msg);
   }
   frameListener(e) {
     if (this.frame && e.source === this.frame.contentWindow) {

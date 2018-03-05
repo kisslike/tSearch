@@ -9,11 +9,16 @@ const trackerWorker = types.model('trackerWorker', {
   return {};
 }).views(self => {
   let worker = null;
+
+  const api = {
+
+  };
+
   return {
     afterCreate() {
       if (!worker) {
         const tracker = getParent(self, 1);
-        worker = new FrameWorker(tracker.id);
+        worker = new FrameWorker(tracker.id, api);
         worker.init();
       }
     },
