@@ -36,9 +36,13 @@ import loadTrackers from './tools/loadTrackers';
           });
         }
       }).then(() => {
+        const store = indexStore.create(storage);
+        store.currentProfileId.trackers.forEach(tracker => {
+          tracker.createWorker();
+        });
         this.setState({
           loading: false,
-          store: indexStore.create(storage)
+          store: store
         });
       });
     });

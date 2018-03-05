@@ -22,19 +22,9 @@ const profileTracker = types.compose(tracker, types.model({
 
   };
 }).views(self => {
-  let worker = null;
   return {
-    getWorker() {
-      return Promise.reject(new Error('Not implemented yet'));
-    },
     getTracker() {
       return resolveIdentifier(tracker, self, self.id) || self;
-    },
-    beforeDestroy() {
-      if (worker) {
-        worker.destroy();
-        worker = null;
-      }
     }
   };
 });

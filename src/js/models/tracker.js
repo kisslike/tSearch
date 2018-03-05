@@ -1,5 +1,6 @@
 const {types} = require('mobx-state-tree');
 import blankSvg from '../../img/blank.svg';
+import trackerWorker from './trackerWorker';
 
 const trackerMeta = types.model('trackerMeta', {
   name: types.string,
@@ -25,9 +26,17 @@ const tracker = types.model('tracker', {
     disableAutoUpdate: types.optional(types.boolean, false),
   }),
   code: types.string,
+  worker: types.maybe(trackerWorker)
 }).actions(self => {
   return {
-
+    createWorker() {
+      if (!self.worker) {
+        self.worker = {};
+      }
+    },
+    destroyWorker() {
+      self.worker = null;
+    }
   };
 }).views(self => {
   let styleNode = null;

@@ -1,3 +1,4 @@
+const debug = require('debug')('indexStore');
 const {types, resolveIdentifier} = require('mobx-state-tree');
 import profile from './profile';
 import tracker from './tracker';
@@ -39,7 +40,13 @@ const indexStore = types.model('indexStore', {
 }).actions(self => {
   return {
     setCurrentProfileId(name) {
+      self.currentProfileId.trackers.forEach(tracker => {
+        tracker.destroyWorker();
+      });
       self.currentProfileId = name;
+      self.currentProfileId.trackers.forEach(tracker => {
+        tracker.createWorker();
+      });
     }
   };
 }).views(self => {
