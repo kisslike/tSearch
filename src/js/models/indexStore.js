@@ -40,13 +40,9 @@ const indexStore = types.model('indexStore', {
 }).actions(self => {
   return {
     setCurrentProfileId(name) {
-      self.currentProfileId.trackers.forEach(tracker => {
-        tracker.destroyWorker();
-      });
+      self.currentProfileId.destroyWorkers();
       self.currentProfileId = name;
-      self.currentProfileId.trackers.forEach(tracker => {
-        tracker.createWorker();
-      });
+      self.currentProfileId.createWorkers();
     }
   };
 }).views(self => {
@@ -56,6 +52,11 @@ const indexStore = types.model('indexStore', {
     },
     getProfileByName(name) {
       return resolveIdentifier(profile, self, name);
+    },
+    afterCreate() {
+      if (self.currentProfileId) {
+        self.currentProfileId.createWorkers();
+      }
     }
   };
 });

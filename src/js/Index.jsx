@@ -36,11 +36,9 @@ import loadTrackers from './tools/loadTrackers';
           });
         }
       }).then(() => {
-        const store = indexStore.create(storage);
-        store.setCurrentProfileId(store.currentProfileId);
         this.setState({
           loading: false,
-          store: store
+          store: indexStore.create(storage)
         });
       });
     });

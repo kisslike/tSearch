@@ -15,6 +15,16 @@ const profile = types.model('profile', {
   return {
     getTrackers() {
       return self.trackers.map(tracker => tracker.getTracker());
+    },
+    createWorkers() {
+      self.trackers.forEach(tracker => {
+        tracker.createWorker();
+      });
+    },
+    destroyWorkers() {
+      self.trackers.forEach(tracker => {
+        tracker.destroyWorker();
+      });
     }
   };
 });
