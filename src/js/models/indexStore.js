@@ -5,14 +5,14 @@ import tracker from './tracker';
 
 
 const indexStore = types.model('indexStore', {
-  currentProfileId: types.reference(profile),
+  profile: types.reference(profile),
   profiles: types.array(profile),
   trackers: types.array(tracker),
 }).preProcessSnapshot(snapshot => {
   if (!snapshot.profiles.length) {
     snapshot.profiles.push({
       name: 'Default',
-      trackers: [{
+      profileTrackers: [{
         id: 'rutracker',
         meta: {
           name: 'rutracker'
@@ -21,7 +21,7 @@ const indexStore = types.model('indexStore', {
     });
     snapshot.profiles.push({
       name: 'Default2',
-      trackers: [{
+      profileTrackers: [{
         id: 'nnmclub',
         meta: {
           name: 'nnmclub'
@@ -30,41 +30,25 @@ const indexStore = types.model('indexStore', {
     });
   }
   const profileFound = snapshot.profiles.some(profile => {
-    return snapshot.currentProfileId === profile.name;
+    return snapshot.profile === profile.name;
   });
   if (!profileFound) {
-    snapshot.currentProfileId = snapshot.profiles[0].name;
+    snapshot.profile = snapshot.profiles[0].name;
   }
 
   return snapshot;
 }).actions(self => {
   return {
-    onChangeProfile() {
-      const activeTrackers = self.profile.getTrackers();
+    setProfile(name) {
+      self.profile = name;
       self.trackers.forEach(tracker => {
-        if (activeTrackers.indexOf(tracker) === -1) {
-          tracker.destroyWorker();
-        } else {
-          tracker.createWorker();
-        }
+        tracker.destroyWorker();
       });
-    },
-    setCurrentProfileId(name) {
-      self.currentProfileId = name;
-      self.onChangeProfile();
     }
   };
 }).views(self => {
   return {
-    get profile() {
-      return self.currentProfileId;
-    },
-    getProfileByName(name) {
-      return resolveIdentifier(profile, self, name);
-    },
-    afterCreate() {
-      self.onChangeProfile();
-    }
+
   };
 });
 

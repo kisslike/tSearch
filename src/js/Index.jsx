@@ -10,6 +10,7 @@ import ScrollTop from './components/ScrollTop';
 import Trackers from './components/Trackers';
 import loadTrackers from './tools/loadTrackers';
 
+
 @observer class Index extends React.Component {
   constructor() {
     super();
@@ -25,7 +26,7 @@ import loadTrackers from './tools/loadTrackers';
   }
   load() {
     new Promise(r => chrome.storage.local.get({
-      currentProfileId: null,
+      profile: null,
       profiles: [],
       trackers: [],
     }, r)).then(storage => {

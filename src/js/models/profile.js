@@ -7,15 +7,11 @@ const profile = types.model('profile', {
   profileTrackers: types.optional(types.array(profileTracker), []),
 }).actions(self => {
   return {
-    setName(value) {
-      self.name = value;
-    }
+
   };
 }).views(self => {
   return {
-    getTrackers() {
-      return self.profileTrackers.map(profileTracker => profileTracker.tracker).filter(a => !!a);
-    }
+
   };
 });
 

@@ -6,7 +6,6 @@ import {observer} from "mobx-react/index";
   render() {
     const store = this.props.store;
     const trackers = store.profile.profileTrackers.map(profileTracker => {
-
       let icon = null;
       if (profileTracker.tracker && profileTracker.tracker.meta.trackerURL) {
         const classList = ['tracker__icon', profileTracker.getIconClassName(), 'tracker__link'];

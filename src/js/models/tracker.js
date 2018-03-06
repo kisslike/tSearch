@@ -1,6 +1,7 @@
 const {types} = require('mobx-state-tree');
 import trackerWorker from './trackerWorker';
 
+
 const trackerMeta = types.model('trackerMeta', {
   name: types.string,
   version: types.string,
@@ -25,29 +26,26 @@ const tracker = types.model('tracker', {
     disableAutoUpdate: types.optional(types.boolean, false),
   }),
   code: types.string,
-  worker: types.maybe(trackerWorker)
+  $worker: types.maybe(trackerWorker)
 }).actions(self => {
   return {
-    createWorker() {
-      if (!self.worker) {
-        self.worker = {};
+    get worker() {
+      if (!self.$worker) {
+        self.$worker = {};
       }
+      return self.$worker;
     },
     destroyWorker() {
-      self.worker = null;
+      self.$worker = null;
     }
   };
 }).views(self => {
   return {
     search(query) {
-      if (self.worker) {
-        return self.worker.search(query);
-      }
+      return self.worker.search(query);
     },
     searchNext(next) {
-      if (self.worker) {
-        return self.worker.searchNext(next);
-      }
+      return self.worker.searchNext(next);
     }
   };
 });

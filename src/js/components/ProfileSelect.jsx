@@ -12,7 +12,7 @@ import {observer} from "mobx-react/index";
   handleSelect() {
     const store = this.props.store;
     const value = this.refs.select.value;
-    store.setCurrentProfileId(value);
+    store.setProfile(value);
   }
 
   render() {

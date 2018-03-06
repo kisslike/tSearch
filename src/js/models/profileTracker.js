@@ -9,7 +9,7 @@ const profileTrackerMeta = types.model('profileTrackerMeta', {
 });
 
 const profileTracker = types.model('profileTracker', {
-  id: types.identifier(types.string),
+  id: types.string,
   meta: profileTrackerMeta,
   search: types.maybe(search)
 }).actions(self => {
