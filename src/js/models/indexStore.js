@@ -39,10 +39,19 @@ const indexStore = types.model('indexStore', {
   return snapshot;
 }).actions(self => {
   return {
+    onChangeProfile() {
+      const activeTrackers = self.profile.getTrackers();
+      self.trackers.forEach(tracker => {
+        if (activeTrackers.indexOf(tracker) === -1) {
+          tracker.destroyWorker();
+        } else {
+          tracker.createWorker();
+        }
+      });
+    },
     setCurrentProfileId(name) {
-      self.currentProfileId.destroyWorkers();
       self.currentProfileId = name;
-      self.currentProfileId.createWorkers();
+      self.onChangeProfile();
     }
   };
 }).views(self => {
@@ -54,9 +63,7 @@ const indexStore = types.model('indexStore', {
       return resolveIdentifier(profile, self, name);
     },
     afterCreate() {
-      if (self.currentProfileId) {
-        self.currentProfileId.createWorkers();
-      }
+      self.onChangeProfile();
     }
   };
 });

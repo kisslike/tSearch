@@ -4,7 +4,7 @@ import getIconClassNameExtend from './getIconClassNameExtend';
 import search from './profileTrackerSearch';
 
 
-const profileTrackerMeta =  types.model('profileTrackerMeta', {
+const profileTrackerMeta = types.model('profileTrackerMeta', {
   name: types.string,
   downloadURL: types.maybe(types.string),
 });
