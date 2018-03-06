@@ -22,9 +22,9 @@ import {observer} from "mobx-react/index";
       }
 
       let count = 0;
-      const search = profileTracker.search;
-      if (search) {
-        count = search.results.length;
+      const lastSearch = profileTracker.lastSearch;
+      if (lastSearch) {
+        count = lastSearch.results.length;
       }
 
       return (

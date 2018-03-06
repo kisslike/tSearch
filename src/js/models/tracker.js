@@ -41,6 +41,16 @@ const tracker = types.model('tracker', {
 }).views(self => {
   let styleNode = null;
   return {
+    search(query) {
+      if (self.worker) {
+        return self.worker.search(query);
+      }
+    },
+    searchNext(next) {
+      if (self.worker) {
+        return self.worker.searchNext(next);
+      }
+    },
     getIconClassName() {
       const className = 'icon_' + self.id;
       if (!styleNode) {
