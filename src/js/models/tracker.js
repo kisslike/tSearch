@@ -1,5 +1,4 @@
 const {types} = require('mobx-state-tree');
-import getIconClassNameExtend from "./getIconClassNameExtend";
 import trackerWorker from './trackerWorker';
 
 const trackerMeta = types.model('trackerMeta', {
@@ -27,7 +26,7 @@ const tracker = types.model('tracker', {
   }),
   code: types.string,
   worker: types.maybe(trackerWorker)
-}).extend(getIconClassNameExtend).actions(self => {
+}).actions(self => {
   return {
     createWorker() {
       if (!self.worker) {

@@ -4,7 +4,7 @@ import profileTracker from './profileTracker';
 
 const profile = types.model('profile', {
   name: types.identifier(types.string),
-  trackers: types.optional(types.array(profileTracker), []),
+  profileTrackers: types.optional(types.array(profileTracker), []),
 }).actions(self => {
   return {
     setName(value) {
@@ -14,7 +14,7 @@ const profile = types.model('profile', {
 }).views(self => {
   return {
     getTrackers() {
-      return self.trackers.map(tracker => tracker.getTracker()).filter(a => !!a);
+      return self.profileTrackers.map(profileTracker => profileTracker.tracker).filter(a => !!a);
     }
   };
 });
