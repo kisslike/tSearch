@@ -1,7 +1,7 @@
 const {types} = require('mobx-state-tree');
 
 
-const lastSearch = types.model('lastSearch', {
+const search = types.model('search', {
   query: types.string,
   readyState: types.string, // loading, success, error
   authRequired: types.optional(types.boolean, false),
@@ -16,4 +16,4 @@ const lastSearch = types.model('lastSearch', {
   };
 });
 
-export default lastSearch;
+export default search;

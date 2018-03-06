@@ -1,30 +1,26 @@
 const {types, resolveIdentifier} = require('mobx-state-tree');
 import tracker from './tracker';
-import {trackerMeta} from './tracker';
-import lastSearch from './profileTrackerSearch';
+import getIconClassNameExtend from './getIconClassNameExtend';
+import search from './profileTrackerSearch';
 
 
-const profileTrackerMeta = types.compose(trackerMeta, types.model({
-  version: types.maybe(types.string),
-  connect: types.maybe(types.array(types.string))
-})).named('profileTrackerMeta');
+const profileTrackerMeta =  types.model('profileTrackerMeta', {
+  name: types.string,
+  downloadURL: types.maybe(types.string),
+});
 
-const profileTracker = types.compose(tracker, types.model({
+const profileTracker = types.model('profileTracker', {
+  id: types.string,
   meta: profileTrackerMeta,
-  info: types.maybe(types.model('profileTrackerInfo', {
-    lastUpdate: types.optional(types.number, 0),
-    disableAutoUpdate: types.optional(types.boolean, false),
-  })),
-  code: types.maybe(types.string),
-  lastSearch: types.maybe(lastSearch),
-})).named('profileTracker').actions(self => {
+  search: types.maybe(search)
+}).extend(getIconClassNameExtend).actions(self => {
   return {
 
   };
 }).views(self => {
   return {
     getTracker() {
-      return resolveIdentifier(tracker, self, self.id) || self;
+      return resolveIdentifier(tracker, self, self.id);
     }
   };
 });

@@ -14,15 +14,15 @@ const profile = types.model('profile', {
 }).views(self => {
   return {
     getTrackers() {
-      return self.trackers.map(tracker => tracker.getTracker());
+      return self.trackers.map(tracker => tracker.getTracker()).filter(a => !!a);
     },
     createWorkers() {
-      self.trackers.forEach(tracker => {
+      self.getTrackers().forEach(tracker => {
         tracker.createWorker();
       });
     },
     destroyWorkers() {
-      self.trackers.forEach(tracker => {
+      self.getTrackers().forEach(tracker => {
         tracker.destroyWorker();
       });
     },

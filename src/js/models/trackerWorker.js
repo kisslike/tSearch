@@ -26,10 +26,12 @@ const trackerWorker = types.model('trackerWorker', {
 
   return {
     search(query) {
-      return worker.callFn('event.search', query);
+      return worker.callFn('events.search', [{
+        query: query
+      }]);
     },
     searchNext(next) {
-      return worker.callFn('event.getNextPage', next);
+      return worker.callFn('events.getNextPage', [next]);
     },
     get requests() {
       return requests;
@@ -37,7 +39,7 @@ const trackerWorker = types.model('trackerWorker', {
     get connectRe() {
       if (!connectRe) {
         const tracker = getParent(self, 1);
-        connectRe = exKitBuildConnectRe(tracker.meta.connect);
+        connectRe = exKitBuildConnectRe(tracker.meta.connect.slice(0));
       }
       return connectRe;
     },
@@ -58,7 +60,7 @@ const trackerWorker = types.model('trackerWorker', {
         const tracker = getParent(self, 1);
         worker = new FrameWorker(tracker.id, api);
         worker.init();
-        worker.callFn('init', tracker.code, tracker.meta.require).then(() => {
+        worker.callFn('init', [tracker.code, tracker.meta.require.slice(0)]).then(() => {
           self.setReadyState('ready');
         }, err => {
           self.setReadyState('error');

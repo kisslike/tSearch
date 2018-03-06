@@ -8,29 +8,30 @@ import {observer} from "mobx-react/index";
     const trackers = store.profile.trackers.map(profileTracker => {
       const tracker = profileTracker.getTracker();
 
+      const trackerIcon = tracker || profileTracker;
       let icon = null;
-      if (tracker.meta.trackerURL) {
-        const classList = ['tracker__icon', tracker.getIconClassName(), 'tracker__link'];
+      if (trackerIcon.meta.trackerURL) {
+        const classList = ['tracker__icon', trackerIcon.getIconClassName(), 'tracker__link'];
         icon = (
-          <a className={classList.join(' ')} target="_blank" href={tracker.meta.trackerURL}/>
+          <a className={classList.join(' ')} target="_blank" href={trackerIcon.meta.trackerURL}/>
         );
       } else {
-        const classList = ['tracker__icon', tracker.getIconClassName()];
+        const classList = ['tracker__icon', trackerIcon.getIconClassName()];
         icon = (
           <div className={classList.join(' ')}/>
         );
       }
 
       let count = 0;
-      const lastSearch = profileTracker.lastSearch;
-      if (lastSearch) {
-        count = lastSearch.results.length;
+      const search = profileTracker.search;
+      if (search) {
+        count = search.results.length;
       }
 
       return (
-        <div key={tracker.id} className="tracker">
+        <div key={profileTracker.id} className="tracker">
           {icon}
-          <a className="tracker__name" href={'#' + tracker.id}>{tracker.meta.name}</a>
+          <a className="tracker__name" href={'#' + profileTracker.id}>{trackerIcon.meta.name}</a>
           <div className="tracker__counter">{count}</div>
         </div>
       );

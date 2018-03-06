@@ -1,5 +1,5 @@
 const {types} = require('mobx-state-tree');
-import blankSvg from '../../img/blank.svg';
+import getIconClassNameExtend from "./getIconClassNameExtend";
 import trackerWorker from './trackerWorker';
 
 const trackerMeta = types.model('trackerMeta', {
@@ -27,7 +27,7 @@ const tracker = types.model('tracker', {
   }),
   code: types.string,
   worker: types.maybe(trackerWorker)
-}).actions(self => {
+}).extend(getIconClassNameExtend).actions(self => {
   return {
     createWorker() {
       if (!self.worker) {
@@ -39,7 +39,6 @@ const tracker = types.model('tracker', {
     }
   };
 }).views(self => {
-  let styleNode = null;
   return {
     search(query) {
       if (self.worker) {
@@ -49,37 +48,6 @@ const tracker = types.model('tracker', {
     searchNext(next) {
       if (self.worker) {
         return self.worker.searchNext(next);
-      }
-    },
-    getIconClassName() {
-      const className = 'icon_' + self.id;
-      if (!styleNode) {
-        let icon = null;
-        if (self.meta.icon64) {
-          icon = JSON.stringify(self.meta.icon64);
-        }
-        if (self.meta.icon) {
-          icon = JSON.stringify(self.meta.icon);
-        }
-        if (!icon) {
-          icon = blankSvg;
-        }
-
-        styleNode = document.createElement('style');
-        styleNode.textContent = `.${className} {
-          background-image:url(${icon});
-        }`;
-
-        document.body.appendChild(styleNode);
-      }
-      return className;
-    },
-    beforeDestroy() {
-      if (styleNode) {
-        if (styleNode.parentNode) {
-          styleNode.parentNode.removeChild(styleNode);
-        }
-        styleNode = null;
       }
     }
   };
