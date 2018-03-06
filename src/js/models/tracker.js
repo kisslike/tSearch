@@ -26,29 +26,23 @@ const tracker = types.model('tracker', {
     disableAutoUpdate: types.optional(types.boolean, false),
   }),
   code: types.string,
-  $worker: types.maybe(trackerWorker)
+  worker: types.maybe(trackerWorker)
 }).actions(self => {
   return {
-    get worker() {
-      if (!self.$worker) {
-        self.$worker = {};
+    createWorker() {
+      if (!self.worker) {
+        self.worker = {};
       }
-      return self.$worker;
     },
     destroyWorker() {
-       if (self.$worker) {
-         destroy(self.$worker);
+       if (self.worker) {
+         destroy(self.worker);
        }
     }
   };
 }).views(self => {
   return {
-    search(query) {
-      return self.worker.search(query);
-    },
-    searchNext(next) {
-      return self.worker.searchNext(next);
-    }
+
   };
 });
 

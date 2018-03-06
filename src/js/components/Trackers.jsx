@@ -6,11 +6,12 @@ import {observer} from "mobx-react/index";
   render() {
     const store = this.props.store;
     const trackers = store.profile.profileTrackers.map(profileTracker => {
+      const tracker = profileTracker.tracker;
       let icon = null;
-      if (profileTracker.tracker && profileTracker.tracker.meta.trackerURL) {
+      if (tracker && tracker.meta.trackerURL) {
         const classList = ['tracker__icon', profileTracker.getIconClassName(), 'tracker__link'];
         icon = (
-          <a className={classList.join(' ')} target="_blank" href={profileTracker.tracker.meta.trackerURL}/>
+          <a className={classList.join(' ')} target="_blank" href={tracker.meta.trackerURL}/>
         );
       } else {
         const classList = ['tracker__icon', profileTracker.getIconClassName()];
@@ -20,9 +21,8 @@ import {observer} from "mobx-react/index";
       }
 
       let count = 0;
-      const search = profileTracker.search;
-      if (search) {
-        count = search.results.length;
+      if (tracker && tracker.worker && tracker.searchResults) {
+        count = tracker.worker.searchResults.getResultCount();
       }
 
       return (

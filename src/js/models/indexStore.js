@@ -51,14 +51,24 @@ const indexStore = types.model('indexStore', {
   return {
     setProfile(name) {
       self.profile = name;
-      self.trackers.forEach(tracker => {
-        tracker.destroyWorker();
-      });
+      self.onProfileChange();
     }
   };
 }).views(self => {
   return {
-
+    onProfileChange() {
+      const trackers = self.profile.getTrackers();
+      self.trackers.forEach(tracker => {
+        if (trackers.indexOf(tracker) !== -1) {
+          tracker.createWorker();
+        } else {
+          tracker.destroyWorker();
+        }
+      });
+    },
+    afterCreate() {
+      self.onProfileChange();
+    }
   };
 });
 

@@ -11,7 +11,9 @@ const profile = types.model('profile', {
   };
 }).views(self => {
   return {
-
+    getTrackers() {
+      return self.profileTrackers.map(profileTracker => profileTracker.tracker).filter(a => !!a);
+    }
   };
 });
 

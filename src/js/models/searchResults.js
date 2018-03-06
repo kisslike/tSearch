@@ -12,7 +12,9 @@ const search = types.model('search', {
   };
 }).views(self => {
   return {
-
+    getResultCount() {
+      return self.results.length;
+    }
   };
 });
 

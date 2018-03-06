@@ -3,10 +3,12 @@ const {types, getParent} = require('mobx-state-tree');
 import FrameWorker from '../tools/frameWorker';
 import exKitRequest from '../tools/exKitRequest';
 import exKitBuildConnectRe from '../tools/exKitBuildConnectRe';
+import searchResults from './searchResults';
 
 
 const trackerWorker = types.model('trackerWorker', {
-  readyState: types.optional(types.string, 'idle'), // idle, loading, ready, error
+  readyState: types.optional(types.string, 'idle'), // idle, loading, ready, error,
+  searchResults: types.maybe(searchResults),
 }).actions(self => {
   return {
     setReadyState(value) {
