@@ -26,12 +26,22 @@ const trackerWorker = types.model('trackerWorker', {
 
   return {
     search(query) {
-      return worker.callFn('events.search', [{
-        query: query
-      }]);
+      return Promise.resolve().then(() => {
+        if (!worker) {
+          throw new Error('Worker is dead');
+        }
+        return worker.callFn('events.search', [{
+          query: query
+        }]);
+      });
     },
     searchNext(next) {
-      return worker.callFn('events.getNextPage', [next]);
+      return Promise.resolve().then(() => {
+        if (!worker) {
+          throw new Error('Worker is dead');
+        }
+        return worker.callFn('events.getNextPage', [next]);
+      });
     },
     get requests() {
       return requests;
