@@ -1,6 +1,7 @@
 const {types, resolveIdentifier} = require('mobx-state-tree');
 import tracker from './tracker';
 import search from './profileTrackerSearch';
+import blankSvg from '../../img/blank.svg';
 
 
 const profileTrackerMeta = types.model('profileTrackerMeta', {

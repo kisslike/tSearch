@@ -1,4 +1,4 @@
-const {types} = require('mobx-state-tree');
+const {types, destroy} = require('mobx-state-tree');
 import trackerWorker from './trackerWorker';
 
 
@@ -36,7 +36,9 @@ const tracker = types.model('tracker', {
       return self.$worker;
     },
     destroyWorker() {
-      self.$worker = null;
+       if (self.$worker) {
+         destroy(self.$worker);
+       }
     }
   };
 }).views(self => {

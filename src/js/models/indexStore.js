@@ -17,6 +17,11 @@ const indexStore = types.model('indexStore', {
         meta: {
           name: 'rutracker'
         }
+      }, {
+        id: 'rutracker1',
+        meta: {
+          name: 'rutracker1'
+        }
       }]
     });
     snapshot.profiles.push({
@@ -25,6 +30,11 @@ const indexStore = types.model('indexStore', {
         id: 'nnmclub',
         meta: {
           name: 'nnmclub'
+        }
+      }, {
+        id: 'nnmclub1',
+        meta: {
+          name: 'nnmclub1'
         }
       }]
     });
