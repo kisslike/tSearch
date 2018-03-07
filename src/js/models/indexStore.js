@@ -22,23 +22,14 @@ const indexStore = types.model('indexStore', {
           name: 'rutracker'
         }
       }, {
-        id: 'rutracker1',
-        meta: {
-          name: 'rutracker1'
-        }
-      }]
-    });
-    snapshot.profiles.push({
-      name: 'Default2',
-      profileTrackers: [{
         id: 'nnmclub',
         meta: {
           name: 'nnmclub'
         }
       }, {
-        id: 'nnmclub1',
+        id: 'rutracker1',
         meta: {
-          name: 'nnmclub1'
+          name: 'rutracker1'
         }
       }]
     });
