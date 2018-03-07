@@ -1,11 +1,14 @@
 const debug = require('debug')('search');
-const {types} = require('mobx-state-tree');
+const {types, destroy} = require('mobx-state-tree');
 import tracker from './tracker';
 
 
 const trackerSearch = types.model({
   tracker: types.reference(tracker),
   readyState: types.optional(types.string, 'idle'), // idle, loading, success, error
+  authRequired: types.maybe(types.model({
+    url: types.string
+  })),
   pages: types.optional(types.array(types.model({
     results: types.optional(types.array(types.frozen), []),
   })), []),
@@ -15,12 +18,22 @@ const trackerSearch = types.model({
     setReadyState(value) {
       self.readyState = value;
     },
-    addResults(result) {
-      self.pages.push({
-        results: result.results
-      });
-      if (result.nextPageRequest) {
-        self.nextQuery = result.nextPageRequest;
+    setResult(result) {
+      if (result.success) {
+        if (self.authRequired) {
+          destroy(self.authRequired);
+        }
+        self.pages.push({
+          results: result.results
+        });
+        if (result.nextPageRequest) {
+          self.nextQuery = result.nextPageRequest;
+        }
+      } else
+      if (result.error === 'AUTH') {
+        self.authRequired = {
+          url: result.url
+        };
       }
     }
   };
@@ -29,9 +42,7 @@ const trackerSearch = types.model({
     self.setReadyState('loading');
     return promise.then(result => {
       debug('r', result);
-      if (result.success) {
-        self.addResults(result);
-      }
+      self.setResult(result);
       self.setReadyState('success');
     }, err => {
       debug('err', err);
