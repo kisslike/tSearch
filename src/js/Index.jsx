@@ -62,7 +62,7 @@ import loadTrackers from './tools/loadTrackers';
     return ([
       <div key="head" className="body__head">
         <div className="search">
-          <SearchForm/>
+          <IndexSearchForm store={this.props.store}/>
         </div>
         <div className="menu">
           <a href="#main" className="menu__btn menu__btn-main" title={chrome.i18n.getMessage('main')}/>
@@ -144,6 +144,18 @@ import loadTrackers from './tools/loadTrackers';
       </div>,
       <ScrollTop key="scroll_top"/>
     ]);
+  }
+}
+
+@observer class IndexSearchForm extends SearchForm {
+  constructor() {
+    super();
+
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+  handleSubmit(e) {
+    e.preventDefault();
+    this.props.store.createSearch(this.props.store.searchForm.query);
   }
 }
 

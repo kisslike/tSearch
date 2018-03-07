@@ -2,12 +2,16 @@ const debug = require('debug')('indexStore');
 const {types, resolveIdentifier} = require('mobx-state-tree');
 import profile from './profile';
 import tracker from './tracker';
+import searchFrom from "./searchForm";
+import search from "./search";
 
 
 const indexStore = types.model('indexStore', {
   profile: types.reference(profile),
   profiles: types.array(profile),
   trackers: types.array(tracker),
+  searchForm: types.optional(searchFrom, {}),
+  search: types.optional(types.maybe(search), null),
 }).preProcessSnapshot(snapshot => {
   if (!snapshot.profiles.length) {
     snapshot.profiles.push({
@@ -52,7 +56,18 @@ const indexStore = types.model('indexStore', {
     setProfile(name) {
       self.profile = name;
       self.onProfileChange();
-    }
+    },
+    createSearch(query) {
+      self.search = {
+        query: query,
+        trackers: self.profile.getTrackers().map(tracker => {
+          return {
+            tracker: tracker
+          }
+        })
+      };
+      self.search.search(query);
+    },
   };
 }).views(self => {
   return {

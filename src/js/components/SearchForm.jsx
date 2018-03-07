@@ -1,6 +1,5 @@
 import React from 'react';
 import Autosuggest from 'react-autosuggest';
-import searchFrom from '../models/searchForm';
 import {observer} from 'mobx-react';
 const debug = require('debug')('SearchFrom');
 const qs = require('querystring');
@@ -11,14 +10,12 @@ import searchFormStyle from '../../css/searchForm.less';
   constructor(props) {
     super();
 
-    this.store = props.store || searchFrom.create({});
-
     this.handleChange = this.handleChange.bind(this);
     this.renderSuggestion = this.renderSuggestion.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
   handleChange(e, {newValue}) {
-    this.store.setQuery(newValue);
+    this.props.store.searchForm.setQuery(newValue);
   }
   renderSuggestion(suggestion) {
     return (
@@ -28,9 +25,9 @@ import searchFormStyle from '../../css/searchForm.less';
   handleSubmit(e) {
     e.preventDefault();
     let url = 'index.html';
-    if (this.store.query) {
+    if (this.props.store.searchForm.query) {
       url += '#' + qs.stringify({
-        query: this.store.query
+        query: this.props.store.searchForm.query
       });
     }
     chrome.tabs.create({url: url});
@@ -47,16 +44,16 @@ import searchFormStyle from '../../css/searchForm.less';
               suggestion: 'suggestion',
               suggestionHighlighted: 'suggestion--highlighted'
             }}
-            suggestions={this.store.getSuggestions()}
-            onSuggestionsFetchRequested={this.store.handleFetchSuggestions}
-            onSuggestionsClearRequested={this.store.handleClearSuggestions}
+            suggestions={this.props.store.searchForm.getSuggestions()}
+            onSuggestionsFetchRequested={this.props.store.searchForm.handleFetchSuggestions}
+            onSuggestionsClearRequested={this.props.store.searchForm.handleClearSuggestions}
             shouldRenderSuggestions={() => true}
             getSuggestionValue={suggestion => suggestion}
             renderSuggestion={this.renderSuggestion}
             inputProps={{
               type: 'search',
               placeholder: chrome.i18n.getMessage('searchPlaceholder'),
-              value: this.store.query,
+              value: this.props.store.searchForm.query,
               onChange: this.handleChange,
               autoFocus: true
             }}

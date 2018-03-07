@@ -21,8 +21,11 @@ import {observer} from "mobx-react/index";
       }
 
       let count = 0;
-      if (tracker && tracker.worker && tracker.searchResults) {
-        count = tracker.worker.searchResults.getResultCount();
+      if (store.search) {
+        const trackerSearch = store.search.getTrackerSearch(profileTracker.id);
+        if (trackerSearch) {
+          count = trackerSearch.getResultCount();
+        }
       }
 
       return (
