@@ -9,6 +9,10 @@ const debug = require('debug')('Table');
   constructor() {
     super();
 
+    this.state = {
+      sortByList: [{by: 'title'}]
+    };
+
     this.columns = ['date', 'quality', 'title', 'size', 'seed', 'peer'];
     // todo: hide columns
     /*if (storage.hidePeerRow) {
@@ -136,6 +140,9 @@ const debug = require('debug')('Table');
     return results.map(({trackerInfo, result}) => this.getRow(trackerInfo, result));
   }
   render() {
+    /**@type {IndexM}*/
+    const store = this.props.store;
+
     return (
       <div className="table table-results">
         <div className="table__head">
@@ -143,7 +150,7 @@ const debug = require('debug')('Table');
             {this.getHeaderColumns()}
           </div>
           <div className="body table__body">
-            {this.getRows(this.props.page)}
+            {this.getRows(store.profile.getSearchResultsPage(this.props.pageIndex, this.state.sortByList))}
           </div>
           <div className="footer table__footer"/>
         </div>

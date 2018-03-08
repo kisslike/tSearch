@@ -1,6 +1,5 @@
-import trackerModel from "./tracker";
 const debug = require('debug')('trackerSearch');
-const {types, resolveIdentifier, destroy, getParent, isAlive} = require('mobx-state-tree');
+const {types, destroy, getParent, isAlive} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} TrackerSearchM
@@ -14,17 +13,12 @@ const {types, resolveIdentifier, destroy, getParent, isAlive} = require('mobx-st
  * @property {function(string)} setReadyState
  * @property {function(Object)} setResult
  * Views:
+ * @property {ProfileTrackerM} profile
  * @property {TrackerM} tracker
- * @property {function(TrackerInfo):SearchResult[][]} getResultsByPage
+ * @property {function(number):TrackerResultM[]} getResultsPage
  * @property {function(string, Promise):Promise} wrapSearchPromise
  * @property {function} searchNext
  * @property {function:number} getResultCount
- */
-
-/**
- * @typedef {{}} SearchResult
- * @property {TrackerInfo} trackerInfo
- * @property {TrackerResultM} result
  */
 
 /**
@@ -122,15 +116,18 @@ const trackerSearchModel = types.model('trackerSearchModel', {
   };
 }).views(/**TrackerSearchM*/self => {
   return {
-    get tracker() {
-      return getParent(self, 1).tracker;
+    get profile() {
+      return getParent(self, 1);
     },
-    getResultsByPage(trackerInfo) {
-      return self.pages.map(page => {
-        return page.results.map(result => {
-          return {trackerInfo, result};
-        });
-      });
+    get tracker() {
+      return self.profile.tracker;
+    },
+    getResultsPage(index) {
+      if (index >= self.pages.length) {
+        return [];
+      } else {
+        return self.pages[index].results;
+      }
     },
     wrapSearchPromise(type, promise) {
       const trackerId = self.tracker.id;

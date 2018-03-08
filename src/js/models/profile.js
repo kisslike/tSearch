@@ -14,9 +14,16 @@ const {types} = require('mobx-state-tree');
  * @property {function:ProfileTrackerM[]} getSearchTrackers
  * @property {function:ProfileTrackerM[]} getSelectedProfileTrackers
  * @property {function:TrackerM[]} getTrackers
- * @property {function:SearchResult[][]} getSearchResults
+ * @property {function(number, SortBy[]):TrackerSearchResult[]} getSearchResultsPage
+ * @property {function:number} getSearchPageCount
  * @property {function} start
  * @property {function} stop
+ */
+
+/**
+ * @typedef {{}} SortBy
+ * @property {string} by
+ * @property {number} direction
  */
 
 const profileModel = types.model('profileModel', {
@@ -37,6 +44,34 @@ const profileModel = types.model('profileModel', {
     }
   };
 }).views(/**ProfileM*/self => {
+  const typeSortMap = {
+    title: {
+      reverse: true
+    }
+  };
+  const sortResults = (results, sortByList) => {
+    const sortFnList = sortByList.map(({by, direction}) => {
+      const info = typeSortMap[by];
+      return ({[by]: a}, {[by]: b}) => {
+        if (info && info.reverse) {
+          [a, b] = [b, a];
+        }
+        if (direction === 1) {
+          [a, b] = [b, a];
+        }
+        return a === b ? 0 : a > b ? -1 : 1;
+      };
+    });
+    results.sort((a, b) => {
+      let result = 0;
+      sortFnList.some(fn => {
+        return (result = fn(a.result, b.result)) !== 0;
+      });
+      return result;
+    });
+    return results;
+  };
+
   return {
     getSearchTrackers() {
       let profileTrackers = self.getSelectedProfileTrackers();
@@ -51,19 +86,22 @@ const profileModel = types.model('profileModel', {
     getTrackers() {
       return self.profileTrackers.map(profileTracker => profileTracker.tracker).filter(a => !!a);
     },
-    getSearchResults() {
-      const pages = [];
+    getSearchResultsPage(index, sortByList) {
+      const results = [];
       self.profileTrackers.forEach(profileTracker => {
-        const pageResults = profileTracker.getSearchResultsByPage();
-        pageResults.forEach((_results, index) => {
-          let results = pages[index];
-          if (!results) {
-            pages.push(results = []);
-          }
-          results.push(..._results);
-        });
+        results.push(...profileTracker.getSearchResultsPage(index));
       });
-      return pages;
+      return sortResults(results, sortByList);
+    },
+    getSearchPageCount() {
+      let result = 0;
+      self.profileTrackers.forEach(profileTracker => {
+        const count = profileTracker.getSearchPageCount();
+        if (count > result) {
+          result = count;
+        }
+      });
+      return result;
     },
     start() {
       const trackers = self.getTrackers();

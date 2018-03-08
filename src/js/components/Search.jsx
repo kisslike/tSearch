@@ -36,12 +36,16 @@ moment.locale(chrome.i18n.getUILanguage());
   render() {
     /**@type {IndexM}*/
     const store = this.props.store;
+
+    const pages = [];
+    for (let i = 0, len = store.profile.getSearchPageCount(); i < len; i++) {
+      pages.push(
+        <Table key={i} pageIndex={i} store={this.props.store}/>
+      );
+    }
+
     return (
-      store.profile.getSearchResults().map((page, i) => {
-        return (
-          <Table key={i} page={page}/>
-        );
-      })
+      pages
     );
   }
 }

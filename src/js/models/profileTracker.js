@@ -17,7 +17,8 @@ const {types, resolveIdentifier, destroy, getParent} = require('mobx-state-tree'
  * @property {function(boolean)} setSelected
  * Views:
  * @property {TrackerM} tracker
- * @property {function:SearchResult[][]} getSearchResultsByPage
+ * @property {function(number):TrackerSearchResult[]} getSearchResultsPage
+ * @property {function():number} getSearchPageCount
  * @property {function:string} getIconClassName
  * @property {function} beforeDestroy
  */
@@ -36,6 +37,12 @@ const {types, resolveIdentifier, destroy, getParent} = require('mobx-state-tree'
  * @property {string} id
  * @property {string} name
  * @property {string} iconClassName
+ */
+
+/**
+ * @typedef {{}} TrackerSearchResult
+ * @property {TrackerInfo} trackerInfo
+ * @property {TrackerResultM} result
  */
 
 
@@ -82,15 +89,28 @@ const profileTrackerModel = types.model('profileTrackerModel', {
     get tracker() {
       return resolveIdentifier(trackerModel, self, self.id);
     },
-    getSearchResultsByPage() {
+    getSearchResultsPage(index) {
       if (self.search) {
-        return self.search.getResultsByPage({
+        const trackerInfo = {
           id: self.id,
           name: self.meta.name,
           iconClassName: self.getIconClassName()
+        };
+        return self.search.getResultsPage(index).map(result => {
+          return {
+            trackerInfo: trackerInfo,
+            result: result
+          };
         });
       } else {
         return [];
+      }
+    },
+    getSearchPageCount() {
+      if (self.search) {
+        return self.search.pages.length;
+      } else {
+        return 0;
       }
     },
     getIconClassName() {
