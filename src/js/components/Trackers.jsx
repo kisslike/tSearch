@@ -11,11 +11,12 @@ import {observer} from "mobx-react/index";
       let icon = null;
       const iconClassList = [];
 
-      if (profileTracker.search) {
-        if (profileTracker.search.readyState === 'loading') {
+      const search = profileTracker.search;
+      if (search) {
+        if (search.readyState === 'loading') {
           iconClassList.push('tracker__icon-loading');
         } else
-        if (profileTracker.search.readyState === 'error') {
+        if (search.readyState === 'error') {
           iconClassList.push('tracker__icon-error');
         }
       }
@@ -32,16 +33,26 @@ import {observer} from "mobx-react/index";
         );
       }
 
-      let count = 0;
-      if (profileTracker.search) {
-        count = profileTracker.search.getResultCount();
+      let extraInfo = null;
+      if (search && search.authRequired) {
+        extraInfo = (
+          <a className="tracker__login" target="_blank" href={search.authRequired.url} title={chrome.i18n.getMessage('login')}/>
+        );
+      } else {
+        let count = 0;
+        if (search) {
+          count = search.getResultCount();
+        }
+        extraInfo = (
+          <div className="tracker__counter">{count}</div>
+        )
       }
 
       return (
         <div key={profileTracker.id} className="tracker">
           {icon}
           <a className="tracker__name" href={'#' + profileTracker.id}>{profileTracker.meta.name}</a>
-          <div className="tracker__counter">{count}</div>
+          {extraInfo}
         </div>
       );
     });

@@ -1,6 +1,6 @@
 import trackerModel from "./tracker";
 const debug = require('debug')('trackerSearch');
-const {types, resolveIdentifier, destroy, getParent} = require('mobx-state-tree');
+const {types, resolveIdentifier, destroy, getParent, isAlive} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} TrackerSearchM
@@ -15,7 +15,7 @@ const {types, resolveIdentifier, destroy, getParent} = require('mobx-state-tree'
  * @property {function(Object)} setResult
  * Views:
  * @property {TrackerM} tracker
- * @property {function(Promise):Promise} wrapSearchPromise
+ * @property {function(string, Promise):Promise} wrapSearchPromise
  * @property {function} searchNext
  * @property {function:number} getResultCount
  */
@@ -89,22 +89,28 @@ const trackerSearchModel = types.model('trackerSearchModel', {
     get tracker() {
       return getParent(self, 1).tracker;
     },
-    wrapSearchPromise(promise) {
+    wrapSearchPromise(type, promise) {
+      const trackerId = self.tracker.id;
       self.setReadyState('loading');
       return promise.then(result => {
-        debug('r', result);
-        self.setResult(result);
-        self.setReadyState('success');
+        if (isAlive(self)) {
+          self.setReadyState('success');
+          self.setResult(result);
+        } else {
+          debug('%s skip, dead', type, trackerId, result);
+        }
       }, err => {
-        debug('err', err);
-        self.setReadyState('error');
+        if (isAlive(self)) {
+          self.setReadyState('error');
+        }
+        debug('%s error', type, trackerId, err);
       });
     },
     search(query) {
-      return self.wrapSearchPromise(self.tracker.worker.search(query));
+      return self.wrapSearchPromise('search', self.tracker.worker.search(query));
     },
     searchNext() {
-      return self.wrapSearchPromise(self.tracker.worker.searchNext(self.nextQuery));
+      return self.wrapSearchPromise('searchNext', self.tracker.worker.searchNext(self.nextQuery));
     },
     getResultCount() {
       return self.pages.reduce((sum, page) => {

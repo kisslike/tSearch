@@ -1,4 +1,5 @@
 const popsicle = require('popsicle');
+import {StatusCodeError} from '../errors';
 
 const exKitRequest = (tracker, options) => {
   if (typeof options !== 'object') {
@@ -49,9 +50,7 @@ const exKitRequest = (tracker, options) => {
   return request.then(function (response) {
     const is2xx = /^2/.test('' + response.status);
     if (!is2xx) {
-      const err = new Error(response.status + ' - ' + JSON.stringify(response.body));
-      err.name = 'StatusCodeError';
-      throw err;
+      throw new StatusCodeError(response.self, response.body, null, response);
     }
     if (toJson) {
       response.body = JSON.parse(response.body);
