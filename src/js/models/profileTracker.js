@@ -1,17 +1,20 @@
 import trackerModel from './tracker';
 import blankSvg from '../../img/blank.svg';
 import trackerSearchModel from "./trackerSearch";
-const {types, resolveIdentifier, destroy} = require('mobx-state-tree');
+const {types, resolveIdentifier, destroy, getParent} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} ProfileTrackerM
  * Model:
  * @property {string} id
  * @property {ProfileTrackerMetaM} meta
+ * @property {boolean} selected
  * @property {TrackerSearchM} [search]
  * Actions:
  * @property {function(string)} createSearch
  * @property {function} clearSearch
+ * @property {function} resetSelected
+ * @property {function(boolean)} setSelected
  * Views:
  * @property {TrackerM} tracker
  * @property {function:string} getIconClassName
@@ -36,6 +39,7 @@ const profileTrackerMetaModel = types.model('profileTrackerMetaModel', {
 const profileTrackerModel = types.model('profileTrackerModel', {
   id: types.string,
   meta: profileTrackerMetaModel,
+  selected: types.optional(types.boolean, false),
   search: types.maybe(trackerSearchModel),
 }).actions(/**ProfileTrackerM*/self => {
   return {
@@ -50,6 +54,19 @@ const profileTrackerModel = types.model('profileTrackerModel', {
         destroy(self.search);
       }
     },
+    resetSelected() {
+      self.selected = false;
+    },
+    setSelected(value) {
+      /**@type {ProfileM}*/
+      const profile = getParent(self, 2);
+      profile.profileTrackers.forEach(profileTracker => {
+        if (profileTracker !== self) {
+          profileTracker.resetSelected();
+        }
+      });
+      self.selected = value;
+    }
   };
 }).views(/**ProfileTrackerM*/self => {
   let styleNode = null;
