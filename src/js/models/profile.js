@@ -10,6 +10,7 @@ const {types} = require('mobx-state-tree');
  * Actions:
  * @property {function(string)} search
  * Views:
+ * @property {function:ProfileTrackerM[]} getSearchTrackers
  * @property {function:ProfileTrackerM[]} getSelectedProfileTrackers
  * @property {function:TrackerM[]} getTrackers
  * @property {function} start
@@ -22,17 +23,20 @@ const profileModel = types.model('profileModel', {
 }).actions(/**ProfileM*/self => {
   return {
     search(query) {
-      let profileTrackers = self.getSelectedProfileTrackers();
-      if (profileTrackers.length === 0) {
-        profileTrackers = self.profileTrackers;
-      }
-      profileTrackers.forEach(profileTracker => {
+      self.getSearchTrackers().forEach(profileTracker => {
         profileTracker.createSearch(query);
       });
     },
   };
 }).views(/**ProfileM*/self => {
   return {
+    getSearchTrackers() {
+      let profileTrackers = self.getSelectedProfileTrackers();
+      if (profileTrackers.length === 0) {
+        profileTrackers = self.profileTrackers;
+      }
+      return profileTrackers;
+    },
     getSelectedProfileTrackers() {
       return self.profileTrackers.filter(a => a.selected);
     },
