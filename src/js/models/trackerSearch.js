@@ -15,13 +15,20 @@ const {types, resolveIdentifier, destroy, getParent, isAlive} = require('mobx-st
  * @property {function(Object)} setResult
  * Views:
  * @property {TrackerM} tracker
+ * @property {function(TrackerInfo):SearchResult[][]} getResultsByPage
  * @property {function(string, Promise):Promise} wrapSearchPromise
  * @property {function} searchNext
  * @property {function:number} getResultCount
  */
 
 /**
- * @typedef {{}} trackerResultM
+ * @typedef {{}} SearchResult
+ * @property {TrackerInfo} trackerInfo
+ * @property {TrackerResultM} result
+ */
+
+/**
+ * @typedef {{}} TrackerResultM
  * Model:
  * @property {string} title
  * @property {string} url
@@ -42,13 +49,27 @@ const trackerResultModel = types.model('trackerResultModel', {
   title: types.string,
   url: types.string,
   categoryId: types.maybe(types.number),
-  categoryTitle: types.maybe(types.string),
-  categoryUrl: types.maybe(types.string),
-  size: types.maybe(types.number),
-  downloadUrl: types.maybe(types.string),
-  seed: types.maybe(types.number),
-  peer: types.maybe(types.number),
-  date: types.maybe(types.number),
+  categoryTitle: types.optional(types.string, ''),
+  categoryUrl: types.optional(types.string, ''),
+  size: types.optional(types.number, 0),
+  downloadUrl: types.optional(types.string, ''),
+  seed: types.optional(types.number, 1),
+  peer: types.optional(types.number, 0),
+  date: types.optional(types.number, -1),
+}).preProcessSnapshot(snapshot => {
+  ['size', 'seed', 'peer', 'date'].forEach(key => {
+    let value = snapshot[key];
+    if (value) {
+      if (typeof value !== 'number') {
+        value = parseInt(snapshot[key], 10);
+      }
+      if (!isFinite(value)) {
+        value = null;
+      }
+      snapshot[key] = value;
+    }
+  });
+  return snapshot;
 });
 
 const trackerSearchModel = types.model('trackerSearchModel', {
@@ -56,7 +77,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
   authRequired: types.maybe(types.model({
     url: types.string
   })),
-  pages: types.optional(types.array(types.model({
+  pages: types.optional(types.array(types.model('page', {
     results: types.optional(types.array(trackerResultModel), []),
   })), []),
   nextQuery: types.frozen,
@@ -70,9 +91,19 @@ const trackerSearchModel = types.model('trackerSearchModel', {
         if (self.authRequired) {
           destroy(self.authRequired);
         }
-        self.pages.push({
-          results: result.results
+
+        const results = result.results.filter(result => {
+          if (!result.title || !result.url) {
+            console.debug('[' + self.tracker.id + ']', 'Skip torrent:', result);
+            return false;
+          } else {
+            return true;
+          }
         });
+        self.pages.push({
+          results: results
+        });
+
         if (result.nextPageRequest) {
           self.nextQuery = result.nextPageRequest;
         }
@@ -88,6 +119,13 @@ const trackerSearchModel = types.model('trackerSearchModel', {
   return {
     get tracker() {
       return getParent(self, 1).tracker;
+    },
+    getResultsByPage(trackerInfo) {
+      return self.pages.map(page => {
+        return page.results.map(result => {
+          return {trackerInfo, result};
+        });
+      });
     },
     wrapSearchPromise(type, promise) {
       const trackerId = self.tracker.id;

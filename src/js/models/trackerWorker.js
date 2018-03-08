@@ -12,7 +12,7 @@ const {types, getParent, isAlive} = require('mobx-state-tree');
  * @property {function(string)} setReadyState
  * Views:
  * @property {function(string):Promise} search
- * @property {function(Object)} searchNext
+ * @property {function(Object):Promise} searchNext
  * @property {string[]} requests
  * @property {RegExp} connectRe
  * @property {function} abortAllRequests

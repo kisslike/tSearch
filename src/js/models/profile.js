@@ -14,6 +14,7 @@ const {types} = require('mobx-state-tree');
  * @property {function:ProfileTrackerM[]} getSearchTrackers
  * @property {function:ProfileTrackerM[]} getSelectedProfileTrackers
  * @property {function:TrackerM[]} getTrackers
+ * @property {function:SearchResult[][]} getSearchResults
  * @property {function} start
  * @property {function} stop
  */
@@ -49,6 +50,20 @@ const profileModel = types.model('profileModel', {
     },
     getTrackers() {
       return self.profileTrackers.map(profileTracker => profileTracker.tracker).filter(a => !!a);
+    },
+    getSearchResults() {
+      const pages = [];
+      self.profileTrackers.forEach(profileTracker => {
+        const pageResults = profileTracker.getSearchResultsByPage();
+        pageResults.forEach((_results, index) => {
+          let results = pages[index];
+          if (!results) {
+            pages.push(results = []);
+          }
+          results.push(..._results);
+        });
+      });
+      return pages;
     },
     start() {
       const trackers = self.getTrackers();
