@@ -2,7 +2,7 @@ import FrameWorker from '../tools/frameWorker';
 import exKitRequest from '../tools/exKitRequest';
 import exKitBuildConnectRe from '../tools/exKitBuildConnectRe';
 const debug = require('debug')('trackerWorker');
-const {types, getParent} = require('mobx-state-tree');
+const {types, getParent, isAlive} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} TrackerWorkerM
@@ -85,14 +85,24 @@ const trackerWorkerModel = types.model('trackerWorkerModel', {
       if (!worker) {
         self.setReadyState('loading');
         const tracker = getParent(self, 1);
-        worker = new FrameWorker(tracker.id, api);
-        worker.init();
+        const trackerId = tracker.id;
+        worker = new FrameWorker({
+          trackerId: tracker.id
+        }, api);
         worker.callFn('init', [tracker.code, tracker.meta.require.slice(0)]).then(() => {
-          self.setReadyState('ready');
+          if (isAlive(self)) {
+            self.setReadyState('ready');
+          } else {
+            debug('init>then skip, dead');
+          }
         }, err => {
-          self.setReadyState('error');
-          debug('init error', tracker.id, err);
-          self.destroyWorker();
+          debug('init error', trackerId, err);
+          if (isAlive(self)) {
+            self.setReadyState('error');
+            self.destroyWorker();
+          } else {
+            debug('init>catch skip, dead');
+          }
         });
       }
     },

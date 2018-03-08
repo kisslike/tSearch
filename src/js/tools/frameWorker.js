@@ -4,8 +4,8 @@ import Transport from './transport';
 
 
 class FrameWorker {
-  constructor(id, actions) {
-    this.id = id;
+  constructor(query, actions) {
+    this.query = query;
     this.actions = actions;
     this.frame = null;
     this.isLoaded = false;
@@ -15,6 +15,8 @@ class FrameWorker {
     this.frameListener = this.frameListener.bind(this);
 
     this.initTransport();
+
+    this.init();
   }
   initTransport() {
     const self = this;
@@ -42,9 +44,7 @@ class FrameWorker {
     this.destroyFrame();
     window.addEventListener("message", this.frameListener);
     const frame = this.frame = document.createElement('iframe');
-    frame.src = 'sandbox.html' + '#' + qs.stringify({
-      id: this.id
-    });
+    frame.src = 'sandbox.html' + '#' + qs.stringify(this.query);
     frame.style.display = 'none';
     frame.onload = () => {
       frame.onload = null;

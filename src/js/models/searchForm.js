@@ -1,6 +1,6 @@
 import {StatusCodeError, AbortError} from '../errors';
 import escapeRegExp from 'lodash.escaperegexp';
-const {types} = require('mobx-state-tree');
+const {types, isAlive} = require('mobx-state-tree');
 const popsicle = require('popsicle');
 const debug = require('debug')('searchForm');
 
@@ -109,7 +109,11 @@ const searchFormModel = types.model('searchFormModel', {
         lastFetch = fetchGoogleSuggestions(value);
       }
       lastFetch.then(results => {
-        self.setSuggestions(results);
+        if (isAlive(self)) {
+          self.setSuggestions(results);
+        } else {
+          debug('setSuggestions skip, dead', results);
+        }
       }, err => {
         if (err.code === 'EABORT') return;
         debug('fetchSuggestions error', err);
