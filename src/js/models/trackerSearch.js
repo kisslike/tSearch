@@ -60,13 +60,18 @@ const trackerResultModel = types.model('trackerResultModel', {
   ['size', 'seed', 'peer', 'date'].forEach(key => {
     let value = snapshot[key];
     if (value) {
+      let change = false;
       if (typeof value !== 'number') {
-        value = parseInt(snapshot[key], 10);
+        change = true;
+        value = parseInt(value, 10);
       }
       if (!isFinite(value)) {
+        change = true;
         value = null;
       }
-      snapshot[key] = value;
+      if (change) {
+        snapshot[key] = value;
+      }
     }
   });
   return snapshot;
@@ -94,7 +99,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
 
         const results = result.results.filter(result => {
           if (!result.title || !result.url) {
-            console.debug('[' + self.tracker.id + ']', 'Skip torrent:', result);
+            debug('[' + self.tracker.id + ']', 'Skip torrent:', result);
             return false;
           } else {
             return true;
