@@ -1,5 +1,5 @@
 const popsicle = require('popsicle');
-import {StatusCodeError} from '../errors';
+import {StatusCodeError} from './errors';
 
 const exKitRequest = (tracker, options) => {
   if (typeof options !== 'object') {

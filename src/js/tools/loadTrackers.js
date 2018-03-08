@@ -1,6 +1,6 @@
 const debug = require('debug')('loadTrackers');
 const popsicle = require('popsicle');
-import {StatusCodeError} from "../errors";
+import {StatusCodeError} from "./errors";
 import getTrackerCodeMeta from "./getTrackerCodeMeta";
 
 

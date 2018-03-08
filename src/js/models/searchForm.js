@@ -1,4 +1,4 @@
-import {StatusCodeError, AbortError} from '../errors';
+import {StatusCodeError, AbortError} from '../tools/errors';
 import escapeRegExp from 'lodash.escaperegexp';
 const {types, isAlive} = require('mobx-state-tree');
 const popsicle = require('popsicle');
