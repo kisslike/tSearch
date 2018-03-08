@@ -166,6 +166,9 @@ moment.locale(chrome.i18n.getUILanguage());
               </div>
             );
           }
+          default: {
+            return null;
+          }
         }
       })}</div>
     );
