@@ -1,11 +1,10 @@
 import trackerModel from "./tracker";
 const debug = require('debug')('trackerSearch');
-const {types, resolveIdentifier, destroy} = require('mobx-state-tree');
+const {types, resolveIdentifier, destroy, getParent} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} TrackerSearchM
  * Model:
- * @property {string} trackerId
  * @property {string} readyState
  * @property {{url:string}} authRequired
  * @property {string} url
@@ -53,7 +52,6 @@ const trackerResultModel = types.model('trackerResultModel', {
 });
 
 const trackerSearchModel = types.model('trackerSearchModel', {
-  trackerId: types.string,
   readyState: types.optional(types.string, 'idle'), // idle, loading, success, error
   authRequired: types.maybe(types.model({
     url: types.string
@@ -89,7 +87,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
 }).views(/**TrackerSearchM*/self => {
   return {
     get tracker() {
-      return resolveIdentifier(trackerModel, self, self.trackerId);
+      return getParent(self, 1).tracker;
     },
     wrapSearchPromise(promise) {
       self.setReadyState('loading');

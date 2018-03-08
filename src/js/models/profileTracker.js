@@ -1,21 +1,25 @@
 import trackerModel from './tracker';
 import blankSvg from '../../img/blank.svg';
-const {types, resolveIdentifier} = require('mobx-state-tree');
+import trackerSearchModel from "./trackerSearch";
+const {types, resolveIdentifier, destroy} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} ProfileTrackerM
  * Model:
  * @property {string} id
- * @property {profileTrackerMetaM} meta
+ * @property {ProfileTrackerMetaM} meta
+ * @property {TrackerSearchM} [search]
  * Actions:
+ * @property {function(string)} createSearch
+ * @property {function} clearSearch
  * Views:
  * @property {TrackerM} tracker
  * @property {function:string} getIconClassName
- * @property {function} beforeDestroyx
+ * @property {function} beforeDestroy
  */
 
 /**
- * @typedef {{}} profileTrackerMetaM
+ * @typedef {{}} ProfileTrackerMetaM
  * Model:
  * @property {string} name
  * @property {string} [downloadURL]
@@ -31,10 +35,21 @@ const profileTrackerMetaModel = types.model('profileTrackerMetaModel', {
 
 const profileTrackerModel = types.model('profileTrackerModel', {
   id: types.string,
-  meta: profileTrackerMetaModel
+  meta: profileTrackerMetaModel,
+  search: types.maybe(trackerSearchModel),
 }).actions(/**ProfileTrackerM*/self => {
   return {
-
+    createSearch(query) {
+      if (self.tracker) {
+        self.search = trackerSearchModel.create();
+        self.search.search(query);
+      }
+    },
+    clearSearch() {
+      if (self.search) {
+        destroy(self.search);
+      }
+    },
   };
 }).views(/**ProfileTrackerM*/self => {
   let styleNode = null;

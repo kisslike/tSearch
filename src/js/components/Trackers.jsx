@@ -9,25 +9,32 @@ import {observer} from "mobx-react/index";
     const trackers = store.profile.profileTrackers.map(profileTracker => {
       const tracker = profileTracker.tracker;
       let icon = null;
+      const iconClassList = [];
+
+      if (profileTracker.search) {
+        if (profileTracker.search.readyState === 'loading') {
+          iconClassList.push('tracker__icon-loading');
+        } else
+        if (profileTracker.search.readyState === 'error') {
+          iconClassList.push('tracker__icon-error');
+        }
+      }
+
       if (tracker && tracker.meta.trackerURL) {
-        const classList = ['tracker__icon', profileTracker.getIconClassName(), 'tracker__link'];
+        const classList = iconClassList.concat(['tracker__icon', profileTracker.getIconClassName(), 'tracker__link']);
         icon = (
           <a className={classList.join(' ')} target="_blank" href={tracker.meta.trackerURL}/>
         );
       } else {
-        const classList = ['tracker__icon', profileTracker.getIconClassName()];
+        const classList = iconClassList.concat(['tracker__icon', profileTracker.getIconClassName()]);
         icon = (
           <div className={classList.join(' ')}/>
         );
       }
 
       let count = 0;
-      const searchResults = store.profile.searchResults;
-      if (searchResults) {
-        const trackerSearch = searchResults.getTrackerSearchById(profileTracker.id);
-        if (trackerSearch) {
-          count = trackerSearch.getResultCount();
-        }
+      if (profileTracker.search) {
+        count = profileTracker.search.getResultCount();
       }
 
       return (

@@ -65,10 +65,10 @@ const indexModel = types.model('indexModel', {
     onProfileChange() {
       self.profiles.forEach(profile => {
         if (self.profile !== profile) {
-          profile.terminate();
+          profile.stop();
         }
       });
-      self.profile.init();
+      self.profile.start();
     },
     afterCreate() {
       self.onProfileChange();
