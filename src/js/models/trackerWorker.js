@@ -34,6 +34,7 @@ const trackerWorkerModel = types.model('trackerWorkerModel', {
   let worker = null;
   const requests = [];
   let connectRe = null;
+  let initPromise = null;
 
   const api = {
     request: (details) => {
@@ -43,7 +44,7 @@ const trackerWorkerModel = types.model('trackerWorkerModel', {
 
   return {
     search(query) {
-      return Promise.resolve().then(() => {
+      return initPromise.then(() => {
         if (!worker) {
           throw new Error('Worker is dead');
         }
@@ -53,7 +54,7 @@ const trackerWorkerModel = types.model('trackerWorkerModel', {
       });
     },
     searchNext(next) {
-      return Promise.resolve().then(() => {
+      return initPromise.then(() => {
         if (!worker) {
           throw new Error('Worker is dead');
         }
@@ -89,14 +90,19 @@ const trackerWorkerModel = types.model('trackerWorkerModel', {
         worker = new FrameWorker({
           trackerId: tracker.id
         }, api);
-        worker.callFn('init', [tracker.code, tracker.meta.require.slice(0)]).then(() => {
+        initPromise = worker.callFn('init', [tracker.code, tracker.meta.require.slice(0)]).catch(() => {
+          return void 0;
+        }, err => {
+          debug('init error', trackerId, err);
+          throw new Error('InitWorkerError');
+        });
+        initPromise.then(() => {
           if (isAlive(self)) {
             self.setReadyState('ready');
           } else {
             debug('init>then skip, dead');
           }
         }, err => {
-          debug('init error', trackerId, err);
           if (isAlive(self)) {
             self.setReadyState('error');
             self.destroyWorker();
