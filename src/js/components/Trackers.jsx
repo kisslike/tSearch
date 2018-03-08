@@ -4,6 +4,7 @@ import {observer} from "mobx-react/index";
 
 @observer class Trackers extends React.Component {
   render() {
+    /**@type {IndexM}*/
     const store = this.props.store;
     const trackers = store.profile.profileTrackers.map(profileTracker => {
       const tracker = profileTracker.tracker;
@@ -21,8 +22,9 @@ import {observer} from "mobx-react/index";
       }
 
       let count = 0;
-      if (store.search) {
-        const trackerSearch = store.search.getTrackerSearch(profileTracker.id);
+      const searchResults = store.profile.searchResults;
+      if (searchResults) {
+        const trackerSearch = searchResults.getTrackerSearchById(profileTracker.id);
         if (trackerSearch) {
           count = trackerSearch.getResultCount();
         }

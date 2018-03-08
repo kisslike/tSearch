@@ -1,5 +1,7 @@
 const debug = require('debug')('frameWorker');
 import once from 'lodash.once';
+import deserializeError from 'deserialize-error';
+import serializeError from 'serialize-error';
 
 const emptyFn = () => {};
 
@@ -109,9 +111,7 @@ class Transport {
     return new Promise((resolve, reject) => {
       const cb = response => {
         if (response.err) {
-          const err = new Error();
-          Object.assign(err, response.err);
-          return reject(err);
+          return reject(deserializeError(response.err));
         } else {
           return resolve(response.result);
         }
@@ -145,11 +145,7 @@ class Transport {
     promise.then(result => {
       response({result: result});
     }, err => {
-      response({err: {
-          name: err.name,
-          message: err.message,
-          stack: err.stack
-        }});
+      response({err: serializeError(err)});
     }).catch(function (err) {
       debug('responsePromise error', err);
     });

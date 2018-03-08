@@ -1,25 +1,46 @@
-const {types, resolveIdentifier} = require('mobx-state-tree');
-import tracker from './tracker';
+import trackerModel from './tracker';
 import blankSvg from '../../img/blank.svg';
+const {types, resolveIdentifier} = require('mobx-state-tree');
+
+/**
+ * @typedef {{}} ProfileTrackerM
+ * Model:
+ * @property {string} id
+ * @property {profileTrackerMetaM} meta
+ * Actions:
+ * Views:
+ * @property {TrackerM} tracker
+ * @property {function:string} getIconClassName
+ * @property {function} beforeDestroyx
+ */
+
+/**
+ * @typedef {{}} profileTrackerMetaM
+ * Model:
+ * @property {string} name
+ * @property {string} [downloadURL]
+ * Actions:
+ * Views:
+ */
 
 
-const profileTrackerMeta = types.model('profileTrackerMeta', {
+const profileTrackerMetaModel = types.model('profileTrackerMetaModel', {
   name: types.string,
   downloadURL: types.maybe(types.string),
 });
 
-const profileTracker = types.model('profileTracker', {
+const profileTrackerModel = types.model('profileTrackerModel', {
   id: types.string,
-  meta: profileTrackerMeta
-}).actions(self => {
+  meta: profileTrackerMetaModel
+}).actions(/**ProfileTrackerM*/self => {
   return {
 
   };
-}).views(self => {
+}).views(/**ProfileTrackerM*/self => {
   let styleNode = null;
   return {
     get tracker() {
-      return resolveIdentifier(tracker, self, self.id);
+      return resolveIdentifier(trackerModel, self, self.id);
     },
     getIconClassName() {
       const className = 'icon_' + self.id;
@@ -57,4 +78,4 @@ const profileTracker = types.model('profileTracker', {
   };
 });
 
-export default profileTracker;
+export default profileTrackerModel;

@@ -1,7 +1,7 @@
 import React from 'react';
 import Autosuggest from 'react-autosuggest';
 import {observer} from 'mobx-react';
-const debug = require('debug')('SearchFrom');
+const debug = require('debug')('SearchForm');
 const qs = require('querystring');
 
 import searchFormStyle from '../../css/searchForm.less';

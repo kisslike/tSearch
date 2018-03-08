@@ -1,8 +1,51 @@
+import trackerWorkerModel from './trackerWorker';
 const {types, destroy} = require('mobx-state-tree');
-import trackerWorker from './trackerWorker';
+
+/**
+ * @typedef {{}} TrackerM
+ * Model:
+ * @property {string} id
+ * @property {TrackerMetaM} meta
+ * @property {TrackerInfoM} info
+ * @property {string} code
+ * @property {TrackerWorkerM} worker
+ * Actions:
+ * @property {function} createWorker
+ * @property {function} destroyWorker
+ * Views:
+ */
+
+/**
+ * @typedef {{}} TrackerMetaM
+ * Model:
+ * @property {string} name
+ * @property {string} version
+ * @property {string} [author]
+ * @property {string} [description]
+ * @property {string} [homepageURL]
+ * @property {string} [icon]
+ * @property {string} [icon64]
+ * @property {string} [trackerURL]
+ * @property {string} [updateURL]
+ * @property {string} [downloadURL]
+ * @property {string} [supportURL]
+ * @property {string[]} require
+ * @property {string[]} connect
+ * Actions:
+ * Views:
+ */
+
+/**
+ * @typedef {{}} TrackerInfoM
+ * Model:
+ * @property {number} lastUpdate
+ * @property {boolean} disableAutoUpdate
+ * Actions:
+ * Views:
+ */
 
 
-const trackerMeta = types.model('trackerMeta', {
+const trackerMetaModel = types.model('trackerMetaModel', {
   name: types.string,
   version: types.string,
   author: types.maybe(types.string),
@@ -18,16 +61,16 @@ const trackerMeta = types.model('trackerMeta', {
   connect: types.array(types.string),
 });
 
-const tracker = types.model('tracker', {
+const trackerModel = types.model('trackerModel', {
   id: types.identifier(types.string),
-  meta: trackerMeta,
+  meta: trackerMetaModel,
   info: types.model('trackerInfo', {
     lastUpdate: types.optional(types.number, 0),
     disableAutoUpdate: types.optional(types.boolean, false),
   }),
   code: types.string,
-  worker: types.maybe(trackerWorker)
-}).actions(self => {
+  worker: types.maybe(trackerWorkerModel)
+}).actions(/**TrackerM*/self => {
   return {
     createWorker() {
       if (!self.worker) {
@@ -40,11 +83,10 @@ const tracker = types.model('tracker', {
        }
     }
   };
-}).views(self => {
+}).views(/**TrackerM*/self => {
   return {
 
   };
 });
 
-export default tracker;
-export {trackerMeta};
+export default trackerModel;

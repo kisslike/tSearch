@@ -1,20 +1,36 @@
-const {types} = require('mobx-state-tree');
-const popsicle = require('popsicle');
-const debug = require('debug')('searchFrom');
 import {StatusCodeError, AbortError} from '../errors';
 import escapeRegExp from 'lodash.escaperegexp';
+const {types} = require('mobx-state-tree');
+const popsicle = require('popsicle');
+const debug = require('debug')('searchForm');
 
-const searchFrom = types.model('searchFrom', {
+/**
+ * @typedef {{}} SearchFormM
+ * Model:
+ * @property {string} query
+ * @property {string[]} suggestions
+ * Actions:
+ * @property {function(string)} setQuery
+ * @property {function(string[])} setSuggestions
+ * Views:
+ * @property {function} getSuggestions
+ * @property {function(string)} fetchSuggestions
+ * @property {function({value:string})} handleFetchSuggestions
+ * @property {function} handleClearSuggestions
+ */
+
+
+const searchFormModel = types.model('searchFormModel', {
   query: types.optional(types.string, ''),
   suggestions: types.optional(types.array(types.string), [])
-}).actions(self => ({
+}).actions(/**SearchFormM*/self => ({
   setQuery(value) {
     self.query = value;
   },
   setSuggestions(results) {
     self.suggestions = results;
   }
-})).views(self => {
+})).views(/**SearchFormM*/self => {
   let lastFetch = null;
 
   const fetchGoogleSuggestions = value => {
@@ -109,4 +125,4 @@ const searchFrom = types.model('searchFrom', {
   };
 });
 
-export default searchFrom;
+export default searchFormModel;

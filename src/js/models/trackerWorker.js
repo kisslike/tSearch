@@ -1,19 +1,36 @@
-const debug = require('debug')('trackerWorker');
-const {types, getParent} = require('mobx-state-tree');
 import FrameWorker from '../tools/frameWorker';
 import exKitRequest from '../tools/exKitRequest';
 import exKitBuildConnectRe from '../tools/exKitBuildConnectRe';
+const debug = require('debug')('trackerWorker');
+const {types, getParent} = require('mobx-state-tree');
+
+/**
+ * @typedef {{}} TrackerWorkerM
+ * Model:
+ * @property {string} readyState
+ * Actions:
+ * @property {function(string)} setReadyState
+ * Views:
+ * @property {function(string):Promise} search
+ * @property {function(Object)} searchNext
+ * @property {string[]} requests
+ * @property {RegExp} connectRe
+ * @property {function} abortAllRequests
+ * @property {function} destroyWorker
+ * @property {function} afterCreate
+ * @property {function} beforeDestroy
+ */
 
 
-const trackerWorker = types.model('trackerWorker', {
+const trackerWorkerModel = types.model('trackerWorkerModel', {
   readyState: types.optional(types.string, 'idle'), // idle, loading, ready, error
-}).actions(self => {
+}).actions(/**TrackerWorkerM*/self => {
   return {
     setReadyState(value) {
       self.readyState = value;
     }
   };
-}).views(self => {
+}).views(/**TrackerWorkerM*/self => {
   let worker = null;
   const requests = [];
   let connectRe = null;
@@ -86,4 +103,4 @@ const trackerWorker = types.model('trackerWorker', {
   };
 });
 
-export default trackerWorker;
+export default trackerWorkerModel;

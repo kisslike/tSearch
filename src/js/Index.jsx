@@ -3,7 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import indexStyle from '../css/index.css';
 import SearchForm from './components/SearchForm';
-import indexStore from './models/indexStore';
+import indexModel from './models/index';
 import {observer} from 'mobx-react';
 import ProfileSelect from './components/ProfileSelect';
 import ScrollTop from './components/ScrollTop';
@@ -39,7 +39,7 @@ import loadTrackers from './tools/loadTrackers';
       }).then(() => {
         this.setState({
           loading: false,
-          store: indexStore.create(storage)
+          store: indexModel.create(storage)
         });
       });
     });
@@ -155,7 +155,7 @@ import loadTrackers from './tools/loadTrackers';
   }
   handleSubmit(e) {
     e.preventDefault();
-    this.props.store.createSearch(this.props.store.searchForm.query);
+    this.props.store.profile.search(this.props.store.searchForm.query);
   }
 }
 
