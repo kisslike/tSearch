@@ -14,6 +14,7 @@ const {types, getParent, isAlive, destroy} = require('mobx-state-tree');
  * @property {ProfileM} profile
  * @property {function(ProfileTrackerM)} addProfileTracker
  * @property {function:ProfileTrackerM[]} getProfileTrackerList
+ * @property {function:ProfileTrackerM[]} getSelectedProfileTrackerList
  * @property {function} clearProfileTrackerList
  */
 
@@ -46,6 +47,7 @@ const searchFragModel = types.model('searchFragModel', {
     },
   };
 }).views(/**SearchFragM*/self => {
+  /**@type {ProfileTrackerM[]}*/
   const profileTrackerList = [];
   return {
     get profile() {
@@ -56,6 +58,13 @@ const searchFragModel = types.model('searchFragModel', {
     },
     getProfileTrackerList() {
       return profileTrackerList;
+    },
+    getSelectedProfileTrackerList() {
+      let result = profileTrackerList.filter(a => a.selected);
+      if (!result.length) {
+        result = profileTrackerList;
+      }
+      return result;
     },
     clearProfileTrackerList() {
       profileTrackerList.splice(0);

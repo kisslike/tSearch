@@ -64,7 +64,7 @@ const searchFragTableModel = types.model('searchFragTableModel', {
     },
     getResults() {
       const results = [];
-      self.searchFrag.getProfileTrackerList().forEach(profileTracker => {
+      self.searchFrag.getSelectedProfileTrackerList().forEach(profileTracker => {
         results.push(...profileTracker.getSearchResultsPage(self.index));
       });
       return results;
@@ -73,12 +73,13 @@ const searchFragTableModel = types.model('searchFragTableModel', {
       return sortResults(self.getResults(), self.sortByList);
     },
     hasMoreBtn() {
-      if (!self.isLastTable()) return false;
-      return self.searchFrag.getProfileTrackerList().some(profileTracker => {
-        if (isAlive(profileTracker) && profileTracker.search) {
-          return !!profileTracker.search.nextQuery;
-        }
-      });
+      if (self.isLastTable()) {
+        return self.searchFrag.getSelectedProfileTrackerList().some(profileTracker => {
+          if (isAlive(profileTracker) && profileTracker.search) {
+            return !!profileTracker.search.nextQuery;
+          }
+        });
+      }
     },
     getSortBy(by) {
       let item = null;
