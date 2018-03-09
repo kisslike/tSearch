@@ -1,10 +1,12 @@
-import sortResults from "../tools/sortResults";
+import trackerSearchModel from "./trackerSearch";
+import searchFragTableModel from "./searchFragTable";
 const debug = require('debug')('SearchFrag');
-const {types, getParent, isAlive, destroy, detach, unprotect} = require('mobx-state-tree');
+const {types, getParent, isAlive} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} SearchFragM
  * Model:
+ * @property {TrackerSearchM[]} trackerSearchList
  * @property {SearchFragTableM[]} tables
  * Actions:
  * @property {function(string)} search
@@ -12,151 +14,79 @@ const {types, getParent, isAlive, destroy, detach, unprotect} = require('mobx-st
  * @property {function} clearSearch
  * Views:
  * @property {ProfileM} profile
- * @property {function(ProfileTrackerM)} addProfileTracker
- * @property {function:ProfileTrackerM[]} getProfileTrackerList
- * @property {function} clearProfileTrackerList
+ * @property {function:TrackerSearchM} getTrackerSearch
+ * @property {function(string):number} getTrackerResultCount
+ * @property {function} beforeDestroy
  */
-
-/**
- * @typedef {{}} SearchFragTableM
- * Model:
- * @property {number} index
- * @property {SortBy[]} sortByList
- * Actions:
- * @property {function(string)} sortBy
- * @property {function(string)} subSortBy
- * Views:
- * @property {SearchFragM} searchFrag
- * @property {function:TrackerSearchResult[]} getResults
- * @property {function:TrackerSearchResult[]} getSortedResults
- * @property {function:boolean} hasMoreBtn
- * @property {function(string):SortBy} getSortBy
- * @property {function(Object)} handleMoreBtn
- * @property {function:boolean} isLastTable
- */
-
-/**
- * @typedef {{}} SortBy
- * @property {string} by
- * @property {number} direction
- */
-
-const searchFragTableModel = types.model('searchFragTableModel', {
-  index: types.number,
-  sortByList: types.optional(types.array(types.model('sortBy', {
-    by: types.string,
-    direction: types.optional(types.number, 0),
-  })), [{by: 'title'}]),
-}).actions(/**SearchFragTableM*/self => {
-  return {
-    sortBy(by) {
-      let item = self.getSortBy(by);
-      if (!item) {
-        item = {by};
-      } else {
-        item.direction = item.direction === 0 ? 1 : 0;
-      }
-      self.sortByList = [item];
-    },
-    subSortBy(by) {
-      let item = self.getSortBy(by);
-      if (item) {
-        detach(item);
-        unprotect(item);
-      }
-      if (!item) {
-        item = {by};
-      } else {
-        item.direction = item.direction === 0 ? 1 : 0;
-      }
-      self.sortByList.push(item);
-    }
-  };
-}).views(/**SearchFragTableM*/self => {
-  return {
-    get searchFrag() {
-      return getParent(self, 2);
-    },
-    getResults() {
-      const results = [];
-      self.searchFrag.getProfileTrackerList().forEach(profileTracker => {
-        results.push(...profileTracker.getSearchResultsPage(self.index));
-      });
-      return results;
-    },
-    getSortedResults() {
-      return sortResults(self.getResults(), self.sortByList);
-    },
-    hasMoreBtn() {
-      if (!self.isLastTable()) return false;
-      return self.searchFrag.getProfileTrackerList().some(profileTracker => {
-        if (isAlive(profileTracker) && profileTracker.search) {
-          return !!profileTracker.search.nextQuery;
-        }
-      });
-    },
-    getSortBy(by) {
-      let item = null;
-      self.sortByList.some(sortBy => {
-        if (sortBy.by === by) {
-          item = sortBy;
-          return true;
-        }
-      });
-      return item;
-    },
-    handleMoreBtn(e) {
-      e.preventDefault();
-      self.searchFrag.searchNext();
-    },
-    isLastTable() {
-      return self.index === self.searchFrag.tables.length - 1;
-    }
-  };
-});
 
 const searchFragModel = types.model('searchFragModel', {
+  trackerSearchList: types.optional(types.array(trackerSearchModel), []),
   tables: types.optional(types.array(searchFragTableModel), []),
 }).actions(/**SearchFragM*/self => {
   return {
     search(query) {
       self.clearSearch();
-      self.tables.push(searchFragTableModel.create({index: self.tables.length}));
+      const table = searchFragTableModel.create();
+      self.tables.push(table);
       self.profile.getSearchTrackers().forEach(profileTracker => {
-        self.addProfileTracker(profileTracker);
-        profileTracker.createSearch(query);
+        const tracker = profileTracker.tracker;
+        if (!tracker) return;
+
+        const info = profileTracker.getInfo();
+        const trackerSearch = trackerSearchModel.create({
+          tracker: tracker.id
+        });
+        self.trackerSearchList.push(trackerSearch);
+        trackerSearch.search(query).then(result => {
+          result.results.forEach(result => {
+            result.trackerInfo = info;
+          });
+          if (isAlive(table)) {
+            table.addResults(result.results);
+          }
+        });
       });
     },
     searchNext() {
-      self.tables.push(searchFragTableModel.create({index: self.tables.length}));
-      self.getProfileTrackerList().some(profileTracker => {
-        if (isAlive(profileTracker)) {
-          profileTracker.searchNext();
-        }
+      const table = searchFragTableModel.create();
+      self.tables.push(table);
+      self.trackerSearchList.forEach(trackerSearch => {
+        trackerSearch.searchNext().then(result => {
+          result.results.forEach(result => {
+            result.trackerInfo = info;
+          });
+          if (isAlive(table)) {
+            table.addResults(result.results);
+          }
+        });
       });
     },
     clearSearch() {
-      self.clearProfileTrackerList();
-      self.tables.forEach(table => {
-        destroy(table);
-      });
-      self.profile.clearSearch();
+      self.tables = [];
+      self.trackerSearchList = [];
     },
   };
 }).views(/**SearchFragM*/self => {
-  const profileTrackerList = [];
   return {
     get profile() {
       return getParent(self, 1).profile;
     },
-    addProfileTracker(profileTracker) {
-      profileTrackerList.push(profileTracker);
+    getTrackerSearch(trackerId) {
+      let result = null;
+      self.trackerSearchList.some(trackerSearch => {
+        if (trackerSearch.tracker.id === trackerId) {
+          return result = trackerSearch;
+        }
+      });
+      return result;
     },
-    getProfileTrackerList() {
-      return profileTrackerList;
+    getTrackerResultCount(trackerId) {
+      return self.tables.reduce((sum, table) => {
+        return sum + table.getTrackerResultCount(trackerId);
+      }, 0);
     },
-    clearProfileTrackerList() {
-      profileTrackerList.splice(0);
+    beforeDestroy() {
+      self.clearSearch();
     }
   };
 });

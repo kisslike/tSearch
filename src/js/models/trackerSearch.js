@@ -2,7 +2,7 @@ import trackerModel from "./tracker";
 import moment from "moment/moment";
 import filesize from 'filesize';
 const debug = require('debug')('trackerSearch');
-const {types, destroy, getParent, isAlive} = require('mobx-state-tree');
+const {types, isAlive} = require('mobx-state-tree');
 
 moment.locale(chrome.i18n.getUILanguage());
 
@@ -13,23 +13,21 @@ moment.locale(chrome.i18n.getUILanguage());
  * @property {string} readyState
  * @property {{url:string}} authRequired
  * @property {string} url
- * @property {{results:TrackerSearchM}[]} pages
  * @property {Object} [nextQuery]
  * Actions:
  * @property {function(string)} setReadyState
- * @property {function(Object)} setResult
+ * @property {function(Object)} setAuthRequired
  * @property {function} clearNextQuery
  * Views:
- * @property {function(number):TrackerResultM[]} getResultsPage
  * @property {function(string, string, Promise):Promise} wrapSearchPromise
  * @property {function(string):Promise} search
  * @property {function:Promise} searchNext
- * @property {function:number} getResultCount
  */
 
 /**
  * @typedef {{}} TrackerResultM
  * Model:
+ * @property {TrackerInfo} trackerInfo
  * @property {string} title
  * @property {string} url
  * @property {number} [categoryId]
@@ -55,6 +53,7 @@ const unixTimeToFromNow = function (unixtime) {
 };
 
 const trackerResultModel = types.model('trackerResultModel', {
+  trackerInfo: types.frozen,
   title: types.string,
   url: types.string,
   categoryId: types.maybe(types.number),
@@ -91,70 +90,66 @@ const trackerSearchModel = types.model('trackerSearchModel', {
   authRequired: types.maybe(types.model({
     url: types.string
   })),
-  pages: types.optional(types.array(types.model('page', {
-    results: types.optional(types.array(trackerResultModel), []),
-  })), []),
   nextQuery: types.frozen,
 }).actions(/**TrackerSearchM*/self => {
   return {
     setReadyState(state) {
       self.readyState = state;
     },
-    setResult(result) {
-      if (result.success) {
-        if (self.authRequired) {
-          destroy(self.authRequired);
-        }
-
-        const results = result.results.filter(result => {
-          if (!result.title || !result.url) {
-            debug('[' + self.tracker.id + ']', 'Skip torrent:', result);
-            return false;
-          } else {
-            return true;
-          }
-        });
-        self.pages.push({
-          results: results
-        });
-
-        if (result.nextPageRequest) {
-          self.nextQuery = result.nextPageRequest;
-        }
-      } else
-      if (result.error === 'AUTH') {
-        self.authRequired = {
-          url: result.url
-        };
-      }
+    setAuthRequired(result) {
+      self.authRequired = result;
     },
-    clearNextQuery() {
-      self.nextQuery = null;
+    setNextQuery(value) {
+      self.nextQuery = value;
     }
   };
 }).views(/**TrackerSearchM*/self => {
   return {
-    getResultsPage(index) {
-      if (index >= self.pages.length) {
-        return [];
-      } else {
-        return self.pages[index].results;
-      }
-    },
     wrapSearchPromise(trackerId, type, promise) {
       self.setReadyState('loading');
+      self.setAuthRequired(null);
       return promise.then(result => {
-        if (isAlive(self)) {
-          self.setReadyState('success');
-          self.setResult(result);
-        } else {
-          debug('%s skip, dead', type, trackerId, result);
+        if (!isAlive(self)) {
+          const err = new Error('SEARCH_IS_DEAD');
+          err.code = 'SEARCH_IS_DEAD';
+          throw err;
         }
-      }, err => {
-        if (isAlive(self)) {
+        if (!result.success) {
+          const err = new Error('AUTH');
+          err.code = 'TRACKER_AUTH';
+          err.url = result.url;
+          throw err;
+        } else {
+          self.setReadyState('success');
+
+          if (result.nextPageRequest) {
+            self.setNextQuery(result.nextPageRequest);
+          }
+
+          result.results = result.results.filter(result => {
+            if (!result.title || !result.url) {
+              debug('[' + trackerId + ']', 'Skip torrent:', result);
+              return false;
+            } else {
+              return true;
+            }
+          });
+
+          return result;
+        }
+      }).catch(err => {
+        if (err.code === 'SEARCH_IS_DEAD') {
+          throw err;
+        }
+
+        if (err.code === 'TRACKER_AUTH') {
+          self.setAuthRequired({
+            url: err.url
+          });
+        } else {
           self.setReadyState('error');
         }
-        debug('%s error', type, trackerId, err);
+        throw err;
       });
     },
     search(query) {
@@ -162,19 +157,15 @@ const trackerSearchModel = types.model('trackerSearchModel', {
     },
     searchNext() {
       const nextQuery = self.nextQuery;
-      self.clearNextQuery();
+      self.setNextQuery(null);
       if (nextQuery) {
         return self.wrapSearchPromise(self.tracker.id, 'searchNext', self.tracker.worker.searchNext(nextQuery));
       } else {
         return Promise.resolve();
       }
     },
-    getResultCount() {
-      return self.pages.reduce((sum, page) => {
-        return sum + page.results.length;
-      }, 0);
-    },
   };
 });
 
 export default trackerSearchModel;
+export {trackerResultModel};

@@ -9,18 +9,12 @@ const {types, resolveIdentifier, destroy, getParent} = require('mobx-state-tree'
  * @property {string} id
  * @property {ProfileTrackerMetaM} meta
  * @property {boolean} selected
- * @property {TrackerSearchM} [search]
  * Actions:
- * @property {function(string)} createSearch
- * @property {function} clearSearch
  * @property {function} resetSelected
  * @property {function(boolean)} setSelected
  * Views:
  * @property {TrackerM} tracker
- * @property {function:Promise} searchNext
  * @property {function:TrackerInfo} getInfo
- * @property {function(number):TrackerSearchResult[]} getSearchResultsPage
- * @property {function:number} getSearchPageCount
  * @property {function:string} getIconClassName
  * @property {function} beforeDestroy
  */
@@ -57,22 +51,8 @@ const profileTrackerModel = types.model('profileTrackerModel', {
   id: types.string,
   meta: profileTrackerMetaModel,
   selected: types.optional(types.boolean, false),
-  search: types.maybe(trackerSearchModel),
 }).actions(/**ProfileTrackerM*/self => {
   return {
-    createSearch(query) {
-      if (self.tracker) {
-        self.search = trackerSearchModel.create({
-          tracker: self.tracker
-        });
-        self.search.search(query);
-      }
-    },
-    clearSearch() {
-      if (self.search) {
-        destroy(self.search);
-      }
-    },
     resetSelected() {
       self.selected = false;
     },
@@ -93,39 +73,12 @@ const profileTrackerModel = types.model('profileTrackerModel', {
     get tracker() {
       return resolveIdentifier(trackerModel, self, self.id);
     },
-    searchNext() {
-      if (self.search) {
-        return self.search.searchNext();
-      } else {
-        return Promise.resolve();
-      }
-    },
     getInfo() {
       return {
         id: self.id,
         name: self.meta.name,
         iconClassName: self.getIconClassName()
       };
-    },
-    getSearchResultsPage(index) {
-      if (self.search) {
-        const trackerInfo = self.getInfo();
-        return self.search.getResultsPage(index).map(result => {
-          return {
-            trackerInfo: trackerInfo,
-            result: result
-          };
-        });
-      } else {
-        return [];
-      }
-    },
-    getSearchPageCount() {
-      if (self.search) {
-        return self.search.pages.length;
-      } else {
-        return 0;
-      }
     },
     getIconClassName() {
       const className = 'icon_' + self.id;

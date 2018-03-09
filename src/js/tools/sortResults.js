@@ -17,14 +17,13 @@ const sortResults = (results, sortByList) => {
       return a === b ? 0 : a > b ? -1 : 1;
     };
   });
-  results.sort((a, b) => {
+  return results.sort((a, b) => {
     let result = 0;
     sortFnList.some(fn => {
-      return (result = fn(a.result, b.result)) !== 0;
+      return (result = fn(a, b)) !== 0;
     });
     return result;
   });
-  return results;
 };
 
 export default sortResults;
