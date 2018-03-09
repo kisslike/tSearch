@@ -3,7 +3,7 @@ import trackerModel from './tracker';
 import searchFormModel from "./searchForm";
 import searchFragModel from "./searchFrag";
 const debug = require('debug')('indexModel');
-const {types, destroy} = require('mobx-state-tree');
+const {types} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} IndexM
@@ -14,8 +14,6 @@ const {types, destroy} = require('mobx-state-tree');
  * @property {SearchFormM} searchForm
  * @property {SearchFragM} searchFrag
  * Actions:
- * @property {function(string)} createSearch
- * @property {function} clearSearch
  * @property {function(string)} setProfile
  * Views:
  * @property {function} onProfileChange
@@ -27,7 +25,7 @@ const indexModel = types.model('indexModel', {
   profiles: types.array(profileModel),
   trackers: types.array(trackerModel),
   searchForm: types.optional(searchFormModel, {}),
-  searchFrag: types.maybe(searchFragModel),
+  searchFrag: types.optional(searchFragModel, {}),
 }).preProcessSnapshot(snapshot => {
   if (!snapshot.profiles.length) {
     snapshot.profiles.push({
@@ -60,17 +58,6 @@ const indexModel = types.model('indexModel', {
   return snapshot;
 }).actions(/**IndexM*/self => {
   return {
-    createSearch(query) {
-      self.searchFrag = searchFragModel.create({
-        query
-      });
-      self.searchFrag.search(query);
-    },
-    clearSearch() {
-      if (self.searchFrag) {
-        destroy(self.searchFrag);
-      }
-    },
     setProfile(name) {
       self.profile = name;
       self.onProfileChange();

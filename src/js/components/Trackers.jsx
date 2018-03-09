@@ -8,7 +8,7 @@ import {observer} from "mobx-react/index";
     const store = this.props.store;
     const trackers = store.profile.profileTrackers.map(profileTracker => {
       return (
-        <ProfileTracker key={profileTracker.id} profileTracker={profileTracker} store={store}/>
+        <ProfileTracker key={profileTracker.id} profileTracker={profileTracker}/>
       );
     });
     return (
@@ -33,8 +33,6 @@ import {observer} from "mobx-react/index";
     profileTracker.setSelected(!profileTracker.selected);
   }
   render() {
-    /**@type {IndexM}*/
-    const store = this.props.store;
     /**@type {ProfileTrackerM}*/
     const profileTracker = this.props.profileTracker;
 
@@ -42,7 +40,7 @@ import {observer} from "mobx-react/index";
     let icon = null;
     const iconClassList = [];
 
-    const search = store.searchFrag && store.searchFrag.getTrackerSearch(profileTracker.id);
+    const search = profileTracker.search;
     if (search) {
       if (search.readyState === 'loading') {
         iconClassList.push('tracker__icon-loading');
@@ -71,8 +69,8 @@ import {observer} from "mobx-react/index";
       );
     } else {
       let count = 0;
-      if (store.searchFrag) {
-        count = store.searchFrag.getTrackerResultCount(profileTracker.id);
+      if (search) {
+        count = search.getResultCount();
       }
       extraInfo = (
         <div className="tracker__counter">{count}</div>

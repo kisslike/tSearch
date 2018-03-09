@@ -57,8 +57,7 @@ const debug = require('debug')('Table');
   getHeaderColumns() {
     return this.columns.map(type => this.getHeaderColumn(type));
   }
-  getRow(/**TrackerResultM*/result) {
-    const trackerInfo = result.trackerInfo;
+  getRow(/**TrackerInfo*/trackerInfo, /**TrackerResultM*/result) {
     return (
       <div key={trackerInfo.id + '_' + result.url} className="row body__row">{this.columns.map(type => {
         switch (type) {
@@ -158,7 +157,7 @@ const debug = require('debug')('Table');
     );
   }
   getRows(results) {
-    return results.map(result => this.getRow(result));
+    return results.map(({trackerInfo, result}) => this.getRow(trackerInfo, result));
   }
   render() {
     /**@type {SearchFragTableM}*/

@@ -23,30 +23,24 @@ const qs = require('querystring');
   clearSearch() {
     /**@type {IndexM}*/
     const store = this.props.store;
-    store.clearSearch();
+    store.searchFrag.clearSearch();
   }
   search(query) {
     /**@type {IndexM}*/
     const store = this.props.store;
-    store.createSearch(query);
+    store.searchFrag.search(query);
   }
   render() {
     /**@type {IndexM}*/
     const store = this.props.store;
 
-    if (!store.searchFrag) {
-      return (
-        'No search yet...'
-      );
-    } else {
-      return (
-        store.searchFrag.tables.map((table, i) => {
-          return (
-            <Table key={i} table={table}/>
-          );
-        })
-      );
-    }
+    return (
+      store.searchFrag.tables.map(table => {
+        return (
+          <Table key={table.index} table={table}/>
+        );
+      })
+    );
   }
 }
 
