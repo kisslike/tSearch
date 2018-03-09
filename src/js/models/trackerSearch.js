@@ -59,7 +59,11 @@ const unixTimeToFromNow = function (unixtime) {
 };
 
 const trackerResultModel = types.model('trackerResultModel', {
-  trackerInfo: types.frozen,
+  trackerInfo: types.model({
+    id: types.string,
+    name: types.string,
+    iconClassName: types.string,
+  }),
   title: types.string,
   url: types.string,
   categoryId: types.maybe(types.number),
