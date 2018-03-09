@@ -109,13 +109,7 @@ const profileTrackerModel = types.model('profileTrackerModel', {
     },
     getSearchResultsPage(index) {
       if (self.search) {
-        const trackerInfo = self.getInfo();
-        return self.search.getResultsPage(index).map(result => {
-          return {
-            trackerInfo: trackerInfo,
-            result: result
-          };
-        });
+        return self.search.getResultsPage(index);
       } else {
         return [];
       }

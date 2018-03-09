@@ -20,7 +20,7 @@ const sortResults = (results, sortByList) => {
   results.sort((a, b) => {
     let result = 0;
     sortFnList.some(fn => {
-      return (result = fn(a.result, b.result)) !== 0;
+      return (result = fn(a, b)) !== 0;
     });
     return result;
   });

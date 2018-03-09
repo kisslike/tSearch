@@ -57,9 +57,9 @@ const debug = require('debug')('Table');
   getHeaderColumns() {
     return this.columns.map(type => this.getHeaderColumn(type));
   }
-  getRow(/**TrackerInfo*/trackerInfo, /**TrackerResultM*/result) {
+  getRow(/**TrackerResultM*/result) {
     return (
-      <div key={trackerInfo.id + '_' + result.url} className="row body__row">{this.columns.map(type => {
+      <div key={result.trackerInfo.id + '_' + result.url} className="row body__row">{this.columns.map(type => {
         switch (type) {
           case 'date': {
             return (
@@ -95,7 +95,8 @@ const debug = require('debug')('Table');
             }
 
             let titleIcon = (
-              <div className={`tracker__icon ${trackerInfo.iconClassName}`} title={trackerInfo.name}/>
+              <div className={`tracker__icon ${result.trackerInfo.iconClassName}`}
+                   title={result.trackerInfo.name}/>
             );
 
             if (category) {
@@ -157,7 +158,7 @@ const debug = require('debug')('Table');
     );
   }
   getRows(results) {
-    return results.map(({trackerInfo, result}) => this.getRow(trackerInfo, result));
+    return results.map(result => this.getRow(result));
   }
   render() {
     /**@type {SearchFragTableM}*/
