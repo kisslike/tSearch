@@ -1,8 +1,9 @@
 import profileModel from './profile';
 import trackerModel from './tracker';
 import searchFormModel from "./searchForm";
+import searchFragModel from "./searchFrag";
 const debug = require('debug')('indexModel');
-const {types, resolveIdentifier} = require('mobx-state-tree');
+const {types} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} IndexM
@@ -11,6 +12,7 @@ const {types, resolveIdentifier} = require('mobx-state-tree');
  * @property {ProfileM[]} profiles
  * @property {TrackerM[]} trackers
  * @property {SearchFormM} searchForm
+ * @property {SearchFragM} searchFrag
  * Actions:
  * @property {function(string)} setProfile
  * Views:
@@ -23,6 +25,7 @@ const indexModel = types.model('indexModel', {
   profiles: types.array(profileModel),
   trackers: types.array(trackerModel),
   searchForm: types.optional(searchFormModel, {}),
+  searchFrag: types.optional(searchFragModel, {}),
 }).preProcessSnapshot(snapshot => {
   if (!snapshot.profiles.length) {
     snapshot.profiles.push({

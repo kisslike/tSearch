@@ -1,9 +1,15 @@
+import trackerModel from "./tracker";
+import moment from "moment/moment";
+import filesize from 'filesize';
 const debug = require('debug')('trackerSearch');
 const {types, destroy, getParent, isAlive} = require('mobx-state-tree');
+
+moment.locale(chrome.i18n.getUILanguage());
 
 /**
  * @typedef {{}} TrackerSearchM
  * Model:
+ * @property {TrackerM} tracker
  * @property {string} readyState
  * @property {{url:string}} authRequired
  * @property {string} url
@@ -12,9 +18,8 @@ const {types, destroy, getParent, isAlive} = require('mobx-state-tree');
  * Actions:
  * @property {function(string)} setReadyState
  * @property {function(Object)} setResult
+ * @property {function} clearNextQuery
  * Views:
- * @property {ProfileTrackerM} profile
- * @property {TrackerM} tracker
  * @property {function(number):TrackerResultM[]} getResultsPage
  * @property {function(string, string, Promise):Promise} wrapSearchPromise
  * @property {function(string):Promise} search
@@ -35,10 +40,19 @@ const {types, destroy, getParent, isAlive} = require('mobx-state-tree');
  * @property {number} [seed]
  * @property {number} [peer]
  * @property {number} [date]
+ * @property {string} dateTitle
+ * @property {string} dateText
+ * @property {string} sizeText
  * Actions:
  * Views:
  */
 
+const unixTimeToString = function (unixtime) {
+  return unixtime <= 0 ? '∞' : moment(unixtime * 1000).format('lll');
+};
+const unixTimeToFromNow = function (unixtime) {
+  return unixtime <= 0 ? '∞' : moment(unixtime * 1000).fromNow();
+};
 
 const trackerResultModel = types.model('trackerResultModel', {
   title: types.string,
@@ -51,28 +65,28 @@ const trackerResultModel = types.model('trackerResultModel', {
   seed: types.optional(types.number, 1),
   peer: types.optional(types.number, 0),
   date: types.optional(types.number, -1),
+  dateTitle: types.string,
+  dateText: types.string,
+  sizeText: types.string,
 }).preProcessSnapshot(snapshot => {
   ['size', 'seed', 'peer', 'date'].forEach(key => {
     let value = snapshot[key];
-    if (value) {
-      let change = false;
-      if (typeof value !== 'number') {
-        change = true;
-        value = parseInt(value, 10);
-      }
+    if (typeof value !== 'number') {
+      value = parseInt(value, 10);
       if (!isFinite(value)) {
-        change = true;
-        value = null;
+        value = void 0;
       }
-      if (change) {
-        snapshot[key] = value;
-      }
+      snapshot[key] = value;
     }
   });
+  snapshot.dateTitle = unixTimeToString(snapshot.date);
+  snapshot.dateText = unixTimeToFromNow(snapshot.date);
+  snapshot.sizeText = filesize(snapshot.size);
   return snapshot;
 });
 
 const trackerSearchModel = types.model('trackerSearchModel', {
+  tracker: types.reference(trackerModel),
   readyState: types.optional(types.string, 'idle'), // idle, loading, success, error
   authRequired: types.maybe(types.model({
     url: types.string
@@ -113,16 +127,13 @@ const trackerSearchModel = types.model('trackerSearchModel', {
           url: result.url
         };
       }
+    },
+    clearNextQuery() {
+      self.nextQuery = null;
     }
   };
 }).views(/**TrackerSearchM*/self => {
   return {
-    get profile() {
-      return getParent(self, 1);
-    },
-    get tracker() {
-      return self.profile.tracker;
-    },
     getResultsPage(index) {
       if (index >= self.pages.length) {
         return [];
@@ -150,7 +161,13 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       return self.wrapSearchPromise(self.tracker.id, 'search', self.tracker.worker.search(query));
     },
     searchNext() {
-      return self.wrapSearchPromise(self.tracker.id, 'searchNext', self.tracker.worker.searchNext(self.nextQuery));
+      const nextQuery = self.nextQuery;
+      self.clearNextQuery();
+      if (nextQuery) {
+        return self.wrapSearchPromise(self.tracker.id, 'searchNext', self.tracker.worker.searchNext(nextQuery));
+      } else {
+        return Promise.resolve();
+      }
     },
     getResultCount() {
       return self.pages.reduce((sum, page) => {

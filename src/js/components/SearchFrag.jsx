@@ -1,11 +1,8 @@
 const debug = require('debug')('SearchFrag');
 import {observer} from 'mobx-react';
 import React from 'react';
-import moment from 'moment';
 import Table from './Table';
 const qs = require('querystring');
-
-moment.locale(chrome.i18n.getUILanguage());
 
 @observer class SearchFrag extends React.Component {
   componentWillMount() {
@@ -26,26 +23,23 @@ moment.locale(chrome.i18n.getUILanguage());
   clearSearch() {
     /**@type {IndexM}*/
     const store = this.props.store;
-    store.profile.clearSearch();
+    store.searchFrag.clearSearch();
   }
   search(query) {
     /**@type {IndexM}*/
     const store = this.props.store;
-    store.profile.search(query);
+    store.searchFrag.search(query);
   }
   render() {
     /**@type {IndexM}*/
     const store = this.props.store;
 
-    const pages = [];
-    for (let i = 0, len = store.profile.getSearchPageCount(); i < len; i++) {
-      pages.push(
-        <Table key={i} pageIndex={i} store={this.props.store}/>
-      );
-    }
-
     return (
-      pages
+      store.searchFrag.tables.map(table => {
+        return (
+          <Table key={table.index} table={table}/>
+        );
+      })
     );
   }
 }

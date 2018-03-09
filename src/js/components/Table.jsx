@@ -1,17 +1,11 @@
-import moment from "moment/moment";
-import filesize from "filesize";
 import {observer} from "mobx-react/index";
 import React from "react";
+import {typeSortMap} from "../tools/sortResults";
 const debug = require('debug')('Table');
-
 
 @observer class Table extends React.Component {
   constructor() {
     super();
-
-    this.state = {
-      sortByList: [{by: 'title'}]
-    };
 
     this.columns = ['date', 'quality', 'title', 'size', 'seed', 'peer'];
     // todo: hide columns
@@ -22,12 +16,39 @@ const debug = require('debug')('Table');
       this.columns.splice(this.columns.indexOf('seed'), 1);
     }*/
   }
+  handleSortBy(by, e) {
+    e.preventDefault();
+    /**@type {SearchFragTableM}*/
+    const table = this.props.table;
+
+    if (e.ctrlKey) {
+      table.subSortBy(by);
+    } else {
+      table.sortBy(by);
+    }
+  }
   getHeaderColumn(type) {
+    /**@type {SearchFragTableM}*/
+    const table = this.props.table;
     const name = chrome.i18n.getMessage('row_' + type);
     const nameShort = chrome.i18n.getMessage('row_' + type + '__short') || name;
+    const sortBy = table.getSortBy(type);
+    const sortReverse = (typeSortMap[type] || {}).reverse;
 
+    const classList = ['cell', 'row__cell', 'cell-' + type];
+    if (sortBy) {
+      let direction = sortBy.direction;
+      if (sortReverse) {
+        direction = direction === 0 ? 1 : 0;
+      }
+      if (direction === 0) {
+        classList.push('cell-sort-down');
+      } else {
+        classList.push('cell-sort-up');
+      }
+    }
     return (
-      <a key={type} className={`cell row__cell cell-${type}`} href={'#cell-' + type}>
+      <a key={type} className={classList.join(' ')} href={'#cell-' + type} onClick={this.handleSortBy.bind(this, type)}>
         <span className="cell__title" title={name}>{nameShort}</span>
         <i className="cell__sort"/>
       </a>
@@ -43,7 +64,7 @@ const debug = require('debug')('Table');
           case 'date': {
             return (
               <div key="date" className={`cell row__cell cell-${type}`}
-                   title={unixTimeToString(result.date)}>{unixTimeToFromNow(result.date)}</div>
+                   title={result.dateTitle}>{result.dateText}</div>
             );
           }
           case 'quality': {
@@ -98,16 +119,15 @@ const debug = require('debug')('Table');
             );
           }
           case 'size': {
-            const sizeStr = filesize(result.size);
             let downloadLink = null;
             if (result.downloadUrl) {
               downloadLink = (
                 <a className="cell__download" target="_blank" href={result.downloadUrl}>{
-                  sizeStr + String.fromCharCode(160) + String.fromCharCode(8595)
+                  result.sizeText + String.fromCharCode(160) + String.fromCharCode(8595)
                 }</a>
               );
             } else {
-              downloadLink = sizeStr;
+              downloadLink = result.sizeText;
             }
             return (
               <div key="size" className={`cell row__cell cell-${type}`}>
@@ -140,8 +160,17 @@ const debug = require('debug')('Table');
     return results.map(({trackerInfo, result}) => this.getRow(trackerInfo, result));
   }
   render() {
-    /**@type {IndexM}*/
-    const store = this.props.store;
+    /**@type {SearchFragTableM}*/
+    const table = this.props.table;
+
+    let moreBtn = null;
+    if (table.hasMoreBtn()) {
+      moreBtn = (
+        <a className="loadMore search__submit footer__loadMore" href="#more" onClick={table.handleMoreBtn}>{
+          chrome.i18n.getMessage('loadMore')
+        }</a>
+      );
+    }
 
     return (
       <div className="table table-results">
@@ -150,20 +179,15 @@ const debug = require('debug')('Table');
             {this.getHeaderColumns()}
           </div>
           <div className="body table__body">
-            {this.getRows(store.profile.getSearchResultsPage(this.props.pageIndex, this.state.sortByList))}
+            {this.getRows(table.getSortedResults())}
           </div>
-          <div className="footer table__footer"/>
+          <div className="footer table__footer">
+            {moreBtn}
+          </div>
         </div>
       </div>
     );
   }
 }
-
-const unixTimeToString = function (unixtime) {
-  return unixtime <= 0 ? '∞' : moment(unixtime * 1000).format('lll');
-};
-const unixTimeToFromNow = function (unixtime) {
-  return unixtime <= 0 ? '∞' : moment(unixtime * 1000).fromNow();
-};
 
 export default Table;
