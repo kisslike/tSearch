@@ -16,7 +16,7 @@ const {types, destroy, getParent, isAlive} = require('mobx-state-tree');
  * @property {ProfileTrackerM} profile
  * @property {TrackerM} tracker
  * @property {function(number):TrackerResultM[]} getResultsPage
- * @property {function(string, Promise):Promise} wrapSearchPromise
+ * @property {function(string, string, Promise):Promise} wrapSearchPromise
  * @property {function(string):Promise} search
  * @property {function:Promise} searchNext
  * @property {function:number} getResultCount
@@ -130,8 +130,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
         return self.pages[index].results;
       }
     },
-    wrapSearchPromise(type, promise) {
-      const trackerId = self.tracker.id;
+    wrapSearchPromise(trackerId, type, promise) {
       self.setReadyState('loading');
       return promise.then(result => {
         if (isAlive(self)) {
@@ -148,10 +147,10 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       });
     },
     search(query) {
-      return self.wrapSearchPromise('search', self.tracker.worker.search(query));
+      return self.wrapSearchPromise(self.tracker.id, 'search', self.tracker.worker.search(query));
     },
     searchNext() {
-      return self.wrapSearchPromise('searchNext', self.tracker.worker.searchNext(self.nextQuery));
+      return self.wrapSearchPromise(self.tracker.id, 'searchNext', self.tracker.worker.searchNext(self.nextQuery));
     },
     getResultCount() {
       return self.pages.reduce((sum, page) => {
