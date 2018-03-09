@@ -32,6 +32,7 @@ const {types, getParent, isAlive, destroy, detach, unprotect} = require('mobx-st
  * @property {function:boolean} hasMoreBtn
  * @property {function(string):SortBy} getSortBy
  * @property {function(Object)} handleMoreBtn
+ * @property {function:boolean} isLastTable
  */
 
 /**
