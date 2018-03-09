@@ -17,7 +17,8 @@ const {types, destroy, getParent, isAlive} = require('mobx-state-tree');
  * @property {TrackerM} tracker
  * @property {function(number):TrackerResultM[]} getResultsPage
  * @property {function(string, Promise):Promise} wrapSearchPromise
- * @property {function} searchNext
+ * @property {function(string):Promise} search
+ * @property {function:Promise} searchNext
  * @property {function:number} getResultCount
  */
 

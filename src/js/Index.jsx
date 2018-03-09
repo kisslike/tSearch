@@ -10,7 +10,7 @@ import ScrollTop from './components/ScrollTop';
 import Trackers from './components/Trackers';
 import loadTrackers from './tools/loadTrackers';
 import {HashRouter, Route, Link} from 'react-router-dom';
-import Search from './components/Search';
+import SearchFrag from './components/SearchFrag';
 const qs = require('querystring');
 
 
@@ -153,7 +153,7 @@ const qs = require('querystring');
               }}/>
               <Route path="/search" component={props => {
                 return (
-                  <Search store={this.props.store} {...props}/>
+                  <SearchFrag store={this.props.store} {...props}/>
                 );
               }}/>
             </div>

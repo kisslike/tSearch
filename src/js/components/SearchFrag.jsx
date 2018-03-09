@@ -1,4 +1,4 @@
-const debug = require('debug')('Search');
+const debug = require('debug')('SearchFrag');
 import {observer} from 'mobx-react';
 import React from 'react';
 import moment from 'moment';
@@ -7,7 +7,7 @@ const qs = require('querystring');
 
 moment.locale(chrome.i18n.getUILanguage());
 
-@observer class Search extends React.Component {
+@observer class SearchFrag extends React.Component {
   componentWillMount() {
     const params = qs.parse(this.props.location.search.substr(1));
     this.search(params.query);
@@ -50,4 +50,4 @@ moment.locale(chrome.i18n.getUILanguage());
   }
 }
 
-export default Search;
+export default SearchFrag;
