@@ -7,12 +7,25 @@ const {types} = require('mobx-state-tree');
 /**
  * @typedef {{}} FilterM
  * Model:
- * @property {string} word
+ * @property {string} text
+ * @property {number} minSize
+ * @property {number} maxSize
+ * @property {number} minSeed
+ * @property {number} maxSeed
+ * @property {number} minPeer
+ * @property {number} maxPeer
+ * @property {number} minTime
+ * @property {number} maxTime
  * Actions:
- * @property {function(string)} setWord
+ * @property {function(string)} setText
+ * @property {function(number, number)} setSize
+ * @property {function(number, number)} setSeed
+ * @property {function(number, number)} setPeer
+ * @property {function(number, number)} setTime
  * Views:
  * @property {function:TextFilter} getTextFilterRe
- * @property {function(string):boolean} testTextFilter
+ * @property {function(string):boolean} testText
+ * @property {function(number, number, number):boolean} testRange
  * @property {function(TrackerResultM[]):TrackerResultM[]} processResults
  */
 
@@ -25,11 +38,35 @@ const {types} = require('mobx-state-tree');
 
 const filterModel = types.model('filterModel', {
   text: types.optional(types.string, ''),
+  minSize: types.optional(types.number, 0),
+  maxSize: types.optional(types.number, 0),
+  minSeed: types.optional(types.number, 0),
+  maxSeed: types.optional(types.number, 0),
+  minPeer: types.optional(types.number, 0),
+  maxPeer: types.optional(types.number, 0),
+  minTime: types.optional(types.number, 0),
+  maxTime: types.optional(types.number, 0),
 }).actions(/**FilterM*/self => {
   return {
     setText(value) {
       self.text = value;
-    }
+    },
+    setSize(min, max) {
+      self.minSize = min;
+      self.maxSize = max;
+    },
+    setSeed(min, max) {
+      self.minSeed = min;
+      self.maxSeed = max;
+    },
+    setPeer(min, max) {
+      self.minPeer = min;
+      self.maxPeer = max;
+    },
+    setTime(min, max) {
+      self.minTime = min;
+      self.maxTime = max;
+    },
   };
 }).views(/**FilterM*/self => {
   const textToWords = function (text) {
@@ -92,7 +129,7 @@ const filterModel = types.model('filterModel', {
       }
       return result
     },
-    testTextFilter(text) {
+    testText(text) {
       const textFilter = self.getTextFilterRe();
       if (textFilter.excludeRe && textFilter.excludeRe.test(text)) {
         return false;
@@ -105,15 +142,36 @@ const filterModel = types.model('filterModel', {
       }
       return true;
     },
+    testRange(value, min, max) {
+      if (min !== 0 && value < min) {
+        return false;
+      }
+      if (max !== 0 && value > max) {
+        return false;
+      }
+      return true;
+    },
     processResults(/**TrackerResultM[]*/results) {
       return results.filter(result => {
-        if (!self.testTextFilter(result.categoryTitle + ' ' + result.title)) {
+        if (!self.testRange(result.size, self.minSize, self.maxSize)) {
+          return false;
+        } else
+        if (!self.testRange(result.seed, self.minSeed, self.maxSeed)) {
+          return false;
+        } else
+        if (!self.testRange(result.peer, self.minPeer, self.maxPeer)) {
+          return false;
+        } else
+        if (!self.testRange(result.date, self.minTime, self.maxTime)) {
+          return false;
+        } else
+        if (!self.testText(result.categoryTitle + ' ' + result.title)) {
           return false;
         } else {
           return true;
         }
       });
-    }
+    },
   };
 });
 

@@ -309,6 +309,10 @@ a.search__submit {
     display: none;
 }
 
+.input_box-time-filter > div {
+    display: inline-block;
+}
+
 .input_box-time-filter.input_box-time-filter-visible {
     display: block;
 }
@@ -327,6 +331,11 @@ a.search__submit {
     z-index: 10;
     height: 100%;
     right: 0;
+    display: none;
+}
+
+.scroll_top.visible {
+    display: block;
 }
 
 .scroll_top:hover {

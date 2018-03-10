@@ -36,14 +36,14 @@ class ScrollTop extends React.Component {
     window.scrollTo(0, 0);
   }
   render() {
-    if (!this.state.visible) {
-      return null;
-    } else {
-      return (
-        <a key="scroll-top" className="scroll_top" href="#scrollTop" onClick={this.onClick}
-           title={chrome.i18n.getMessage('scrollTop')}/>
-      );
+    const classList = ['scroll_top'];
+    if (this.state.visible) {
+      classList.push('visible');
     }
+    return (
+      <a key="scroll-top" className={classList.join(' ')} href="#scrollTop" onClick={this.onClick}
+         title={chrome.i18n.getMessage('scrollTop')}/>
+    );
   }
 }
 
