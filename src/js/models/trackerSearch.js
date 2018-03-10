@@ -1,6 +1,7 @@
 import trackerModel from "./tracker";
 import moment from "moment/moment";
 import filesize from 'filesize';
+import highlight from "../tools/highlight";
 const debug = require('debug')('trackerSearch');
 const {types, isAlive, clone} = require('mobx-state-tree');
 
@@ -10,6 +11,7 @@ moment.locale(chrome.i18n.getUILanguage());
  * @typedef {{}} TrackerSearchM
  * Model:
  * @property {string} id
+ * @property {string} query
  * @property {TrackerM} tracker
  * @property {ProfileTrackerInfoM} trackerInfo
  * @property {string} readyState
@@ -24,6 +26,7 @@ moment.locale(chrome.i18n.getUILanguage());
  * @property {function(string, Object)} setResult
  * @property {function} clearNextQuery
  * Views:
+ * @property {function:Object} getQueryHighlightMap
  * @property {function(number):TrackerResultM[]} getResultsPage
  * @property {function(string, string, Promise):Promise} wrapSearchPromise
  * @property {function:Promise} search
@@ -35,6 +38,7 @@ moment.locale(chrome.i18n.getUILanguage());
  * Model:
  * @property {ProfileTrackerInfoM} trackerInfo
  * @property {string} title
+ * @property {Object} titleHighlightMap
  * @property {string} url
  * @property {number} [categoryId]
  * @property {string} [categoryTitle]
@@ -77,6 +81,7 @@ const profileTrackerInfoModel = types.model('profileTrackerInfoModel', {
 const trackerResultModel = types.model('trackerResultModel', {
   trackerInfo: profileTrackerInfoModel,
   title: types.string,
+  titleHighlightMap: types.frozen,
   url: types.string,
   categoryId: types.maybe(types.number),
   categoryTitle: types.optional(types.string, ''),
@@ -131,12 +136,14 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       self.nextQuery = value;
     },
     setResult(trackerId, result) {
+      const queryHighlightMap = self.getQueryHighlightMap();
       const results = result.results.filter(result => {
         if (!result.title || !result.url) {
           debug('[' + self.tracker.id + ']', 'Skip torrent:', result);
           return false;
         } else {
           result.trackerInfo = clone(self.trackerInfo);
+          result.titleHighlightMap = highlight.getTextMap(result.title, queryHighlightMap);
           return true;
         }
       });
@@ -151,6 +158,9 @@ const trackerSearchModel = types.model('trackerSearchModel', {
   };
 }).views(/**TrackerSearchM*/self => {
   return {
+    getQueryHighlightMap() {
+      return highlight.getMap(self.query);
+    },
     getResultsPage(index) {
       if (index >= self.pages.length) {
         return [];

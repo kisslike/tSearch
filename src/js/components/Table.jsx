@@ -1,6 +1,7 @@
 import {observer} from "mobx-react/index";
 import React from "react";
 import {typeSortMap} from "../tools/sortResults";
+import highlight from "../tools/highlight";
 const debug = require('debug')('Table');
 
 @observer class Table extends React.Component {
@@ -112,7 +113,11 @@ const debug = require('debug')('Table');
             return (
               <div key="title" className={`cell row__cell cell-${type}`}>
                 <div className="cell__title">
-                  <a className="title" target="_blank" href={result.url}>{result.title}</a>
+                  {highlight.getReactComponent('a', {
+                    className: 'title',
+                    target: '_blank',
+                    href: result.url
+                  }, result.title, result.titleHighlightMap)}
                   {titleIcon}
                 </div>
                 {category}
