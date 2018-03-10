@@ -11,7 +11,7 @@ const {types, resolveIdentifier, destroy, getParent} = require('mobx-state-tree'
  * @property {boolean} selected
  * @property {TrackerSearchM} [search]
  * Actions:
- * @property {function(string)} createSearch
+ * @property {function(string):Promise} createSearch
  * @property {function} clearSearch
  * @property {function(boolean)} setSelected
  * @property {function(boolean)} applySelected
@@ -58,7 +58,9 @@ const profileTrackerModel = types.model('profileTrackerModel', {
         self.search = trackerSearchModel.create({
           tracker: self.tracker
         });
-        self.search.search(query);
+        return self.search.search(query);
+      } else {
+        return Promise.resolve();
       }
     },
     clearSearch() {

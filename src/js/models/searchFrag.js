@@ -12,11 +12,6 @@ const {types, getParent, isAlive, destroy} = require('mobx-state-tree');
  * @property {function} clearSearch
  * Views:
  * @property {ProfileM} profile
- * @property {function(ProfileTrackerM)} addProfileTracker
- * @property {function:ProfileTrackerM[]} getProfileTrackerList
- * @property {function(string):ProfileTrackerM} getProfileTrackerById
- * @property {function:ProfileTrackerM[]} getSelectedProfileTrackerList
- * @property {function} clearProfileTrackerList
  * @property {function(ProfileTrackerM):number} getTrackerResultCount
  * @property {function(ProfileTrackerM):number} getTrackerVisibleResultCount
  */
@@ -28,49 +23,29 @@ const searchFragModel = types.model('searchFragModel', {
     search(query) {
       self.clearSearch();
       self.tables.push(searchFragTableModel.create({index: self.tables.length}));
-      self.profile.getSearchTrackers().forEach(profileTracker => {
-        self.addProfileTracker(profileTracker);
+      self.profile.getSelectedTrackers().forEach(profileTracker => {
         profileTracker.createSearch(query);
       });
     },
     searchNext() {
       self.tables.push(searchFragTableModel.create({index: self.tables.length}));
-      self.getProfileTrackerList().some(profileTracker => {
-        if (isAlive(profileTracker)) {
-          profileTracker.searchNext();
-        }
+      self.profile.getSelectedTrackers().forEach(profileTracker => {
+        profileTracker.searchNext();
       });
     },
     clearSearch() {
-      self.clearProfileTrackerList();
       self.tables.forEach(table => {
         destroy(table);
       });
-      self.profile.clearSearch();
+      self.profile.profileTrackers.forEach(profileTracker => {
+        profileTracker.clearSearch();
+      });
     },
   };
 }).views(/**SearchFragM*/self => {
-  /**@type {Map.<string, ProfileTrackerM>}*/
-  const profileTrackerList = new Map();
   return {
     get profile() {
       return getParent(self, 1).profile;
-    },
-    addProfileTracker(profileTracker) {
-      profileTrackerList.set(profileTracker.id, profileTracker);
-    },
-    getProfileTrackerList() {
-      return Array.from(profileTrackerList.values());
-    },
-    getSelectedProfileTrackerList() {
-      let result = self.getProfileTrackerList().filter(a => a.selected);
-      if (!result.length) {
-        result = self.getProfileTrackerList();
-      }
-      return result;
-    },
-    clearProfileTrackerList() {
-      profileTrackerList.clear();
     },
     getTrackerResultCount(profileTracker) {
       return self.tables.reduce((sum, table) => {
