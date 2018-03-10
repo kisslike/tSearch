@@ -3,6 +3,7 @@ import trackerModel from './tracker';
 import searchFormModel from "./searchForm";
 import searchFragModel from "./searchFrag";
 import filterModel from "./filters";
+import getSearchFramModelId from "../tools/getSearchFragModelId";
 const debug = require('debug')('indexModel');
 const {types, destroy} = require('mobx-state-tree');
 
@@ -73,6 +74,7 @@ const indexModel = types.model('indexModel', {
   return {
     createSearch(query) {
       self.searchFrag = searchFragModel.create({
+        id: getSearchFramModelId(),
         query: query
       });
       self.searchFrag.search(query);

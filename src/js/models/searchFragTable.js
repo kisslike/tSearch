@@ -5,6 +5,7 @@ const {types, getParent, isAlive, detach, unprotect} = require('mobx-state-tree'
 /**
  * @typedef {{}} SearchFragTableM
  * Model:
+ * @property {string} id
  * @property {number} index
  * @property {SortBy[]} sortByList
  * Actions:
@@ -14,8 +15,8 @@ const {types, getParent, isAlive, detach, unprotect} = require('mobx-state-tree'
  * @property {FilterM} filter
  * @property {ProfileM} profile
  * @property {SearchFragM} searchFrag
- * @property {function(ProfileTrackerM):TrackerResultM[]} getTrackerResults
- * @property {function(ProfileTrackerM):TrackerResultM[]} getFilteredTrackerResults
+ * @property {function(TrackerSearchM):TrackerResultM[]} getTrackerResults
+ * @property {function(TrackerSearchM):TrackerResultM[]} getFilteredTrackerResults
  * @property {function:TrackerResultM[]} getResults
  * @property {function:TrackerResultM[]} getFilteredResults
  * @property {function:TrackerResultM[]} getSortedFilteredResults
@@ -23,8 +24,8 @@ const {types, getParent, isAlive, detach, unprotect} = require('mobx-state-tree'
  * @property {function(string):SortBy} getSortBy
  * @property {function(Object)} handleMoreBtn
  * @property {function:boolean} isLastTable
- * @property {function(ProfileTrackerM):number} getTrackerResultCount
- * @property {function(ProfileTrackerM):number} getTrackerVisibleResultCount
+ * @property {function(TrackerSearchM):number} getTrackerResultCount
+ * @property {function(TrackerSearchM):number} getTrackerVisibleResultCount
  */
 
 /**
@@ -34,6 +35,7 @@ const {types, getParent, isAlive, detach, unprotect} = require('mobx-state-tree'
  */
 
 const searchFragTableModel = types.model('searchFragTableModel', {
+  id: types.identifier(types.string),
   index: types.number,
   sortByList: types.optional(types.array(types.model('sortBy', {
     by: types.string,
@@ -75,23 +77,23 @@ const searchFragTableModel = types.model('searchFragTableModel', {
     get profile() {
       return getParent(self, 3).profile;
     },
-    getTrackerResults(profileTracker) {
-      return profileTracker.getSearchResultsPage(self.index);
+    getTrackerResults(trackerSearch) {
+      return trackerSearch.getResultsPage(self.index);
     },
-    getFilteredTrackerResults(profileTracker) {
-      return self.filter.processResults(profileTracker.getSearchResultsPage(self.index));
+    getFilteredTrackerResults(trackerSearch) {
+      return self.filter.processResults(trackerSearch.getResultsPage(self.index));
     },
     getResults() {
       const results = [];
-      self.profile.profileTrackers.forEach(profileTracker => {
-        results.push(...self.getTrackerResults(profileTracker));
+      self.searchFrag.trackerSearchList.forEach(trackerSearch => {
+        results.push(...self.getTrackerResults(trackerSearch));
       });
       return results;
     },
     getFilteredResults() {
       const results = [];
-      self.profile.getSelectedTrackers().forEach(profileTracker => {
-        results.push(...self.getFilteredTrackerResults(profileTracker));
+      self.searchFrag.getSelectedTrackerSearch().forEach(trackerSearch => {
+        results.push(...self.getFilteredTrackerResults(trackerSearch));
       });
       return results;
     },
@@ -100,10 +102,8 @@ const searchFragTableModel = types.model('searchFragTableModel', {
     },
     hasMoreBtn() {
       if (self.isLastTable()) {
-        return self.profile.getSelectedTrackers().some(profileTracker => {
-          if (isAlive(profileTracker) && profileTracker.search) {
-            return !!profileTracker.search.nextQuery;
-          }
+        return self.searchFrag.getSelectedTrackerSearch().some(trackerSearch => {
+          return !!trackerSearch.nextQuery;
         });
       }
     },
@@ -124,13 +124,13 @@ const searchFragTableModel = types.model('searchFragTableModel', {
     isLastTable() {
       return self === self.searchFrag.tables.slice(-1)[0];
     },
-    getTrackerResultCount(profileTracker) {
-      return self.getTrackerResults(profileTracker).length;
+    getTrackerResultCount(trackerSearch) {
+      return self.getTrackerResults(trackerSearch).length;
     },
-    getTrackerVisibleResultCount(profileTracker) {
-      const selected = self.profile.getSelectedTrackers();
-      if (selected.indexOf(profileTracker) !== -1) {
-        return self.getFilteredTrackerResults(profileTracker).length;
+    getTrackerVisibleResultCount(trackerSearch) {
+      const selected = self.searchFrag.getSelectedTrackerSearch();
+      if (selected.indexOf(trackerSearch) !== -1) {
+        return self.getFilteredTrackerResults(trackerSearch).length;
       } else {
         return 0;
       }

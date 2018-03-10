@@ -9,6 +9,7 @@ moment.locale(chrome.i18n.getUILanguage());
 /**
  * @typedef {{}} TrackerSearchM
  * Model:
+ * @property {string} id
  * @property {TrackerM} tracker
  * @property {ProfileTrackerInfoM} trackerInfo
  * @property {string} readyState
@@ -106,6 +107,7 @@ const trackerResultModel = types.model('trackerResultModel', {
 });
 
 const trackerSearchModel = types.model('trackerSearchModel', {
+  id: types.identifier(types.string),
   tracker: types.reference(trackerModel),
   trackerInfo: profileTrackerInfoModel,
   readyState: types.optional(types.string, 'idle'), // idle, loading, success, error

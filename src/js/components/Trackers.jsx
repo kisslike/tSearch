@@ -42,11 +42,11 @@ import {observer} from "mobx-react/index";
     let icon = null;
     const iconClassList = [];
 
-    const search = profileTracker.search;
-    if (search) {
-      if (search.readyState === 'loading') {
+    const trackerSearch = store.searchFrag && store.searchFrag.getSearchTrackerByTracker(profileTracker.tracker);
+    if (trackerSearch) {
+      if (trackerSearch.readyState === 'loading') {
         iconClassList.push('tracker__icon-loading');
-      } else if (search.readyState === 'error') {
+      } else if (trackerSearch.readyState === 'error') {
         iconClassList.push('tracker__icon-error');
       }
     }
@@ -64,17 +64,17 @@ import {observer} from "mobx-react/index";
     }
 
     let extraInfo = null;
-    if (search && search.authRequired) {
+    if (trackerSearch && trackerSearch.authRequired) {
       extraInfo = (
-        <a className="tracker__login" target="_blank" href={search.authRequired.url}
+        <a className="tracker__login" target="_blank" href={trackerSearch.authRequired.url}
            title={chrome.i18n.getMessage('login')}/>
       );
     } else {
       let count = 0;
       let visibleCount = 0;
-      if (store.searchFrag) {
-        count = store.searchFrag.getTrackerResultCount(profileTracker);
-        visibleCount = store.searchFrag.getTrackerVisibleResultCount(profileTracker);
+      if (trackerSearch) {
+        count = store.searchFrag.getTrackerResultCount(trackerSearch);
+        visibleCount = store.searchFrag.getTrackerVisibleResultCount(trackerSearch);
       }
 
       let text = '';

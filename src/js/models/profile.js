@@ -9,7 +9,7 @@ const {types} = require('mobx-state-tree');
  * @property {ProfileTrackerM[]} profileTrackers
  * Actions:
  * Views:
- * @property {function:ProfileTrackerM[]} getSelectedTrackers
+ * @property {function:ProfileTrackerM[]} getSelectedProfileTrackers
  * @property {function:TrackerM[]} getTrackers
  * @property {function(string):ProfileTrackerM} getProfileTrackerById
  * @property {function} start
@@ -25,7 +25,7 @@ const profileModel = types.model('profileModel', {
   };
 }).views(/**ProfileM*/self => {
   return {
-    getSelectedTrackers() {
+    getSelectedProfileTrackers() {
       let result = self.profileTrackers.filter(a => a.selected);
       if (result.length === 0) {
         result = self.profileTrackers;
