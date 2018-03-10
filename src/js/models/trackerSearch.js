@@ -26,7 +26,7 @@ moment.locale(chrome.i18n.getUILanguage());
  * Views:
  * @property {function(number):TrackerResultM[]} getResultsPage
  * @property {function(string, string, Promise):Promise} wrapSearchPromise
- * @property {function(string):Promise} search
+ * @property {function:Promise} search
  * @property {function:Promise} searchNext
  */
 
@@ -108,6 +108,7 @@ const trackerResultModel = types.model('trackerResultModel', {
 
 const trackerSearchModel = types.model('trackerSearchModel', {
   id: types.identifier(types.string),
+  query: types.string,
   tracker: types.reference(trackerModel),
   trackerInfo: profileTrackerInfoModel,
   readyState: types.optional(types.string, 'idle'), // idle, loading, success, error
@@ -193,8 +194,8 @@ const trackerSearchModel = types.model('trackerSearchModel', {
         debug('%s error', type, trackerId, err);
       });
     },
-    search(query) {
-      return self.wrapSearchPromise(self.tracker.id, 'search', self.tracker.worker.search(query));
+    search() {
+      return self.wrapSearchPromise(self.tracker.id, 'search', self.tracker.worker.search(self.query));
     },
     searchNext() {
       const nextQuery = self.nextQuery;

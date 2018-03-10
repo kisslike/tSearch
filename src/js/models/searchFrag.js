@@ -7,10 +7,11 @@ const {types, getParent, isAlive, destroy, resolveIdentifier} = require('mobx-st
  * @typedef {{}} SearchFragM
  * Model:
  * @property {number} id
+ * @property {string} query
  * @property {TrackerSearchM[]} trackerSearchList
  * @property {SearchFragTableM[]} tables
  * Actions:
- * @property {function(string)} search
+ * @property {function} search
  * @property {function} searchNext
  * @property {function} clearSearch
  * Views:
@@ -24,11 +25,12 @@ const {types, getParent, isAlive, destroy, resolveIdentifier} = require('mobx-st
 
 const searchFragModel = types.model('searchFragModel', {
   id: types.identifier(types.number),
+  query: types.string,
   trackerSearchList: types.optional(types.array(trackerSearchModel), []),
   tables: types.optional(types.array(searchFragTableModel), []),
 }).actions(/**SearchFragM*/self => {
   return {
-    search(query) {
+    search() {
       self.clearSearch();
       self.tables.push(searchFragTableModel.create({
         id: self.getTableId(),
@@ -39,11 +41,12 @@ const searchFragModel = types.model('searchFragModel', {
         if (tracker) {
           const trackerSearch = trackerSearchModel.create({
             id: self.id + '_' + tracker.id,
+            query: self.query,
             tracker: tracker,
             trackerInfo: profileTracker.getInfo()
           });
           self.trackerSearchList.push(trackerSearch);
-          trackerSearch.search(query);
+          trackerSearch.search();
         }
       });
     },
