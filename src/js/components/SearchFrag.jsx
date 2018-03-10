@@ -43,7 +43,7 @@ const qs = require('querystring');
     return (
       store.searchFrag.tables.map(table => {
         return (
-          <Table key={table.index} table={table}/>
+          <Table key={table.id} table={table}/>
         );
       })
     );
