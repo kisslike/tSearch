@@ -15,6 +15,7 @@ const {types, getParent, isAlive, destroy, resolveIdentifier} = require('mobx-st
  * @property {function} clearSearch
  * Views:
  * @property {ProfileM} profile
+ * @property {function:string} getTableId
  * @property {function:TrackerSearchM[]} getSelectedTrackerSearch
  * @property {function(TrackerSearchM):number} getTrackerResultCount
  * @property {function(TrackerSearchM):number} getTrackerVisibleResultCount
