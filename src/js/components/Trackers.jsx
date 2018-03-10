@@ -72,8 +72,15 @@ import {observer} from "mobx-react/index";
     } else {
       const count = store.searchFrag.getTrackerResultCount(profileTracker);
       const visibleCount = store.searchFrag.getTrackerVisibleResultCount(profileTracker);
+
+      let text = '';
+      if (count === visibleCount) {
+        text = count;
+      } else {
+        text = visibleCount + '/' + count;
+      }
       extraInfo = (
-        <div className="tracker__counter">{visibleCount} / {count}</div>
+        <div className="tracker__counter">{text}</div>
       )
     }
 
