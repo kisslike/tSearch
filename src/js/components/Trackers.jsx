@@ -8,7 +8,7 @@ import {observer} from "mobx-react/index";
     const store = this.props.store;
     const trackers = store.profile.profileTrackers.map(profileTracker => {
       return (
-        <ProfileTracker key={profileTracker.id} profileTracker={profileTracker}/>
+        <ProfileTracker key={profileTracker.id} profileTracker={profileTracker} store={store}/>
       );
     });
     return (
@@ -33,6 +33,8 @@ import {observer} from "mobx-react/index";
     profileTracker.setSelected(!profileTracker.selected);
   }
   render() {
+    /**@type {IndexM}*/
+    const store = this.props.store;
     /**@type {ProfileTrackerM}*/
     const profileTracker = this.props.profileTracker;
 
@@ -68,12 +70,11 @@ import {observer} from "mobx-react/index";
            title={chrome.i18n.getMessage('login')}/>
       );
     } else {
-      let count = 0;
-      if (search) {
-        count = search.getResultCount();
-      }
+      const count = store.searchFrag.getTrackerResultCount(profileTracker);
+      const visibleCount = store.searchFrag.getTrackerVisibleResultCount(profileTracker);
+      if (store)
       extraInfo = (
-        <div className="tracker__counter">{count}</div>
+        <div className="tracker__counter">{visibleCount} / {count}</div>
       )
     }
 

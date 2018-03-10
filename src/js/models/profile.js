@@ -15,6 +15,7 @@ const {types} = require('mobx-state-tree');
  * @property {function:ProfileTrackerM[]} getSelectedProfileTrackers
  * @property {function:TrackerM[]} getTrackers
  * @property {function:number} getSearchPageCount
+ * @property {function(string):ProfileTrackerM} getProfileTrackerById
  * @property {function} start
  * @property {function} stop
  */
@@ -57,6 +58,15 @@ const profileModel = types.model('profileModel', {
         const count = profileTracker.getSearchPageCount();
         if (count > result) {
           result = count;
+        }
+      });
+      return result;
+    },
+    getProfileTrackerById(id) {
+      let result = null;
+      self.profileTrackers.some(profileTracker => {
+        if (profileTracker.id === id) {
+          result = profileTracker;
         }
       });
       return result;

@@ -11,6 +11,16 @@ const isWatch = process.argv.some(function (arg) {
 
 const outputPath = path.resolve('./dist/');
 
+const env = {
+  targets: {
+    browsers: ['Chrome >= 22']
+  }
+};
+
+if (isWatch) {
+  env.targets.browsers = ['Chrome >= 65'];
+}
+
 const config = {
   entry: {
     bg: './src/js/bg',
@@ -40,11 +50,7 @@ const config = {
             ],
             presets: [
               'react',
-              ['env', {
-                "targets": {
-                  "browsers": ["Chrome >= 22"]
-                }
-              }]
+              ['env', env]
             ]
           }
         }

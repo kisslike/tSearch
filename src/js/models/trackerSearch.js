@@ -27,7 +27,6 @@ moment.locale(chrome.i18n.getUILanguage());
  * @property {function(string, string, Promise):Promise} wrapSearchPromise
  * @property {function(string):Promise} search
  * @property {function:Promise} searchNext
- * @property {function:number} getResultCount
  */
 
 /**
@@ -194,11 +193,6 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       } else {
         return Promise.resolve();
       }
-    },
-    getResultCount() {
-      return self.pages.reduce((sum, page) => {
-        return sum + page.results.length;
-      }, 0);
     },
   };
 });

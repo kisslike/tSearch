@@ -14,8 +14,11 @@ const {types, getParent, isAlive, destroy} = require('mobx-state-tree');
  * @property {ProfileM} profile
  * @property {function(ProfileTrackerM)} addProfileTracker
  * @property {function:ProfileTrackerM[]} getProfileTrackerList
+ * @property {function(string):ProfileTrackerM} getProfileTrackerById
  * @property {function:ProfileTrackerM[]} getSelectedProfileTrackerList
  * @property {function} clearProfileTrackerList
+ * @property {function(ProfileTrackerM):number} getTrackerResultCount
+ * @property {function(ProfileTrackerM):number} getTrackerVisibleResultCount
  */
 
 const searchFragModel = types.model('searchFragModel', {
@@ -47,27 +50,37 @@ const searchFragModel = types.model('searchFragModel', {
     },
   };
 }).views(/**SearchFragM*/self => {
-  /**@type {ProfileTrackerM[]}*/
-  const profileTrackerList = [];
+  /**@type {Map.<string, ProfileTrackerM>}*/
+  const profileTrackerList = new Map();
   return {
     get profile() {
       return getParent(self, 1).profile;
     },
     addProfileTracker(profileTracker) {
-      profileTrackerList.push(profileTracker);
+      profileTrackerList.set(profileTracker.id, profileTracker);
     },
     getProfileTrackerList() {
-      return profileTrackerList;
+      return Array.from(profileTrackerList.values());
     },
     getSelectedProfileTrackerList() {
-      let result = profileTrackerList.filter(a => a.selected);
+      let result = self.getProfileTrackerList().filter(a => a.selected);
       if (!result.length) {
-        result = profileTrackerList;
+        result = self.getProfileTrackerList();
       }
       return result;
     },
     clearProfileTrackerList() {
-      profileTrackerList.splice(0);
+      profileTrackerList.clear();
+    },
+    getTrackerResultCount(profileTracker) {
+      return self.tables.reduce((sum, table) => {
+        return sum + table.getTrackerResultCount(profileTracker);
+      }, 0);
+    },
+    getTrackerVisibleResultCount(profileTracker) {
+      return self.tables.reduce((sum, table) => {
+        return sum + table.getTrackerVisibleResultCount(profileTracker);
+      }, 0);
     }
   };
 });

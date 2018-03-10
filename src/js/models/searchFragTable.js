@@ -12,12 +12,16 @@ const {types, getParent, isAlive, detach, unprotect} = require('mobx-state-tree'
  * @property {function(string)} subSortBy
  * Views:
  * @property {SearchFragM} searchFrag
+ * @property {function(ProfileTrackerM):TrackerSearchResult[]} getTrackerResults
+ * @property {function(ProfileTrackerM):TrackerSearchResult[]} getFilteredTrackerResults
  * @property {function:TrackerSearchResult[]} getResults
- * @property {function:TrackerSearchResult[]} getSortedResults
+ * @property {function:TrackerSearchResult[]} getFilteredResults
  * @property {function:boolean} hasMoreBtn
  * @property {function(string):SortBy} getSortBy
  * @property {function(Object)} handleMoreBtn
  * @property {function:boolean} isLastTable
+ * @property {function(ProfileTrackerM):number} getTrackerResultCount
+ * @property {function(ProfileTrackerM):number} getTrackerVisibleResultCount
  */
 
 /**
@@ -62,15 +66,26 @@ const searchFragTableModel = types.model('searchFragTableModel', {
     get searchFrag() {
       return getParent(self, 2);
     },
+    getTrackerResults(profileTracker) {
+      return profileTracker.getSearchResultsPage(self.index);
+    },
+    getFilteredTrackerResults(profileTracker) {
+      // todo add fitler
+      return profileTracker.getSearchResultsPage(self.index);
+    },
     getResults() {
       const results = [];
-      self.searchFrag.getSelectedProfileTrackerList().forEach(profileTracker => {
-        results.push(...profileTracker.getSearchResultsPage(self.index));
+      self.searchFrag.getProfileTrackerList().forEach(profileTracker => {
+        results.push(...self.getTrackerResults(profileTracker));
       });
       return results;
     },
-    getSortedResults() {
-      return sortResults(self.getResults(), self.sortByList);
+    getFilteredResults() {
+      const results = [];
+      self.searchFrag.getSelectedProfileTrackerList().forEach(profileTracker => {
+        results.push(...self.getFilteredTrackerResults(profileTracker));
+      });
+      return sortResults(results, self.sortByList);
     },
     hasMoreBtn() {
       if (self.isLastTable()) {
@@ -82,14 +97,14 @@ const searchFragTableModel = types.model('searchFragTableModel', {
       }
     },
     getSortBy(by) {
-      let item = null;
+      let result = null;
       self.sortByList.some(sortBy => {
         if (sortBy.by === by) {
-          item = sortBy;
+          result = sortBy;
           return true;
         }
       });
-      return item;
+      return result;
     },
     handleMoreBtn(e) {
       e.preventDefault();
@@ -97,7 +112,13 @@ const searchFragTableModel = types.model('searchFragTableModel', {
     },
     isLastTable() {
       return self === self.searchFrag.tables.slice(-1)[0];
-    }
+    },
+    getTrackerResultCount(profileTracker) {
+      return self.getTrackerResults(profileTracker).length;
+    },
+    getTrackerVisibleResultCount(profileTracker) {
+      return self.getFilteredTrackerResults(profileTracker).length;
+    },
   };
 });
 

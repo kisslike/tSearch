@@ -180,7 +180,7 @@ const debug = require('debug')('Table');
             {this.getHeaderColumns()}
           </div>
           <div className="body table__body">
-            {this.getRows(table.getSortedResults())}
+            {this.getRows(table.getFilteredResults())}
           </div>
           <div className="footer table__footer">
             {moreBtn}
