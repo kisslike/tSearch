@@ -70,8 +70,12 @@ import {observer} from "mobx-react/index";
            title={chrome.i18n.getMessage('login')}/>
       );
     } else {
-      const count = store.searchFrag.getTrackerResultCount(profileTracker);
-      const visibleCount = store.searchFrag.getTrackerVisibleResultCount(profileTracker);
+      let count = 0;
+      let visibleCount = 0;
+      if (store.searchFrag) {
+        count = store.searchFrag.getTrackerResultCount(profileTracker);
+        visibleCount = store.searchFrag.getTrackerVisibleResultCount(profileTracker);
+      }
 
       let text = '';
       if (count === visibleCount) {
