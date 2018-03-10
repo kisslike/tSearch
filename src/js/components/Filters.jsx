@@ -49,12 +49,19 @@ const debug = require('debug')('Filters');
     this.onChange();
   }
   render() {
+    /**@type {FilterM}*/
+    const filter = this.props.filter;
+
     return (
       <div className="parameter parameter-filter">
         <span className="filter__label">{chrome.i18n.getMessage('wordFilterLabel')}</span>
         <form onSubmit={this.handleSubmit} className="input_box input_box-filter">
-          <input onDoubleClick={this.handleDoubleClick} ref={'input'} onChange={this.onChange} type="search" name="textFilter"
-                 className="input__input input__input-word-filter"/>
+          <input
+            onDoubleClick={this.handleDoubleClick}
+            ref={'input'}
+            onChange={this.onChange}
+            defaultValue={filter.text}
+            type="search" name="textFilter" className="input__input input__input-word-filter"/>
         </form>
       </div>
     );
@@ -87,17 +94,28 @@ const debug = require('debug')('Filters');
     this.onChange();
   }
   render() {
+    /**@type {FilterM}*/
+    const filter = this.props.filter;
+
     return (
       <div className="parameter parameter-filter">
         <span className="filter__label">{chrome.i18n.getMessage('sizeFilterLabel')}</span>
         <form onSubmit={this.handleSubmit} className="input_box input_box-filter">
-          <input onDoubleClick={this.handleDoubleClick} onChange={this.onChange} ref={'min'} name={'sizeMin'}
-                 className="input__input input__input-size-filter input__input-range input__input-range-from"
-                 type="number" placeholder={chrome.i18n.getMessage('rangeFromPlaceholder')}/>
+          <input
+            onDoubleClick={this.handleDoubleClick}
+            onChange={this.onChange}
+            defaultValue={filter.minSize || ''}
+            ref={'min'} name={'sizeMin'}
+            className="input__input input__input-size-filter input__input-range input__input-range-from"
+            type="number" placeholder={chrome.i18n.getMessage('rangeFromPlaceholder')}/>
           {' — '}
-          <input onDoubleClick={this.handleDoubleClick} onChange={this.onChange} ref={'max'} name={'sizeMax'}
-                 className="input__input input__input-size-filter input__input-range input__input-range-to"
-                 type="number" placeholder={chrome.i18n.getMessage('rangeToPlaceholder')}/>
+          <input
+            onDoubleClick={this.handleDoubleClick}
+            onChange={this.onChange}
+            defaultValue={filter.maxSize || ''}
+            ref={'max'} name={'sizeMax'}
+            className="input__input input__input-size-filter input__input-range input__input-range-to"
+            type="number" placeholder={chrome.i18n.getMessage('rangeToPlaceholder')}/>
         </form>
       </div>
     );
@@ -130,17 +148,28 @@ const debug = require('debug')('Filters');
     this.onChange();
   }
   render() {
+    /**@type {FilterM}*/
+    const filter = this.props.filter;
+
     return (
       <div className="parameter parameter-filter">
         <span className="filter__label">{chrome.i18n.getMessage('seedFilterLabel')}</span>
         <form onSubmit={this.handleSubmit} className="input_box input_box-filter">
-          <input onDoubleClick={this.handleDoubleClick} onChange={this.onChange} ref={'min'} name={'seedMin'}
-                 className="input__input input__input-seed-filter input__input-range input__input-range-from"
-                 type="number" placeholder={chrome.i18n.getMessage('rangeFromPlaceholder')}/>
+          <input
+            onDoubleClick={this.handleDoubleClick}
+            onChange={this.onChange}
+            defaultValue={filter.minSeed || ''}
+            ref={'min'} name={'seedMin'}
+            className="input__input input__input-seed-filter input__input-range input__input-range-from"
+            type="number" placeholder={chrome.i18n.getMessage('rangeFromPlaceholder')}/>
           {' — '}
-          <input onDoubleClick={this.handleDoubleClick} onChange={this.onChange} ref={'max'} name={'seedMax'}
-                 className="input__input input__input-seed-filter input__input-range input__input-range-to"
-                 type="number" placeholder={chrome.i18n.getMessage('rangeToPlaceholder')}/>
+          <input
+            onDoubleClick={this.handleDoubleClick}
+            onChange={this.onChange}
+            defaultValue={filter.maxSeed || ''}
+            ref={'max'} name={'seedMax'}
+            className="input__input input__input-seed-filter input__input-range input__input-range-to"
+            type="number" placeholder={chrome.i18n.getMessage('rangeToPlaceholder')}/>
         </form>
       </div>
     );
@@ -173,17 +202,28 @@ const debug = require('debug')('Filters');
     this.onChange();
   }
   render() {
+    /**@type {FilterM}*/
+    const filter = this.props.filter;
+
     return (
       <div className="parameter parameter-filter">
         <span className="filter__label">{chrome.i18n.getMessage('peerFilterLabel')}</span>
         <form onSubmit={this.handleSubmit} className="input_box input_box-filter">
-          <input onDoubleClick={this.handleDoubleClick} onChange={this.onChange} ref={'min'} name={'peerMin'}
-                 className="input__input input__input-peer-filter input__input-range input__input-range-from"
-                 type="number" placeholder={chrome.i18n.getMessage('rangeFromPlaceholder')}/>
+          <input
+            onDoubleClick={this.handleDoubleClick}
+            onChange={this.onChange}
+            defaultValue={filter.minPeer || ''}
+            ref={'min'} name={'peerMin'}
+            className="input__input input__input-peer-filter input__input-range input__input-range-from"
+            type="number" placeholder={chrome.i18n.getMessage('rangeFromPlaceholder')}/>
           {' — '}
-          <input onDoubleClick={this.handleDoubleClick} onChange={this.onChange} ref={'max'} name={'peerMax'}
-                 className="input__input input__input-peer-filter input__input-range input__input-range-to"
-                 type="number" placeholder={chrome.i18n.getMessage('rangeToPlaceholder')}/>
+          <input
+            onDoubleClick={this.handleDoubleClick}
+            onChange={this.onChange}
+            defaultValue={filter.maxPeer || ''}
+            ref={'max'} name={'peerMax'}
+            className="input__input input__input-peer-filter input__input-range input__input-range-to"
+            type="number" placeholder={chrome.i18n.getMessage('rangeToPlaceholder')}/>
         </form>
       </div>
     );
