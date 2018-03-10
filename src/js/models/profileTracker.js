@@ -18,7 +18,7 @@ const {types, resolveIdentifier, destroy, getParent} = require('mobx-state-tree'
  * Views:
  * @property {TrackerM} tracker
  * @property {function:Promise} searchNext
- * @property {function:TrackerInfo} getInfo
+ * @property {function:ProfileTrackerInfoM} getInfo
  * @property {function(number):TrackerResultM[]} getSearchResultsPage
  * @property {function:number} getSearchPageCount
  * @property {function:string} getIconClassName
@@ -32,13 +32,6 @@ const {types, resolveIdentifier, destroy, getParent} = require('mobx-state-tree'
  * @property {string} [downloadURL]
  * Actions:
  * Views:
- */
-
-/**
- * @typedef {{}} TrackerInfo
- * @property {string} id
- * @property {string} name
- * @property {string} iconClassName
  */
 
 const profileTrackerMetaModel = types.model('profileTrackerMetaModel', {
@@ -56,7 +49,8 @@ const profileTrackerModel = types.model('profileTrackerModel', {
     createSearch(query) {
       if (self.tracker) {
         self.search = trackerSearchModel.create({
-          tracker: self.tracker
+          tracker: self.tracker,
+          trackerInfo: self.getInfo()
         });
         return self.search.search(query);
       } else {

@@ -2,7 +2,7 @@ import trackerModel from "./tracker";
 import moment from "moment/moment";
 import filesize from 'filesize';
 const debug = require('debug')('trackerSearch');
-const {types, isAlive, getParent} = require('mobx-state-tree');
+const {types, isAlive, clone} = require('mobx-state-tree');
 
 moment.locale(chrome.i18n.getUILanguage());
 
@@ -10,6 +10,7 @@ moment.locale(chrome.i18n.getUILanguage());
  * @typedef {{}} TrackerSearchM
  * Model:
  * @property {TrackerM} tracker
+ * @property {ProfileTrackerInfoM} trackerInfo
  * @property {string} readyState
  * @property {{url:string}} authRequired
  * @property {string} url
@@ -22,7 +23,6 @@ moment.locale(chrome.i18n.getUILanguage());
  * @property {function(string, Object)} setResult
  * @property {function} clearNextQuery
  * Views:
- * @property {ProfileTrackerM} trackerProfile
  * @property {function(number):TrackerResultM[]} getResultsPage
  * @property {function(string, string, Promise):Promise} wrapSearchPromise
  * @property {function(string):Promise} search
@@ -32,7 +32,7 @@ moment.locale(chrome.i18n.getUILanguage());
 /**
  * @typedef {{}} TrackerResultM
  * Model:
- * @property {TrackerInfo} trackerInfo
+ * @property {ProfileTrackerInfoM} trackerInfo
  * @property {string} title
  * @property {string} url
  * @property {number} [categoryId]
@@ -57,12 +57,24 @@ const unixTimeToFromNow = function (unixtime) {
   return unixtime <= 0 ? '∞' : moment(unixtime * 1000).fromNow();
 };
 
+/**
+ * @typedef {{}} ProfileTrackerInfoM
+ * Model:
+ * @property {string} id
+ * @property {string} name
+ * @property {string} iconClassName
+ * Actions:
+ * Views:
+ */
+
+const profileTrackerInfoModel = types.model('profileTrackerInfoModel', {
+  id: types.string,
+  name: types.string,
+  iconClassName: types.string,
+});
+
 const trackerResultModel = types.model('trackerResultModel', {
-  trackerInfo: types.model({
-    id: types.string,
-    name: types.string,
-    iconClassName: types.string,
-  }),
+  trackerInfo: profileTrackerInfoModel,
   title: types.string,
   url: types.string,
   categoryId: types.maybe(types.number),
@@ -95,6 +107,7 @@ const trackerResultModel = types.model('trackerResultModel', {
 
 const trackerSearchModel = types.model('trackerSearchModel', {
   tracker: types.reference(trackerModel),
+  trackerInfo: profileTrackerInfoModel,
   readyState: types.optional(types.string, 'idle'), // idle, loading, success, error
   authRequired: types.maybe(types.model({
     url: types.string
@@ -115,13 +128,12 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       self.nextQuery = value;
     },
     setResult(trackerId, result) {
-      const trackerInfo = self.trackerProfile.getInfo();
       const results = result.results.filter(result => {
         if (!result.title || !result.url) {
           debug('[' + self.tracker.id + ']', 'Skip torrent:', result);
           return false;
         } else {
-          result.trackerInfo = trackerInfo;
+          result.trackerInfo = clone(self.trackerInfo);
           return true;
         }
       });
@@ -136,9 +148,6 @@ const trackerSearchModel = types.model('trackerSearchModel', {
   };
 }).views(/**TrackerSearchM*/self => {
   return {
-    get trackerProfile() {
-      return getParent(self, 1);
-    },
     getResultsPage(index) {
       if (index >= self.pages.length) {
         return [];
