@@ -34,7 +34,7 @@ const debug = require('debug')('Table');
     const name = chrome.i18n.getMessage('row_' + type);
     const nameShort = chrome.i18n.getMessage('row_' + type + '__short') || name;
     const sortBy = table.getSortBy(type);
-    const sortReverse = (typeSortMap[type] || {}).reverse;
+    const sortReverse = typeSortMap[type] && typeSortMap[type].reverse;
 
     const classList = ['cell', 'row__cell', 'cell-' + type];
     if (sortBy) {
