@@ -74,9 +74,8 @@ const debug = require('debug')('Table');
             return (
               <div key="quality" className={`cell row__cell cell-${type}`}>
                 <div className="quality_box" title={qualityValue}>
-                  <div className="quality_progress" style={{width: percent + '%'}}>
-                    <span className="quality_value">{qualityValue}</span>
-                  </div>
+                  <div className="quality_progress" style={{width: percent + '%'}}/>
+                  <span className="quality_value">{qualityValue}</span>
                 </div>
               </div>
             );

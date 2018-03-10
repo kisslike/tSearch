@@ -2,6 +2,7 @@ import trackerModel from "./tracker";
 import moment from "moment/moment";
 import filesize from 'filesize';
 import highlight from "../tools/highlight";
+import rate from "../tools/rate";
 const debug = require('debug')('trackerSearch');
 const {types, isAlive, clone} = require('mobx-state-tree');
 
@@ -27,6 +28,7 @@ moment.locale(chrome.i18n.getUILanguage());
  * @property {function} clearNextQuery
  * Views:
  * @property {function:Object} getQueryHighlightMap
+ * @property {function:Object} getQueryRateScheme
  * @property {function(number):TrackerResultM[]} getResultsPage
  * @property {function(string, string, Promise):Promise} wrapSearchPromise
  * @property {function:Promise} search
@@ -41,6 +43,8 @@ moment.locale(chrome.i18n.getUILanguage());
  * @property {string} title
  * @property {Object} titleHighlightMap
  * @property {string} url
+ * @property {Object} rate
+ * @property {number} quality
  * @property {number} [categoryId]
  * @property {string} [categoryTitle]
  * @property {string} [categoryUrl]
@@ -85,6 +89,8 @@ const trackerResultModel = types.model('trackerResultModel', {
   title: types.string,
   titleHighlightMap: types.frozen,
   url: types.string,
+  rate: types.frozen,
+  quality: types.number,
   categoryId: types.maybe(types.number),
   categoryTitle: types.optional(types.string, ''),
   categoryUrl: types.optional(types.string, ''),
@@ -96,21 +102,6 @@ const trackerResultModel = types.model('trackerResultModel', {
   dateTitle: types.string,
   dateText: types.string,
   sizeText: types.string,
-}).preProcessSnapshot(snapshot => {
-  ['size', 'seed', 'peer', 'date'].forEach(key => {
-    let value = snapshot[key];
-    if (typeof value !== 'number') {
-      value = parseInt(value, 10);
-      if (!isFinite(value)) {
-        value = void 0;
-      }
-      snapshot[key] = value;
-    }
-  });
-  snapshot.dateTitle = unixTimeToString(snapshot.date);
-  snapshot.dateText = unixTimeToFromNow(snapshot.date);
-  snapshot.sizeText = filesize(snapshot.size);
-  return snapshot;
 });
 
 const trackerSearchModel = types.model('trackerSearchModel', {
@@ -139,6 +130,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
     },
     setResult(trackerId, result) {
       const queryHighlightMap = self.getQueryHighlightMap();
+      const queryRateScheme = self.getQueryRateScheme();
       const pageIndex = self.pages.length;
       let index = 0;
       const results = result.results.filter(result => {
@@ -146,9 +138,24 @@ const trackerSearchModel = types.model('trackerSearchModel', {
           debug('[' + self.tracker.id + ']', 'Skip torrent:', result);
           return false;
         } else {
+          ['size', 'seed', 'peer', 'date'].forEach(key => {
+            let value = result[key];
+            if (typeof value !== 'number') {
+              value = parseInt(value, 10);
+              if (!isFinite(value)) {
+                value = void 0;
+              }
+              result[key] = value;
+            }
+          });
           result.id = self.id + '_' + pageIndex + '_' + index++;
           result.trackerInfo = clone(self.trackerInfo);
           result.titleHighlightMap = highlight.getTextMap(result.title, queryHighlightMap);
+          result.rate = rate.getRate(result, queryRateScheme);
+          result.quality = result.rate.sum;
+          result.dateTitle = unixTimeToString(result.date);
+          result.dateText = unixTimeToFromNow(result.date);
+          result.sizeText = filesize(result.size);
           return true;
         }
       });
@@ -165,6 +172,9 @@ const trackerSearchModel = types.model('trackerSearchModel', {
   return {
     getQueryHighlightMap() {
       return highlight.getMap(self.query);
+    },
+    getQueryRateScheme() {
+      return rate.getScheme(self.query);
     },
     getResultsPage(index) {
       if (index >= self.pages.length) {
