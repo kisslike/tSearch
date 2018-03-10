@@ -1,5 +1,5 @@
 import escapeRegExp from 'lodash.escaperegexp';
-import sortByLength from "../tools/sortByLen";
+import sortByLength from "../tools/sortByLength";
 import uniq from 'lodash.uniq';
 const debug = require('debug')('searchFrag');
 const {types} = require('mobx-state-tree');
