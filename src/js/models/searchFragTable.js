@@ -17,6 +17,7 @@ const {types, getParent, isAlive, detach, unprotect} = require('mobx-state-tree'
  * @property {function(ProfileTrackerM):TrackerResultM[]} getFilteredTrackerResults
  * @property {function:TrackerResultM[]} getResults
  * @property {function:TrackerResultM[]} getFilteredResults
+ * @property {function:TrackerResultM[]} getSortedFilteredResults
  * @property {function:boolean} hasMoreBtn
  * @property {function(string):SortBy} getSortBy
  * @property {function(Object)} handleMoreBtn
@@ -88,7 +89,10 @@ const searchFragTableModel = types.model('searchFragTableModel', {
       self.searchFrag.getSelectedProfileTrackerList().forEach(profileTracker => {
         results.push(...self.getFilteredTrackerResults(profileTracker));
       });
-      return sortResults(results, self.sortByList);
+      return results;
+    },
+    getSortedFilteredResults() {
+      return sortResults(self.getFilteredResults(), self.sortByList);
     },
     hasMoreBtn() {
       if (self.isLastTable()) {
