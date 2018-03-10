@@ -60,7 +60,7 @@ const debug = require('debug')('Table');
   }
   getRow(/**TrackerResultM*/result) {
     return (
-      <div key={result.trackerInfo.id + '_' + result.url} className="row body__row">{this.columns.map(type => {
+      <div key={result.id} className="row body__row">{this.columns.map(type => {
         switch (type) {
           case 'date': {
             return (

@@ -36,6 +36,7 @@ moment.locale(chrome.i18n.getUILanguage());
 /**
  * @typedef {{}} TrackerResultM
  * Model:
+ * @property {string} id
  * @property {ProfileTrackerInfoM} trackerInfo
  * @property {string} title
  * @property {Object} titleHighlightMap
@@ -79,6 +80,7 @@ const profileTrackerInfoModel = types.model('profileTrackerInfoModel', {
 });
 
 const trackerResultModel = types.model('trackerResultModel', {
+  id: types.identifier(types.string),
   trackerInfo: profileTrackerInfoModel,
   title: types.string,
   titleHighlightMap: types.frozen,
@@ -137,11 +139,14 @@ const trackerSearchModel = types.model('trackerSearchModel', {
     },
     setResult(trackerId, result) {
       const queryHighlightMap = self.getQueryHighlightMap();
+      const pageIndex = self.pages.length;
+      let index = 0;
       const results = result.results.filter(result => {
         if (!result.title || !result.url) {
           debug('[' + self.tracker.id + ']', 'Skip torrent:', result);
           return false;
         } else {
+          result.id = self.id + '_' + pageIndex + '_' + index++;
           result.trackerInfo = clone(self.trackerInfo);
           result.titleHighlightMap = highlight.getTextMap(result.title, queryHighlightMap);
           return true;
