@@ -49,6 +49,15 @@ const indexModel = types.model('indexModel', {
         }
       }]
     });
+    snapshot.profiles.push({
+      name: 'Default 2',
+      profileTrackers: [{
+        id: 'nnmclub1',
+        meta: {
+          name: 'nnmclub1'
+        }
+      }]
+    });
   }
   const profileFound = snapshot.profiles.some(profile => {
     return snapshot.profile === profile.name;
