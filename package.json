@@ -13,6 +13,7 @@
     "jquery": "^3.3.1",
     "lodash.escaperegexp": "^4.1.2",
     "lodash.once": "^4.1.1",
+    "lodash.uniq": "^4.5.0",
     "moment": "^2.21.0",
     "popsicle": "^9.2.0",
     "react": "^16.2.0",

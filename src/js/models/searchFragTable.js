@@ -11,11 +11,12 @@ const {types, getParent, isAlive, detach, unprotect} = require('mobx-state-tree'
  * @property {function(string)} sortBy
  * @property {function(string)} subSortBy
  * Views:
+ * @property {FilterM} filter
  * @property {SearchFragM} searchFrag
- * @property {function(ProfileTrackerM):TrackerSearchResult[]} getTrackerResults
- * @property {function(ProfileTrackerM):TrackerSearchResult[]} getFilteredTrackerResults
- * @property {function:TrackerSearchResult[]} getResults
- * @property {function:TrackerSearchResult[]} getFilteredResults
+ * @property {function(ProfileTrackerM):TrackerResultM[]} getTrackerResults
+ * @property {function(ProfileTrackerM):TrackerResultM[]} getFilteredTrackerResults
+ * @property {function:TrackerResultM[]} getResults
+ * @property {function:TrackerResultM[]} getFilteredResults
  * @property {function:boolean} hasMoreBtn
  * @property {function(string):SortBy} getSortBy
  * @property {function(Object)} handleMoreBtn
@@ -66,12 +67,14 @@ const searchFragTableModel = types.model('searchFragTableModel', {
     get searchFrag() {
       return getParent(self, 2);
     },
+    get filter() {
+      return getParent(self, 3).filter;
+    },
     getTrackerResults(profileTracker) {
       return profileTracker.getSearchResultsPage(self.index);
     },
     getFilteredTrackerResults(profileTracker) {
-      // todo add fitler
-      return profileTracker.getSearchResultsPage(self.index);
+      return self.filter.processResults(profileTracker.getSearchResultsPage(self.index));
     },
     getResults() {
       const results = [];
@@ -117,7 +120,12 @@ const searchFragTableModel = types.model('searchFragTableModel', {
       return self.getTrackerResults(profileTracker).length;
     },
     getTrackerVisibleResultCount(profileTracker) {
-      return self.getFilteredTrackerResults(profileTracker).length;
+      const selected = self.searchFrag.getSelectedProfileTrackerList();
+      if (selected.indexOf(profileTracker) !== -1) {
+        return self.getFilteredTrackerResults(profileTracker).length;
+      } else {
+        return 0;
+      }
     },
   };
 });

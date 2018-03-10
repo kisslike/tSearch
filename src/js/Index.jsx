@@ -1,4 +1,4 @@
-const debug = require('debug')('Index');
+import Filters from "./components/Filters";
 import React from 'react';
 import ReactDOM from 'react-dom';
 import indexStyle from '../css/index.css';
@@ -11,6 +11,7 @@ import Trackers from './components/Trackers';
 import loadTrackers from './tools/loadTrackers';
 import {HashRouter, Route, Link} from 'react-router-dom';
 import SearchFrag from './components/SearchFrag';
+const debug = require('debug')('Index');
 const qs = require('querystring');
 
 
@@ -89,59 +90,7 @@ const qs = require('querystring');
                   <Trackers store={this.props.store}/>
                 </div>
               </div>
-              {/*<div className="parameter_box__right">
-            <div className="parameter parameter-filter">
-              <span className="filter__label">{chrome.i18n.getMessage('wordFilterLabel')}</span>
-              <div className="input_box input_box-filter">
-                <input type="text" className="input__input input__input-word-filter"/>
-                <a href="#clear" title={chrome.i18n.getMessage('clear')} className="input__clear input__clear-word-filter"/>
-              </div>
-            </div>
-            <div className="parameter parameter-filter">
-              <span className="filter__label">{chrome.i18n.getMessage('sizeFilterLabel')}</span>
-              <div className="input_box input_box-filter">
-                <input className="input__input input__input-size-filter input__input-range input__input-range-from" type="text" placeholder={chrome.i18n.getMessage('rangeFromPlaceholder')}/>
-                {' — '}
-                <input className="input__input input__input-size-filter input__input-range input__input-range-to" type="text" placeholder={chrome.i18n.getMessage('rangeToPlaceholder')}/>
-              </div>
-            </div>
-            <div className="parameter parameter-filter">
-              <span className="filter__label">{chrome.i18n.getMessage('timeFilterLabel')}</span>
-              <div className="select">
-                <select className="select__select select__select-time-filter">
-                  <option value="0" selected>{chrome.i18n.getMessage('timeFilterAll')}</option>
-                  <option value="3600">{chrome.i18n.getMessage('timeFilter1h')}</option>
-                  <option value="86400">{chrome.i18n.getMessage('timeFilter24h')}</option>
-                  <option value="259200">{chrome.i18n.getMessage('timeFilter72h')}</option>
-                  <option value="604800">{chrome.i18n.getMessage('timeFilter1w')}</option>
-                  <option value="2592000">{chrome.i18n.getMessage('timeFilter1m')}</option>
-                  <option value="31536000">{chrome.i18n.getMessage('timeFilter1y')}</option>
-                  <option value="-1">{chrome.i18n.getMessage('timeFilterRange')}</option>
-                </select>
-              </div>
-              <div className="input_box input_box-filter input_box-time-filter">
-                <input className="input__input input__input-time-filter input__input-range input__input-range-from" type="text" placeholder={chrome.i18n.getMessage('rangeFromPlaceholder')}/>
-                {' — '}
-                <input className="input__input input__input-time-filter input__input-range input__input-range-to" type="text" placeholder={chrome.i18n.getMessage('rangeToPlaceholder')}/>
-              </div>
-            </div>
-            <div className="parameter parameter-filter">
-              <span className="filter__label">{chrome.i18n.getMessage('seedFilterLabel')}</span>
-              <div className="input_box input_box-filter">
-                <input className="input__input input__input-seed-filter input__input-range input__input-range-from" type="text" placeholder={chrome.i18n.getMessage('rangeFromPlaceholder')}/>
-                {' — '}
-                <input className="input__input input__input-seed-filter input__input-range input__input-range-to" type="text" placeholder={chrome.i18n.getMessage('rangeToPlaceholder')}/>
-              </div>
-            </div>
-            <div className="parameter parameter-filter">
-              <span className="filter__label">{chrome.i18n.getMessage('peerFilterLabel')}</span>
-              <div className="input_box input_box-filter">
-                <input className="input__input input__input-peer-filter input__input-range input__input-range-from" type="text" placeholder={chrome.i18n.getMessage('rangeFromPlaceholder')}/>
-                {' — '}
-                <input className="input__input input__input-peer-filter input__input-range input__input-range-to" type="text" placeholder={chrome.i18n.getMessage('rangeToPlaceholder')}/>
-              </div>
-            </div>
-          </div>*/}
+              <Filters store={this.props.store}/>
             </div>
             <div className="main">
               <Route exact path="/" component={props => {

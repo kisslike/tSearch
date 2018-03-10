@@ -30,7 +30,7 @@ import {observer} from "mobx-react/index";
 
     /**@type {ProfileTrackerM}*/
     const profileTracker = this.props.profileTracker;
-    profileTracker.setSelected(!profileTracker.selected);
+    profileTracker.applySelected(!profileTracker.selected);
   }
   render() {
     /**@type {IndexM}*/

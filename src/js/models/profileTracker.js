@@ -13,13 +13,13 @@ const {types, resolveIdentifier, destroy, getParent} = require('mobx-state-tree'
  * Actions:
  * @property {function(string)} createSearch
  * @property {function} clearSearch
- * @property {function} resetSelected
  * @property {function(boolean)} setSelected
+ * @property {function(boolean)} applySelected
  * Views:
  * @property {TrackerM} tracker
  * @property {function:Promise} searchNext
  * @property {function:TrackerInfo} getInfo
- * @property {function(number):TrackerSearchResult[]} getSearchResultsPage
+ * @property {function(number):TrackerResultM[]} getSearchResultsPage
  * @property {function:number} getSearchPageCount
  * @property {function:string} getIconClassName
  * @property {function} beforeDestroy
@@ -40,13 +40,6 @@ const {types, resolveIdentifier, destroy, getParent} = require('mobx-state-tree'
  * @property {string} name
  * @property {string} iconClassName
  */
-
-/**
- * @typedef {{}} TrackerSearchResult
- * @property {TrackerInfo} trackerInfo
- * @property {TrackerResultM} result
- */
-
 
 const profileTrackerMetaModel = types.model('profileTrackerMetaModel', {
   name: types.string,
@@ -73,18 +66,19 @@ const profileTrackerModel = types.model('profileTrackerModel', {
         destroy(self.search);
       }
     },
-    resetSelected() {
-      self.selected = false;
-    },
     setSelected(value) {
+      self.selected = value;
+    },
+    applySelected(value) {
       /**@type {ProfileM}*/
       const profile = getParent(self, 2);
       profile.profileTrackers.forEach(profileTracker => {
-        if (profileTracker !== self) {
-          profileTracker.resetSelected();
+        if (value) {
+          profileTracker.setSelected(profileTracker === self);
+        } else {
+          profileTracker.setSelected(false);
         }
       });
-      self.selected = value;
     }
   };
 }).views(/**ProfileTrackerM*/self => {
