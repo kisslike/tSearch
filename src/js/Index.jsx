@@ -96,7 +96,7 @@ const qs = require('querystring');
             <div className="main">
               <Route exact path="/" component={props => {
                 return (
-                  <Explorer store={this.props.store} {...props}/>
+                  <Explorer store={this.props.store} explorer={this.props.store.explorer} {...props}/>
                 );
               }}/>
               <Route path="/search" component={props => {
