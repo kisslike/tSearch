@@ -2,6 +2,10 @@ const popsicle = require('popsicle');
 import {StatusCodeError} from './errors';
 
 const exKitRequest = (tracker, options) => {
+  if (typeof options !== 'object') {
+    throw new Error('Incorrect options');
+  }
+
   if (!tracker.connectRe || !tracker.connectRe.test(options.url)) {
     const err = new Error(`Connection is not allowed! ${options.url} Add url patter in @connect!`);
     throw err;
