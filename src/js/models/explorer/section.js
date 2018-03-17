@@ -7,10 +7,10 @@ const {types, destroy} = require('mobx-state-tree');
  * @typedef {{}} SectionM
  * Model:
  * @property {string} id
- * @property {TrackerMetaM} meta
- * @property {TrackerInfoM} info
+ * @property {SectionMetaM} meta
+ * @property {SectionInfoM} info
  * @property {string} code
- * @property {TrackerWorkerM} worker
+ * @property {SectionWorkerM} worker
  * Actions:
  * @property {function} createWorker
  * @property {function} destroyWorker
@@ -18,7 +18,7 @@ const {types, destroy} = require('mobx-state-tree');
  */
 
 /**
- * @typedef {{}} SectionOptionsM
+ * @typedef {{}} SectionInfoM
  * Model:
  * @property {number} lastUpdate
  * @property {boolean} disableAutoUpdate
@@ -65,12 +65,12 @@ const sectionMetaModel = types.model('sectionMetaModel', {
 const sectionModel = types.model('sectionModel', {
   id: types.identifier(types.string),
   meta: sectionMetaModel,
-  options: types.model('sectionOptions', {
+  info: types.model('sectionInfo', {
     lastUpdate: types.optional(types.number, 0),
     disableAutoUpdate: types.optional(types.boolean, false),
   }),
   code: types.string,
-  worker: types.maybe(sectionWorkerModel)
+  worker: types.maybe(sectionWorkerModel),
 }).actions(/**SectionM*/self => {
   return {
     createWorker() {
@@ -86,7 +86,14 @@ const sectionModel = types.model('sectionModel', {
   };
 }).views(/**SectionM*/self => {
   return {
-
+    getItems() {
+      if (!self.worker) {
+        self.createWorker();
+      }
+      return self.worker.getItems().finally(() => {
+        self.destroyWorker();
+      });
+    }
   };
 });
 

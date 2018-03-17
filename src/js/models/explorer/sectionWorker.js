@@ -7,8 +7,7 @@ const {types} = require('mobx-state-tree');
  * Model:
  * Actions:
  * Views:
- * @property {function(string):Promise} search
- * @property {function(Object):Promise} searchNext
+ * @property {function:Promise} getItems
  */
 
 const sectionWorkerModel = types.compose(PluginWorkerModel).named('sectionWorkerModel').views(/**SectionWorkerM*/self => {

@@ -35,7 +35,7 @@ const qs = require('querystring');
       profile: null,
       profiles: [],
       trackers: [],
-      explorers: [],
+      explorerSections: [],
     }, r)).then(storage => {
       return Promise.resolve().then(() => {
         if (storage.trackers.length === 0) {
@@ -44,9 +44,9 @@ const qs = require('querystring');
           });
         }
       }).then(() => {
-        if (storage.explorers.length === 0) {
+        if (storage.explorerSections.length === 0) {
           return loadExplorers().then(explorer => {
-            storage.explorers.push(...explorer);
+            storage.explorerSections.push(...explorer);
           });
         }
       }).then(() => {

@@ -5,6 +5,7 @@ import searchFragModel from "./searchFrag";
 import filterModel from "./filters";
 import getSearchFragModelId from "../tools/getSearchFragModelId";
 import explorerModel from "./explorer/explorer";
+import sectionModel from "./explorer/section";
 const debug = require('debug')('indexModel');
 const {types, destroy} = require('mobx-state-tree');
 
@@ -33,6 +34,7 @@ const indexModel = types.model('indexModel', {
   searchFrag: types.maybe(searchFragModel),
   filter: types.optional(filterModel, {}),
   explorer: types.optional(explorerModel, {}),
+  explorerSections: types.array(sectionModel),
 }).preProcessSnapshot(snapshot => {
   if (!snapshot.profiles.length) {
     snapshot.profiles.push({
