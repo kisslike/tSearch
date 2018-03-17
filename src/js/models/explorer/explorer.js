@@ -1,5 +1,6 @@
+import sectionModel from "./section";
 const debug = require('debug')('explorer');
-const {types} = require('mobx-state-tree');
+const {types, resolveIdentifier} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} ExplorerM
@@ -35,7 +36,11 @@ const explorerSectionModel = types.model('explorerSectionModel', {
 }).actions(/**ExplorerSectionM*/self => {
   return {};
 }).views(/**ExplorerSectionM*/self => {
-  return {};
+  return {
+    get section() {
+      return resolveIdentifier(sectionModel, self, self.id);
+    },
+  };
 });
 
 const explorerModel = types.model('explorerModel', {

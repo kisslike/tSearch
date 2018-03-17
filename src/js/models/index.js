@@ -4,7 +4,7 @@ import searchFormModel from "./searchForm";
 import searchFragModel from "./searchFrag";
 import filterModel from "./filters";
 import getSearchFramModelId from "../tools/getSearchFragModelId";
-import explorerModel from "./explorer";
+import explorerModel from "./explorer/explorer";
 const debug = require('debug')('indexModel');
 const {types, destroy} = require('mobx-state-tree');
 
