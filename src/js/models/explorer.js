@@ -15,8 +15,23 @@ const {types} = require('mobx-state-tree');
  * Views:
  */
 
+/**
+ * @typedef {{}} ExplorerSectionMetaM
+ * Model:
+ * @property {string} name
+ * @property {string} [downloadURL]
+ * Actions:
+ * Views:
+ */
+
+const explorerSectionMetaModel = types.model('explorerSectionMetaModel', {
+  name: types.string,
+  downloadURL: types.maybe(types.string),
+});
+
 const explorerSectionModel = types.model('explorerSectionModel', {
   id: types.identifier(types.string),
+  meta: explorerSectionMetaModel
 }).actions(/**ExplorerSectionM*/self => {
   return {};
 }).views(/**ExplorerSectionM*/self => {

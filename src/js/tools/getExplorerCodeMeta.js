@@ -8,7 +8,7 @@ const fieldType = {
   homepageURL: 'string',
   icon: 'string',
   icon64: 'string',
-  trackerURL: 'string',
+  siteURL: 'string',
   updateURL: 'string',
   downloadURL: 'string',
   supportURL: 'string',
@@ -16,8 +16,8 @@ const fieldType = {
   connect: '*array!connect'
 };
 
-const getTrackerCodeMeta = function (code) {
+const getExplorerCodeMeta = function (code) {
   return getCodeMeta(code, fieldType);
 };
 
-export default getTrackerCodeMeta;
+export default getExplorerCodeMeta;

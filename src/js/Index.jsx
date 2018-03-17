@@ -12,6 +12,7 @@ import loadTrackers from './tools/loadTrackers';
 import {HashRouter, Route, Link} from 'react-router-dom';
 import SearchFrag from './components/SearchFrag';
 import Explorer from "./components/Explorer";
+import loadExplorers from "./tools/loadExplorers";
 const debug = require('debug')('Index');
 const qs = require('querystring');
 
@@ -34,11 +35,18 @@ const qs = require('querystring');
       profile: null,
       profiles: [],
       trackers: [],
+      explorers: [],
     }, r)).then(storage => {
       return Promise.resolve().then(() => {
         if (storage.trackers.length === 0) {
           return loadTrackers().then(trackers => {
             storage.trackers.push(...trackers);
+          });
+        }
+      }).then(() => {
+        if (storage.explorers.length === 0) {
+          return loadExplorers().then(explorer => {
+            storage.explorers.push(...explorer);
           });
         }
       }).then(() => {

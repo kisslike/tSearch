@@ -64,6 +64,19 @@ const indexModel = types.model('indexModel', {
       }]
     });
   }
+  if (!snapshot.explorer) {
+    snapshot.explorer = {};
+  }
+  if (!snapshot.explorer.sections) {
+    snapshot.explorer.sections = [
+      {
+        id: 'kpInCinema',
+        meta: {
+          name: 'kpInCinema'
+        }
+      }
+    ];
+  }
   const profileFound = snapshot.profiles.some(profile => {
     return snapshot.profile === profile.name;
   });

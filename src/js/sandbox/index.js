@@ -47,5 +47,51 @@ window.API_event = function (name, callback) {
 };
 
 window.API_request = function (options) {
-  return transport.callFn('request', [options]);
+  if (typeof options !== 'object') {
+    options = {url: options};
+  }
+
+  if (options.type) {
+    options.method = options.type;
+    delete options.type;
+  }
+
+  if (!options.method) {
+    options.method = 'GET';
+  }
+
+  if (options.data) {
+    if (options.method === 'POST') {
+      options.body = options.data;
+    } else {
+      options.query = options.data;
+    }
+    delete options.data;
+  }
+
+  if (!options.headers) {
+    options.headers = {};
+  }
+
+  if (options.body && !options.headers['Content-Type']) {
+    options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+  }
+
+  if (options.cache === false && ['GET', 'HEAD'].indexOf(options.method) !== -1) {
+    if (!options.query) {
+      options.query = {};
+    }
+    options.query._ = Date.now();
+  }
+
+  const toJson = options.json;
+  delete options.json;
+
+  return transport.callFn('request', [options]).then(response => {
+    if (toJson) {
+      response.body = JSON.parse(response.body);
+    }
+
+    return response;
+  });
 };
