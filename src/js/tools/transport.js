@@ -110,6 +110,9 @@ class Transport {
   waitPromise(msg) {
     return new Promise((resolve, reject) => {
       const cb = response => {
+        if (!response) {
+          return reject(new Error('Response is empty'));
+        } else
         if (response.err) {
           return reject(deserializeError(response.err));
         } else {
