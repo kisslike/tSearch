@@ -2,7 +2,7 @@ const popsicle = require('popsicle');
 import {StatusCodeError} from './errors';
 
 const exKitRequest = (tracker, options) => {
-  if (typeof options !== 'object') {
+  if (typeof options !== 'object' || !options.url) {
     throw new Error('Incorrect options');
   }
 
