@@ -19,32 +19,33 @@ const processConnect = value => {
 const getCodeMeta = (code, fieldScheme) => {
   const meta = {};
 
-  const importantKeys = [];
-  const keyValidator = {};
   const keyType = {};
+  const importantKeys = [];
+  const keyValidators = {};
   Object.keys(fieldScheme).forEach(key => {
     const value = fieldScheme[key];
     const m = /^(\*)?([^!]+)(?:!(.+))?$/.exec(value);
     const isImportant = m[1];
     const type = m[2];
-    const validatorType = m[3];
+    const typeValidators = !m[3] ? [] : m[3].split('!');
 
-    let validator = null;
-    switch (validatorType) {
-      case 'version':
-        validator = processVersion;
-        break;
-      case 'connect':
-        validator = processConnect;
-        break;
-    }
+    const validators = typeValidators.map(type => {
+      switch (type) {
+        case 'version':
+          return processVersion;
+        case 'connect':
+          return processConnect;
+        default:
+          throw new Error(`Validator is not found ${type}`);
+      }
+    });
 
     keyType[key] = type;
     if (isImportant) {
       importantKeys.push(key);
     }
-    if (validator) {
-      keyValidator[key] = validator;
+    if (validators.length) {
+      keyValidators[key] = validators;
     }
   });
 
@@ -89,14 +90,16 @@ const getCodeMeta = (code, fieldScheme) => {
     }
   });
 
-  Object.keys(keyValidator).forEach(key => {
-    const validator = keyValidator[key];
+  Object.keys(keyValidators).forEach(key => {
     if (meta[key]) {
-      try {
-        meta[key] = validator(meta[key]);
-      } catch (err) {
-        throw new Error(`Validate field ${key}: ${meta[key]} error: ${err.message}`);
-      }
+      const validators = keyValidators[key];
+      validators.forEach(validator => {
+        try {
+          meta[key] = validator(meta[key]);
+        } catch (err) {
+          throw new Error(`Validate field ${key}: ${meta[key]} error: ${err.message}`);
+        }
+      });
     }
   });
 
