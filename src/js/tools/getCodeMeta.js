@@ -19,7 +19,7 @@ const processConnect = value => {
 const processActions = value => {
   value = value.map(function (action) {
     const json = JSON.parse(action);
-    if (!json.type || !json.title || !json.event) {
+    if (!json.title || !json.command) {
       throw new Error('Action is incorrect');
     }
     return json;

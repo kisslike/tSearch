@@ -16,7 +16,7 @@ const {types, destroy, getParent} = require('mobx-state-tree');
  * @property {function} destroyWorker
  * Views:
  * @property {function} getItems
- * @property {function(string)} sendEvent
+ * @property {function(string)} sendCommand
  */
 
 /**
@@ -52,10 +52,9 @@ const {types, destroy, getParent} = require('mobx-state-tree');
 /**
  * @typedef {{}} ExploreSectionMetaActionM
  * Model:
- * @property {string} type
+ * @property {string} icon
  * @property {string} title
- * @property {string} event
- * @property {*} event
+ * @property {*} command
  * @property {boolean} isLoading
  * Actions:
  * @property {function(boolean)} setLoading
@@ -64,9 +63,9 @@ const {types, destroy, getParent} = require('mobx-state-tree');
  */
 
 const exploreSectionMetaActionModel = types.model('exploreSectionMetaActionModel', {
-  type: types.string,
+  icon: types.string,
   title: types.string,
-  event: types.frozen,
+  command: types.frozen,
   isLoading: types.optional(types.boolean, false)
 }).actions(/**ExploreSectionMetaActionM*/self => {
   return {
@@ -83,8 +82,12 @@ const exploreSectionMetaActionModel = types.model('exploreSectionMetaActionModel
         self.setLoading(true);
         /**@type {ExploreSectionM}*/
         const section = getParent(self, 3);
-        section.sendEvent(self.event).finally(() => {
+        section.sendCommand(self.command).finally(() => {
           self.setLoading(false);
+        }).then(result => {
+          debug('Command result', self.command, result);
+        }, err => {
+          debug('Command error', self.command, err);
         });
       }
     }
@@ -140,11 +143,11 @@ const exploreSectionModel = types.model('exploreSectionModel', {
         self.destroyWorker();
       });
     },
-    sendEvent(event) {
+    sendCommand(command) {
       if (!self.worker) {
         self.createWorker();
       }
-      return self.worker.callFn('events.' + event).finally(() => {
+      return self.worker.sendCommand(command).finally(() => {
         self.destroyWorker();
       });
     }

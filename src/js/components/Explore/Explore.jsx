@@ -39,7 +39,7 @@ class ExploreSection extends React.Component {
       if (action.isLoading) {
         classList.push('loading');
       }
-      switch (action.type) {
+      switch (action.icon) {
         case 'update': {
           classList.push('action__update');
           return <a key={i} href={"#"} onClick={action.handleClick} className={classList.join(' ')} title={action.title}/>;
