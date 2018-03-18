@@ -66,7 +66,10 @@ const exploreSectionMetaActionModel = types.model('exploreSectionMetaActionModel
   icon: types.string,
   title: types.string,
   command: types.frozen,
-  isLoading: types.optional(types.boolean, false)
+  isLoading: types.boolean,
+}).preProcessSnapshot(snapshot => {
+  snapshot.isLoading = false;
+  return snapshot;
 }).actions(/**ExploreSectionMetaActionM*/self => {
   return {
     setLoading(state) {
