@@ -117,7 +117,7 @@ const exploreSectionMetaModel = types.model('exploreSectionMetaModel', {
 const exploreSectionModel = types.model('exploreSectionModel', {
   id: types.identifier(types.string),
   meta: exploreSectionMetaModel,
-  info: types.model('sectionInfo', {
+  info: types.model('exploreSectionInfo', {
     lastUpdate: types.optional(types.number, 0),
     disableAutoUpdate: types.optional(types.boolean, false),
   }),
