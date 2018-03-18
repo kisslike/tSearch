@@ -17,6 +17,9 @@ const {types, destroy} = require('mobx-state-tree');
  * @property {TrackerM[]} trackers
  * @property {SearchFormM} searchForm
  * @property {SearchFragM} searchFrag
+ * @property {FilterM} filter
+ * @property {ExplorerM} explorer
+ * @property {SectionM[]} explorerSections
  * Actions:
  * @property {function(string)} createSearch
  * @property {function} clearSearch

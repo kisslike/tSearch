@@ -11,7 +11,7 @@ import Trackers from './components/Trackers';
 import loadTrackers from './tools/loadTrackers';
 import {HashRouter, Route, Link} from 'react-router-dom';
 import SearchFrag from './components/SearchFrag';
-import Explorer from "./components/Explorer";
+import Explorer from "./components/Explorer/Explorer";
 import loadExplorers from "./tools/loadExplorers";
 const debug = require('debug')('Index');
 const qs = require('querystring');
@@ -104,7 +104,7 @@ const qs = require('querystring');
             <div className="main">
               <Route exact path="/" component={props => {
                 return (
-                  <Explorer store={this.props.store} explorer={this.props.store.explorer} {...props}/>
+                  <Explorer store={this.props.store} {...props}/>
                 );
               }}/>
               <Route path="/search" component={props => {

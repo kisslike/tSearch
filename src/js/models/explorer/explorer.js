@@ -5,6 +5,7 @@ const {types, resolveIdentifier} = require('mobx-state-tree');
 /**
  * @typedef {{}} ExplorerM
  * Model:
+ * @property {ExplorerSectionM[]} sections
  * Actions:
  * Views:
  */
@@ -12,6 +13,8 @@ const {types, resolveIdentifier} = require('mobx-state-tree');
 /**
  * @typedef {{}} ExplorerSectionM
  * Model:
+ * @property {string} id
+ * @property {ExplorerSectionMetaM} meta
  * Actions:
  * Views:
  */
@@ -48,7 +51,13 @@ const explorerModel = types.model('explorerModel', {
 }).actions(/**ExplorerM*/self => {
   return {};
 }).views(/**ExplorerM*/self => {
-  return {};
+  return {
+    getSections() {
+      return self.sections.map(item => {
+        return item.section;
+      }).filter(a => !!a);
+    },
+  };
 });
 
 export default explorerModel;
