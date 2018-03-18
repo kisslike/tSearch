@@ -13,11 +13,12 @@ const fieldType = {
   downloadURL: 'string',
   supportURL: 'string',
   require: 'array',
-  connect: '*array!connect'
+  connect: '*array!connect',
+  actions: '*array!actions',
 };
 
-const getExplorerCodeMeta = function (code) {
+const getExploreSectionCodeMeta = function (code) {
   return getCodeMeta(code, fieldType);
 };
 
-export default getExplorerCodeMeta;
+export default getExploreSectionCodeMeta;

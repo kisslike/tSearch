@@ -16,6 +16,20 @@ const processConnect = value => {
   return value;
 };
 
+const processActions = value => {
+  value = value.map(function (action) {
+    const json = JSON.parse(action);
+    if (!json.type || !json.title || !json.event) {
+      throw new Error('Action is incorrect');
+    }
+    return json;
+  });
+  if (!value.length) {
+    throw new Error("Action field is empty!");
+  }
+  return value;
+};
+
 const getCodeMeta = (code, fieldScheme) => {
   const meta = {};
 
@@ -35,6 +49,8 @@ const getCodeMeta = (code, fieldScheme) => {
           return processVersion;
         case 'connect':
           return processConnect;
+        case 'actions':
+          return processActions;
         default:
           throw new Error(`Validator is not found ${type}`);
       }

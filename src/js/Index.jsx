@@ -11,8 +11,8 @@ import Trackers from './components/Trackers';
 import loadTrackers from './tools/loadTrackers';
 import {HashRouter, Route, Link} from 'react-router-dom';
 import SearchFrag from './components/SearchFrag';
-import Explorer from "./components/Explorer/Explorer";
-import loadExplorers from "./tools/loadExplorers";
+import Explore from "./components/Explore";
+import loadExploreSections from "./tools/loadExploreSections";
 const debug = require('debug')('Index');
 const qs = require('querystring');
 
@@ -35,7 +35,7 @@ const qs = require('querystring');
       profile: null,
       profiles: [],
       trackers: [],
-      explorerSections: [],
+      exploreSections: [],
     }, r)).then(storage => {
       return Promise.resolve().then(() => {
         if (storage.trackers.length === 0) {
@@ -44,9 +44,9 @@ const qs = require('querystring');
           });
         }
       }).then(() => {
-        if (storage.explorerSections.length === 0) {
-          return loadExplorers().then(explorer => {
-            storage.explorerSections.push(...explorer);
+        if (storage.exploreSections.length === 0) {
+          return loadExploreSections().then(section => {
+            storage.exploreSections.push(...section);
           });
         }
       }).then(() => {
@@ -104,7 +104,7 @@ const qs = require('querystring');
             <div className="main">
               <Route exact path="/" component={props => {
                 return (
-                  <Explorer store={this.props.store} {...props}/>
+                  <Explore store={this.props.store} {...props}/>
                 );
               }}/>
               <Route path="/search" component={props => {

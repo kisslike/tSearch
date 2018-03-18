@@ -4,8 +4,8 @@ import searchFormModel from "./searchForm";
 import searchFragModel from "./searchFrag";
 import filterModel from "./filters";
 import getSearchFragModelId from "../tools/getSearchFragModelId";
-import explorerModel from "./explorer/explorer";
-import sectionModel from "./explorer/section";
+import exploreModel from "./explore/explore";
+import sectionModel from "./explore/section";
 const debug = require('debug')('indexModel');
 const {types, destroy} = require('mobx-state-tree');
 
@@ -18,8 +18,8 @@ const {types, destroy} = require('mobx-state-tree');
  * @property {SearchFormM} searchForm
  * @property {SearchFragM} searchFrag
  * @property {FilterM} filter
- * @property {ExplorerM} explorer
- * @property {SectionM[]} explorerSections
+ * @property {ExploreM} explore
+ * @property {ExploreSectionM[]} exploreSections
  * Actions:
  * @property {function(string)} createSearch
  * @property {function} clearSearch
@@ -36,8 +36,8 @@ const indexModel = types.model('indexModel', {
   searchForm: types.optional(searchFormModel, {}),
   searchFrag: types.maybe(searchFragModel),
   filter: types.optional(filterModel, {}),
-  explorer: types.optional(explorerModel, {}),
-  explorerSections: types.array(sectionModel),
+  explore: types.optional(exploreModel, {}),
+  exploreSections: types.array(sectionModel),
 }).preProcessSnapshot(snapshot => {
   if (!snapshot.profiles.length) {
     snapshot.profiles.push({
@@ -69,11 +69,11 @@ const indexModel = types.model('indexModel', {
       }]
     });
   }
-  if (!snapshot.explorer) {
-    snapshot.explorer = {};
+  if (!snapshot.explore) {
+    snapshot.explore = {};
   }
-  if (!snapshot.explorer.sections) {
-    snapshot.explorer.sections = [
+  if (!snapshot.explore.items) {
+    snapshot.explore.items = [
       {
         id: 'kpInCinema',
         meta: {

@@ -87,7 +87,7 @@ const config = {
       {from: './src/manifest.json',},
       {from: './src/icons', to: './icons'},
       {from: './src/trackers', to: './trackers'},
-      {from: './src/explorers', to: './explorers'},
+      {from: './src/exploreSections', to: './exploreSections'},
       {from: './src/_locales', to: './_locales'},
     ]),
     new HtmlWebpackPlugin({
