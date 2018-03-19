@@ -102,7 +102,7 @@ const debug = require('debug')('Table');
             if (category) {
               category = (
                 <div className="cell__category">
-                  {category},
+                  {category}
                   {titleIcon}
                 </div>
               );
