@@ -34,7 +34,7 @@ class ExploreSection extends React.Component {
       );
     }
 
-    const actions = section.meta.getActions().map((action, i) => {
+    const actions = section.meta.actions.map((action, i) => {
       const classList = ['action'];
       if (action.isLoading) {
         classList.push('loading');
@@ -54,7 +54,7 @@ class ExploreSection extends React.Component {
       <li className="section">
         <div className="section__head">
           <div className="section__move"/>
-          <div className="section__title">{section.meta.getName()}</div>
+          <div className="section__title">{section.meta.name}</div>
           <div className="section__actions">
             {openSite}
             {actions}
