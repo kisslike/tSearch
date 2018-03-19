@@ -8,9 +8,15 @@ const getLocale = (defaultLocale, locales) => {
   languages.push(defaultLocale);
 
   let result = null;
-  languages.some(language => {
-    return result = locales && locales[language];
-  });
+  if (locales) {
+    languages.some(language => {
+      return result = locales[language];
+    });
+
+    if (result) {
+      result = Object.assign({}, locales[defaultLocale], result);
+    }
+  }
 
   return result;
 };

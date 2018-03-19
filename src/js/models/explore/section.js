@@ -52,6 +52,8 @@ const {types, destroy, getParent} = require('mobx-state-tree');
  * @property {Object<string,string>} locale
  * Actions:
  * Views:
+ * @property {function:string} getName
+ * @property {function:ExploreSectionMetaActionM[]} getActions
  */
 
 /**
@@ -124,15 +126,20 @@ const exploreSectionMetaModel = types.model('exploreSectionMetaModel', {
   return {
     afterCreate() {
       self.locale = getLocale(self.defaultLocale, self.locales);
-      self.name = processLocale(self.name, self.locale);
-      self.actions.forEach(action => {
-        action.title = processLocale(action.title, self.locale);
-      });
     },
   };
 }).views(/**ExploreSectionMetaM*/self => {
   return {
-
+    getName() {
+      return processLocale(self.name, self.locale);
+    },
+    getActions() {
+      return self.actions.map(action => {
+        return Object.assign({}, action, {
+          title: processLocale(action.title, self.locale)
+        });
+      });
+    }
   }
 });
 
