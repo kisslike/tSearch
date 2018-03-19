@@ -1,6 +1,7 @@
 import exploreSectionWorkerModel from "./sectionWorker";
 import processLocale from "../../tools/processLocale";
 import getLocale from "../../tools/getLocale";
+import cacheModel from "./cache";
 
 const debug = require('debug')('exploreSectionModel');
 const {types, destroy, getParent} = require('mobx-state-tree');
@@ -13,9 +14,11 @@ const {types, destroy, getParent} = require('mobx-state-tree');
  * @property {ExploreSectionInfoM} info
  * @property {string} code
  * @property {ExploreSectionWorkerM} worker
+ * @property {CacheM} cache
  * Actions:
  * @property {function} createWorker
  * @property {function} destroyWorker
+ * @property {function:CacheM} getCache
  * Views:
  * @property {function} getItems
  * @property {function(string)} sendCommand
@@ -152,6 +155,7 @@ const exploreSectionModel = types.model('exploreSectionModel', {
   }),
   code: types.string,
   worker: types.maybe(exploreSectionWorkerModel),
+  cache: types.maybe(cacheModel),
 }).actions(/**ExploreSectionM*/self => {
   return {
     createWorker() {
@@ -163,7 +167,15 @@ const exploreSectionModel = types.model('exploreSectionModel', {
       if (self.worker) {
         destroy(self.worker);
       }
-    }
+    },
+    getCache() {
+      if (!self.cache) {
+        self.cache = {
+          id: self.id
+        };
+      }
+      return self.cache;
+    },
   };
 }).views(/**ExploreSectionM*/self => {
   return {

@@ -1,9 +1,10 @@
 import React from 'react';
+import {observer} from 'mobx-react';
 const debug = require('debug')('Explore');
 
 import exploreStyle from '../../../css/explore.less';
 
-class Explore extends React.Component {
+@observer class Explore extends React.Component {
   render() {
     /**@type {IndexM}*/
     const store = this.props.store;
@@ -22,7 +23,7 @@ class Explore extends React.Component {
   }
 }
 
-class ExploreSection extends React.Component {
+@observer class ExploreSection extends React.Component {
   render() {
     /**@type {ExploreSectionM}*/
     const section = this.props.section;
@@ -49,6 +50,9 @@ class ExploreSection extends React.Component {
         }
       }
     });
+
+    const items = section.getCache().data;
+    debug('items', items);
 
     return (
       <li className="section">
