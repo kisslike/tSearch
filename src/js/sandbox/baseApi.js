@@ -105,10 +105,8 @@ window.API_getDom = function (html) {
 })();
 
 window.API_getDoc = (html, location) => {
-  const parse5 = require('parse5');
-  const doc = parse5.parse(html, {
-    treeAdapter: new TreeAdapter(document)
-  });
+  const parser = DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
 
   const base = doc.head.querySelector('base');
   if (!base) {
