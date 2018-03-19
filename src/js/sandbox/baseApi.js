@@ -1,3 +1,5 @@
+import TreeAdapter from './treeAdapter';
+
 /**
  * @returns {DocumentFragment}
  */
@@ -101,5 +103,21 @@ window.API_getDom = function (html) {
     return parsedUrl.path + value;
   };
 })();
+
+window.API_getDoc = (html, location) => {
+  const parse5 = require('parse5');
+  const doc = parse5.parse(html, {
+    treeAdapter: new TreeAdapter(document)
+  });
+
+  const base = doc.head.querySelector('base');
+  if (!base) {
+    const base = doc.createElement('base');
+    base.href = location;
+    doc.head.appendChild(base);
+  }
+
+  return doc;
+};
 
 export default null;

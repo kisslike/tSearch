@@ -47,19 +47,19 @@ var checkResult = function (obj) {
 
 const onPageLoad = function (response) {
   const content = response.body;
-  var dom = API_getDom(API_sanitizeHtml(content));
+  const doc = API_getDoc(content, response.url);
 
-  var threeD = dom.querySelectorAll('div.filmsListNew > div.item div.threeD');
+  var threeD = doc.querySelectorAll('div.filmsListNew > div.item div.threeD');
   for (var i = 0, el; el = threeD[i]; i++) {
     var parent = el.parentNode;
     parent && parent.removeChild(el);
   }
 
-  var nodes = dom.querySelectorAll('div.filmsListNew > div.item');
+  var nodes = doc.querySelectorAll('div.filmsListNew > div.item');
   var arr = [];
   [].slice.call(nodes).forEach(function (el) {
     var img = el.querySelector('div > a > img');
-    img = img && img.getAttribute('src');
+    img = img && img.src;
     img = img && kpGetImgFileName(img);
 
     var title = el.querySelector('div > div.name > a');
@@ -73,7 +73,7 @@ const onPageLoad = function (response) {
     }
 
     var url = el.querySelector('div > div.name > a');
-    url = url && url.getAttribute('href');
+    url = url && url.href;
 
     var obj = {
       img: img,
@@ -103,7 +103,7 @@ const onPageLoad = function (response) {
 API_event('getItems', function () {
   const items = [];
   let promise = Promise.resolve();
-  /*['0', '1', '2'].forEach(page => {
+  ['0', '1', '2'].forEach(page => {
     promise = promise.then(() => {
       return API_request({
         method: 'GET',
@@ -116,7 +116,7 @@ API_event('getItems', function () {
         console.error('Page load error', err);
       });
     });
-  });*/
+  });
   return promise.then(() => items);
 });
 
