@@ -1,8 +1,11 @@
 // ==UserScript==
-// @name Кнопопоиск: в кино
+// @name __MSG_name__
 // @connect *://kinopoisk.ru/*
 // @version 1.0
-// @actions {"icon":"update","title":"Update","command":"update"}
+// @action {"icon":"update","title":"__MSG_update__","command":"update"}
+// @locale ru {"name": "Кнопопоиск: в кино", "update": "Обновить"}
+// @locale en {"name": "Kinopoisk: in cinema", "update": "Update"}
+// @defaultLocale en
 // ==/UserScript==
 
 const onPageLoad = function (response) {

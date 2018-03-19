@@ -16,7 +16,7 @@ const processConnect = value => {
   return value;
 };
 
-const processActions = value => {
+const processAction = value => {
   value = value.map(function (action) {
     const json = JSON.parse(action);
     if (!json.title || !json.command) {
@@ -28,6 +28,25 @@ const processActions = value => {
     throw new Error("Action field is empty!");
   }
   return value;
+};
+
+const processLocale = (localeObj, meta) => {
+  const result = {};
+  Object.keys(localeObj).forEach(key => {
+    const json = localeObj[key];
+    try {
+      result[key] = JSON.parse(json);
+    } catch (err) {
+      debug(`Parse locale  ${key}: ${json} error: ${err.message}`);
+    }
+  });
+  if (!meta.defaultLocale) {
+    meta.defaultLocale = 'en';
+  }
+  if (!result[meta.defaultLocale]) {
+    throw new Error(`Default locale ${meta.defaultLocale} is not found!`);
+  }
+  return result;
 };
 
 const getCodeMeta = (code, fieldScheme) => {
@@ -49,8 +68,10 @@ const getCodeMeta = (code, fieldScheme) => {
           return processVersion;
         case 'connect':
           return processConnect;
-        case 'actions':
-          return processActions;
+        case 'action':
+          return processAction;
+        case 'locale':
+          return processLocale;
         default:
           throw new Error(`Validator is not found ${type}`);
       }
@@ -91,6 +112,18 @@ const getCodeMeta = (code, fieldScheme) => {
               }
               meta[key].push(value);
               break;
+            case 'object':
+              if (!meta[key]) {
+                meta[key] = {};
+              }
+              const m = /^([^\s]+)\s+(.+)$/.exec(value);
+              if (!m) {
+                throw new Error(`Parse field ${key}: ${meta[key]} error!`);
+              }
+              const _key = m[1];
+              const _value = m[2].trim();
+              Object.assign(meta[key], {[_key]: _value});
+              break;
             default: {
               debug('Skip meta key %s: %v', key, value);
             }
@@ -111,7 +144,7 @@ const getCodeMeta = (code, fieldScheme) => {
       const validators = keyValidators[key];
       validators.forEach(validator => {
         try {
-          meta[key] = validator(meta[key]);
+          meta[key] = validator(meta[key], meta);
         } catch (err) {
           throw new Error(`Validate field ${key}: ${meta[key]} error: ${err.message}`);
         }

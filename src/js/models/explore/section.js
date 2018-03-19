@@ -45,6 +45,9 @@ const {types, destroy, getParent} = require('mobx-state-tree');
  * @property {string[]} require
  * @property {string[]} connect
  * @property {ExploreSectionMetaActionM[]} actions
+ * @property {Object<string,Object<string,string>>} locales
+ * @property {string} defaultLocale
+ * @property {string} locale
  * Actions:
  * Views:
  */
@@ -112,6 +115,87 @@ const exploreSectionMetaModel = types.model('exploreSectionMetaModel', {
   require: types.optional(types.array(types.string), []),
   connect: types.array(types.string),
   actions: types.optional(types.array(exploreSectionMetaActionModel), []),
+  locales: types.frozen,
+  defaultLocale: types.maybe(types.string),
+  locale: types.maybe(types.string),
+}).preProcessSnapshot(snapshot => {
+  const getLocale = () => {
+    const languages = [];
+    const uiLang = chrome.i18n.getUILanguage();
+    const m = /([^-]+)/.exec(uiLang);
+    if (m) {
+      languages.push(m[1]);
+    }
+    languages.push(snapshot.defaultLocale);
+
+    let result = null;
+    languages.some(language => {
+      return result = snapshot.locales && snapshot.locales[language] && language;
+    });
+
+    return result;
+  };
+
+  snapshot.locale = getLocale();
+
+  return snapshot;
+}).views(/**ExploreSectionMetaM*/self => {
+  const setLocale = value => {
+    const key = value.substr(6, value.length - 6 - 2);
+    return self.locales && self.locales[self.locale][key] || value;
+  };
+
+  const processLocale = value => {
+    const readMsg = value => {
+      const startMsg = 6;
+      let endMsg = value.indexOf('__', startMsg);
+      if (endMsg !== -1) {
+        endMsg += 2;
+      }
+      let pos = null;
+      let str = null;
+      if (endMsg !== -1) {
+        const msg = value.substr(0, endMsg);
+        if (/^__MSG_[a-zA-Z_]+__$/.test(msg)) {
+          str = setLocale(msg);
+          pos = endMsg - 1;
+        } else {
+          str = value.substr(0, startMsg);
+          pos = startMsg - 1;
+        }
+      } else {
+        str = value;
+        pos = value.length - 1;
+      }
+      return {
+        text: str,
+        i: pos
+      };
+    };
+
+    let str = '';
+    for (let i = 0, symbol; symbol = value[i]; i++) {
+      if (value.substr(i, 6) === '__MSG_') {
+        const result = readMsg(value.substr(i));
+        i += result.i;
+        str += result.text;
+      } else {
+        str += symbol;
+      }
+    }
+    return str;
+  };
+
+  return {
+    getName() {
+      return processLocale(self.name);
+    },
+    getActions() {
+      return self.actions.map(action => {
+        return Object.assign({}, action, {title: processLocale(action.title)})
+      });
+    }
+  }
 });
 
 const exploreSectionModel = types.model('exploreSectionModel', {

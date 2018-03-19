@@ -14,11 +14,21 @@ const fieldType = {
   supportURL: 'string',
   require: 'array',
   connect: '*array!connect',
-  actions: '*array!actions',
+  action: '*array!action',
+  locale: 'object!locale',
+  defaultLocale: 'string',
 };
 
 const getExploreSectionCodeMeta = function (code) {
-  return getCodeMeta(code, fieldType);
+  const result = getCodeMeta(code, fieldType);
+
+  result.actions = result.action;
+  delete result.action;
+
+  result.locales = result.locale;
+  delete result.locale;
+
+  return result;
 };
 
 export default getExploreSectionCodeMeta;
