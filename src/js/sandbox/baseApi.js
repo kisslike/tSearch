@@ -1,5 +1,3 @@
-import TreeAdapter from './treeAdapter';
-
 /**
  * @returns {DocumentFragment}
  */
@@ -105,7 +103,7 @@ window.API_getDom = function (html) {
 })();
 
 window.API_getDoc = (html, location) => {
-  const parser = DOMParser();
+  const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
 
   const base = doc.head.querySelector('base');

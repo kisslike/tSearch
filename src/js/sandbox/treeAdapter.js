@@ -4,7 +4,7 @@ const DomTreeAdapter = require('dom-treeadapter');
 class _Adapter {}
 Object.assign(_Adapter.prototype, DomTreeAdapter(document));
 
-class Adapter extends _Adapter {
+class TreeAdapter extends _Adapter {
   createElement(tagName, nameSpaceUri, attrs) {
     attrs.forEach(pair => {
       if (/^on/i.test(pair.name)) {
@@ -22,4 +22,4 @@ class Adapter extends _Adapter {
   }
 }
 
-export default Adapter;
+export default TreeAdapter;
