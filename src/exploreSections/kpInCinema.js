@@ -3,7 +3,7 @@
 // @connect *://kinopoisk.ru/*
 // @version 1.0
 // @action {"icon":"update","title":"__MSG_update__","command":"update"}
-// @locale ru {"name": "Кнопопоиск: в кино", "update": "Обновить"}
+// @locale ru {"name": "Кнопоиск: в кино", "update": "Обновить"}
 // @locale en {"name": "Kinopoisk: in cinema", "update": "Update"}
 // @defaultLocale en
 // ==/UserScript==
