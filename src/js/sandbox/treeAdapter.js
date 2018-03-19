@@ -7,8 +7,8 @@ Object.assign(_Adapter.prototype, DomTreeAdapter(document));
 class Adapter extends _Adapter {
   createElement(tagName, nameSpaceUri, attrs) {
     attrs.forEach(pair => {
-      if (/^on/.test(pair.name)) {
-        pair.name = 'deny-' + pair.name;
+      if (/^on/i.test(pair.name)) {
+        pair.name = 'DENY-' + pair.name;
       }
     });
     const tagNameU = tagName.toUpperCase();

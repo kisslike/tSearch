@@ -9,13 +9,9 @@
 // @version 1.0.1
 // ==/UserScript==
 
-var deSanitizeKeys = ['categoryTitle', 'categoryUrl', 'title', 'url', 'downloadUrl'];
-var urlKeys = ['categoryUrl', 'url', 'downloadUrl', 'nextPageUrl'];
 
 var onPageLoad = function (response) {
-    var body = response.body;
-    body = API_sanitizeHtml(body);
-    var bodyDom = API_getDom(body);
+    var bodyDom = API_getDoc(response.body, response.url);
     var $bodyDom = $(bodyDom);
 
     if (/login\.php/.test(response.url) || $bodyDom.find('#login-form').length) {
@@ -29,11 +25,11 @@ var onPageLoad = function (response) {
         try {
             var $node = torrentElList.eq(i);
             var categoryTitle = $node.find('td.row1.f-name>div>a').text();
-            var categoryUrl = $node.find('td.row1.f-name>div>a').attr('href');
+            var categoryUrl = $node.find('td.row1.f-name>div>a').prop('href');
             var title = $node.find('td.row4.med.tLeft.t-title>div.wbr.t-title>a').text();
-            var url = $node.find('td.row4.med.tLeft.t-title>div.wbr.t-title>a').attr('href');
+            var url = $node.find('td.row4.med.tLeft.t-title>div.wbr.t-title>a').prop('href');
             var size = $node.find('td.row4.small.nowrap.tor-size>u').text();
-            var downloadUrl = $node.find('td.row4.small.nowrap.tor-size>a').attr('href');
+            var downloadUrl = $node.find('td.row4.small.nowrap.tor-size>a').prop('href');
             var seed = $node.find('td.row4.nowrap:eq(1)>u').text();
             var peer = $node.find('td.row4.leechmed>b').text();
             var date = $node.find('td.row4.small.nowrap:eq(1)>u').text();
@@ -50,27 +46,12 @@ var onPageLoad = function (response) {
                 date: date
             };
 
-            deSanitizeKeys.forEach(function (key) {
-                if (item[key]) {
-                    item[key] = API_deSanitizeHtml(item[key]);
-                }
-            });
-
-            urlKeys.forEach(function (key) {
-                if (item[key]) {
-                    item[key] = API_normalizeUrl(response.url, item[key]);
-                }
-            });
-
             results.push(item);
         } catch (e) {
             console.error(e);
         }
     }
-    var nextPageUrl = $bodyDom.find('div.nav>p:eq(1)>a.pg:eq(-1)').attr('href');
-    if (nextPageUrl) {
-        nextPageUrl = API_normalizeUrl(response.url, nextPageUrl);
-    }
+    var nextPageUrl = $bodyDom.find('div.nav>p:eq(1)>a.pg:eq(-1)').prop('href');
     return {
         success: true,
         results: results,
