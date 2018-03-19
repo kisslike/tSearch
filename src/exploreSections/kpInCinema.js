@@ -103,7 +103,7 @@ const onPageLoad = function (response) {
 API_event('getItems', function () {
   const items = [];
   let promise = Promise.resolve();
-  /*['0', '1', '2'].forEach(page => {
+  ['0', '1', '2'].forEach(page => {
     promise = promise.then(() => {
       return API_request({
         method: 'GET',
@@ -116,7 +116,7 @@ API_event('getItems', function () {
         console.error('Page load error', err);
       });
     });
-  });*/
+  });
   return promise.then(() => items);
 });
 
