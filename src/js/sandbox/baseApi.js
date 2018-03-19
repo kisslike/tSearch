@@ -2,14 +2,7 @@
  * @returns {DocumentFragment}
  */
 window.API_getDom = function (html) {
-  const fragment = document.createDocumentFragment();
-  const div = document.createElement('html');
-  div.innerHTML = html;
-  let el;
-  while (el = div.firstChild) {
-    fragment.appendChild(el);
-  }
-  return fragment;
+  return (new DOMParser()).parseFromString(html, 'text/html');
 };
 
 (function () {
