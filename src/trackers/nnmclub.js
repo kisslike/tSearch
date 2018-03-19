@@ -31,7 +31,7 @@ API_exKit({
     },
     search: {
         searchUrl: 'http://nnm-club.me/forum/tracker.php',
-        nextPageSelector: {selector: 'table td[align="right"] .nav a:eq(-1)', attr: 'href'},
+        nextPageSelector: {selector: 'table td[align="right"] .nav a:eq(-1)', prop: 'href'},
         baseUrl: 'http://nnm-club.me/forum/',
         requestType: 'GET',
         requestData: 'nm=%search%&f=-1',
@@ -39,12 +39,12 @@ API_exKit({
         listItemSelector: 'table.forumline.tablesorter>tbody>tr',
         torrentSelector: {
             categoryTitle: 'td:eq(1)>a',
-            categoryUrl: {selector: 'td:eq(1)>a', attr: 'href'},
-            categoryId: {selector: 'td:eq(1)>a', attr: 'href'},
+            categoryUrl: {selector: 'td:eq(1)>a', prop: 'href'},
+            categoryId: {selector: 'td:eq(1)>a', prop: 'href'},
             title: 'td.genmed>a',
-            url: {selector: 'td.genmed>a', attr: 'href'},
+            url: {selector: 'td.genmed>a', prop: 'href'},
             size: 'td.gensmall:eq(0)>u',
-            downloadUrl: {selector: 'td:eq(4)>a', attr: 'href'},
+            downloadUrl: {selector: 'td:eq(4)>a', prop: 'href'},
             seed: 'td.seedmed',
             peer: 'td.leechmed',
             date: 'td.gensmall:eq(-1)>u'

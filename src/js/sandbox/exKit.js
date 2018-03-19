@@ -573,6 +573,9 @@ const exKit = {
     let value = null;
     if (item.attr) {
       value = node.getAttribute(item.attr);
+    } else
+    if (item.prop) {
+      value = node[item.prop];
     } else if (item.html) {
       value = node.innerHTML;
     } else {
@@ -590,6 +593,9 @@ const exKit = {
       error[key] = value;
       if (item.attr) {
         error[key + '!'] = 'Attribute is not found!';
+      } else
+      if (item.prop) {
+        error[key + '!'] = 'Property is not found!';
       } else if (item.html) {
         error[key + '!'] = 'Html content is empty!';
       } else {
@@ -660,6 +666,9 @@ const exKit = {
     let value = null;
     if (item.attr) {
       value = node.getAttribute(item.attr);
+    } else
+    if (item.prop) {
+      value = node[item.prop];
     } else if (item.html) {
       value = node.innerHTML;
     } else {
@@ -677,6 +686,9 @@ const exKit = {
       trObj.error[key] = value;
       if (item.attr) {
         trObj.error[key + '!'] = 'Attribute is not found!';
+      } else
+      if (item.prop) {
+        trObj.error[key + '!'] = 'Property is not found!';
       } else if (item.html) {
         trObj.error[key + '!'] = 'Html content is empty!';
       } else {
