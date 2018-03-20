@@ -6,6 +6,7 @@ import filterModel from "./filters";
 import getSearchFragModelId from "../tools/getSearchFragModelId";
 import exploreModel from "./explore/explore";
 import sectionModel from "./explore/section";
+import pageModel from "./pageModel";
 const debug = require('debug')('indexModel');
 const {types, destroy} = require('mobx-state-tree');
 
@@ -20,6 +21,7 @@ const {types, destroy} = require('mobx-state-tree');
  * @property {FilterM} filter
  * @property {ExploreM} explore
  * @property {ExploreSectionM[]} exploreSections
+ * @property {PageM[]} page
  * Actions:
  * @property {function(string)} createSearch
  * @property {function} clearSearch
@@ -38,6 +40,7 @@ const indexModel = types.model('indexModel', {
   filter: types.optional(filterModel, {}),
   explore: types.optional(exploreModel, {}),
   exploreSections: types.array(sectionModel),
+  page: types.optional(pageModel, {}),
 }).preProcessSnapshot(snapshot => {
   if (!snapshot.profiles.length) {
     snapshot.profiles.push({

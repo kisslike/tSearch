@@ -7,7 +7,7 @@ const {types, getParent} = require('mobx-state-tree');
  * @property {string} id
  * @property {string} state
  * @property {number} createTime
- * @property {*} data
+ * @property {ExploreSectionItemM[]} data
  * Actions:
  * @property {function(string)} setState
  * @property {function(number)} setCreateTime
@@ -18,11 +18,36 @@ const {types, getParent} = require('mobx-state-tree');
  * @property {function:Promise} update
  */
 
+/**
+ * @typedef {{}} ExploreSectionItemM
+ * Model:
+ * @property {string} title
+ * @property {string} img
+ * @property {string} url
+ * @property {boolean} posterError
+ * Actions:
+ * @property {function(boolean)} setPosterError
+ * Views:
+ */
+
+const sectionItemMode = types.model('sectionItemMode', {
+  title: types.string,
+  img: types.maybe(types.string),
+  url: types.string,
+  posterError: types.optional(types.boolean, false)
+}).actions(self => {
+  return {
+    setPosterError(value) {
+      self.posterError = value;
+    }
+  };
+});
+
 const cacheModel = types.model('cacheModel', {
   id: types.string,
   state: types.optional(types.string, 'idle'), // idle, loading, ready
   createTime: types.optional(types.number, 0),
-  data: types.frozen,
+  data: types.optional(types.array(sectionItemMode), []),
 }).actions(/**CacheM*/self => {
   return {
     setState(value) {

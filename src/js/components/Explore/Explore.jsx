@@ -11,7 +11,7 @@ import exploreStyle from '../../../css/explore.less';
 
     const sections = store.explore.getSections().map(section => {
       return (
-        <ExploreSection key={section.id} section={section}/>
+        <ExploreSection key={section.id} section={section} store={store}/>
       );
     });
 
@@ -24,6 +24,30 @@ import exploreStyle from '../../../css/explore.less';
 }
 
 @observer class ExploreSection extends React.Component {
+  constructor() {
+    super();
+
+    this.state = {
+      page: 0
+    };
+
+    this.handleSetPage = this.handleSetPage.bind(this);
+  }
+  getDisplayItemCount() {
+    /**@type {IndexM}*/
+    const store = this.props.store;
+    /**@type {ExploreSectionM}*/
+    const section = this.props.section;
+
+    const itemCount = Math.ceil((store.page.width - 175) / (section.width + 10 * 2)) - 1;
+
+    return itemCount * section.lines;
+  }
+  handleSetPage(page) {
+    this.setState({
+      page: page
+    });
+  }
   render() {
     /**@type {ExploreSectionM}*/
     const section = this.props.section;
@@ -51,8 +75,25 @@ import exploreStyle from '../../../css/explore.less';
       }
     });
 
-    const items = section.getCache().data;
-    debug('items', items);
+    let pages = null;
+    const content = [];
+    const cache = section.getCache();
+    if (cache.state === 'ready') {
+      const displayItemCount = this.getDisplayItemCount();
+      const from = displayItemCount * this.state.page;
+
+      pages = (
+        <ExploreSectionPages page={this.state.page} itemCount={cache.data.length} displayCount={displayItemCount} onSetPage={this.handleSetPage}/>
+      );
+
+      const items = cache.data.slice(from, from + displayItemCount);
+
+      items.forEach((item, i) => {
+        return content.push(
+          <ExploreSectionItem key={i} section={section} item={item}/>
+        );
+      });
+    }
 
     return (
       <li className="section">
@@ -66,8 +107,103 @@ import exploreStyle from '../../../css/explore.less';
           </div>
           <div className="section__collapses"/>
         </div>
-        <ul className="section__pages"/>
-        <ul className="section__body"/>
+        {pages}
+        <ul className="section__body">{content}</ul>
+      </li>
+    );
+  }
+}
+
+@observer class ExploreSectionPages extends React.Component {
+  constructor() {
+    super();
+
+    this.handleMouseEnter = this.handleMouseEnter.bind(this);
+  }
+  handleMouseEnter(index, e) {
+    this.props.onSetPage(index);
+  }
+  render() {
+    const page = this.props.page;
+    const coefficient = this.props.itemCount / this.props.displayCount;
+    let pageCount = Math.floor(coefficient);
+    if (coefficient % 1 === 0) {
+      pageCount--;
+    }
+    if (pageCount === Infinity) {
+      pageCount = 0;
+    }
+
+    const pages = [];
+    for (let i = 0; i <= pageCount; i++) {
+      const isActive = page === i;
+      const classList = ['pages__item'];
+      if (isActive) {
+        classList.push('item-active');
+      }
+      pages.push(
+        <li key={i} className={classList.join(' ')} onMouseEnter={this.handleMouseEnter.bind(this, i)}>{i + 1}</li>
+      );
+    }
+
+    let content = null;
+    if (pages.length) {
+      content = (
+        <ul className="section__pages">{pages}</ul>
+      )
+    }
+
+    return (
+      content
+    );
+  }
+}
+
+@observer class ExploreSectionItem extends React.Component {
+  constructor() {
+    super();
+
+    this.handlePosterError = this.handlePosterError.bind(this);
+  }
+
+  handlePosterError(e) {
+    /**@type ExploreSectionItemM*/
+    const item = this.props.item;
+
+    item.setPosterError(true);
+  }
+
+  render() {
+    /**@type ExploreSectionM*/
+    const section = this.props.section;
+    /**@type ExploreSectionItemM*/
+    const item = this.props.item;
+
+    let posterUrl = null;
+    if (item.posterError) {
+      posterUrl = require('!url-loader!../../../img/no_poster.png');
+    } else {
+      posterUrl = item.img;
+    }
+
+    const itemStyle = {
+      width: section.width
+    };
+
+    return (
+      <li className="section__poster poster" style={itemStyle}>
+        <div className="poster__image">
+          <div className="action__quick_search" title={chrome.i18n.getMessage('quickSearch')}>{'?'}</div>
+          <a className="image__more_link" href={item.url} target="_blank" title={chrome.i18n.getMessage('readMore')}/>
+          <a className="image__search_link" href={"#"} title={item.title}>
+            <img className="image__image" src={posterUrl} onError={this.handlePosterError}/>
+          </a>
+        </div>
+        <div className="poster__title">
+          <span>
+            <a className="poster__search_link" href={"#"} title={item.title}>{item.title}</a>
+          </span>
+        </div>
       </li>
     );
   }

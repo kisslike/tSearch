@@ -2,6 +2,7 @@ body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     margin: 0;
     font-size: 14px;
+    overflow-y: scroll;
 }
 
 a:link {

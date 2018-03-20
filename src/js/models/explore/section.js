@@ -15,6 +15,8 @@ const {types, destroy, getParent} = require('mobx-state-tree');
  * @property {string} code
  * @property {ExploreSectionWorkerM} worker
  * @property {CacheM} cache
+ * @property {number} lines
+ * @property {number} width
  * Actions:
  * @property {function} createWorker
  * @property {function} destroyWorker
@@ -156,6 +158,8 @@ const exploreSectionModel = types.model('exploreSectionModel', {
   code: types.string,
   worker: types.maybe(exploreSectionWorkerModel),
   cache: types.maybe(cacheModel),
+  lines: types.optional(types.number, 2),
+  width: types.optional(types.number, 120),
 }).actions(/**ExploreSectionM*/self => {
   return {
     createWorker() {
