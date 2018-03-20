@@ -34,6 +34,7 @@ const sectionItemMode = types.model('sectionItemMode', {
   title: types.string,
   img: types.maybe(types.string),
   url: types.string,
+  extra: types.frozen,
   posterError: types.optional(types.boolean, false)
 }).actions(self => {
   return {
@@ -84,7 +85,7 @@ const cacheModel = types.model('cacheModel', {
       const key = self.getKey();
       return new Promise(r => chrome.storage.local.set({
         [key]: {
-          data: self.data,
+          data: self.data.slice(0),
           createTime: self.createTime
         }
       }, r));

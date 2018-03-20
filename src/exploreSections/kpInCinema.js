@@ -12,91 +12,81 @@ const kpGetImgFileName = url => {
   return url.replace(/sm_film/, 'film');
 };
 
-const kpRmRuntime = text => {
-  return text.replace(/\s+\d+\s+.{3}\.$/, '').trim();
-};
-
-const kpGetYear = text => {
-  const m = /\s+\([^)]*([1-2]\d{3})[^)]*\)$/.exec(text);
-  return m && parseInt(m[1]);
-};
-
-const kpRmYear = text => {
-  return text.replace(/\s+\([^)]*([1-2]\d{3})[^)]*\)$/, '').trim();
-};
-
 const spaceReplace = text => {
   return text.replace(/[\s\xA0]/g, ' ');
 };
 
-const checkResult = obj => {
-  for (let key in obj) {
-    obj[key] = obj[key] && spaceReplace(obj[key]).trim();
-    if (typeof obj[key] !== 'string' || !obj[key]) {
-      if (key === 'title_en') {
-        // console.debug('Original title is not found!', obj);
-        obj[key] = undefined;
-        continue;
-      }
-      return false;
-    }
+const parseInfo = text => {
+  const m = /^(?:(.*)\s+|)\((\d{4})\)\s+\d+\s+.{3}\.$/.exec(text);
+  if (m) {
+    return {
+      title: m[1],
+      year: parseInt(m[2], 10)
+    };
   }
-  return true;
+};
+
+const validateItem = item => {
+  Object.keys(item).forEach(key => {
+    if (!item[key]) {
+      throw new Error(`Item ${key} is empty!`);
+    }
+  });
 };
 
 const onPageLoad = response => {
   const content = response.body;
   const doc = API_getDoc(content, response.url);
 
-  const threeD = doc.querySelectorAll('div.filmsListNew > div.item div.threeD');
-  for (let i = 0, el; el = threeD[i]; i++) {
-    const parent = el.parentNode;
-    parent && parent.removeChild(el);
-  }
-
-  const nodes = doc.querySelectorAll('div.filmsListNew > div.item');
-  const arr = [];
-  [].slice.call(nodes).forEach(function (el) {
-    let img = el.querySelector('div > a > img');
-    img = img && img.src;
-    img = img && kpGetImgFileName(img);
-
-    let title = el.querySelector('div > div.name > a');
-    title = title && title.textContent.trim();
-
-    let titleEn = el.querySelector('div > div.name > span');
-    titleEn = titleEn && titleEn.textContent.trim();
-    titleEn = titleEn && kpRmRuntime(titleEn);
-    if (/^\([^)]+\)$/.test(titleEn)) {
-      titleEn = '';
-    }
-
-    let url = el.querySelector('div > div.name > a');
-    url = url && url.href;
-
-    const obj = {
-      img: img,
-      title: title,
-      title_en: titleEn,
-      url: url
-    };
-
-    if (obj.title_en) {
-      const year = kpGetYear(obj.title_en);
-      if (year) {
-        obj.title_en = kpRmYear(obj.title_en);
-        obj.title_en += ' ' + year;
-        obj.title += ' ' + year;
+  const results = [];
+  Array.from(doc.querySelectorAll('div.filmsListNew > div.item')).forEach(function (item) {
+    try {
+      let poster = null;
+      const posterNode = item.querySelector('.poster img[src]');
+      if (posterNode) {
+        poster = kpGetImgFileName(posterNode.src);
       }
-    }
 
-    if (checkResult(obj)) {
-      arr.push(obj);
-    } else {
-      console.debug("Explorer kp_in_cinema have problem!");
+      let title = null;
+      let url = null;
+      const linkNode = item.querySelector('.info .name a');
+      if (linkNode) {
+        title = spaceReplace(linkNode.textContent.trim());
+        url = linkNode.href;
+      }
+
+      let year = null;
+      let titleEn = null;
+      const infoNode = item.querySelector('.info .name span');
+      if (infoNode) {
+        const info = parseInfo(spaceReplace(infoNode.textContent).trim());
+        if (info) {
+          titleEn = info.title;
+          year = info.year;
+        }
+      }
+
+      const result = {
+        img: poster,
+        title: title,
+        extra: {
+          year: year
+        },
+        url: url
+      };
+
+      if (titleEn) {
+        result.extra.titleEn = titleEn;
+      }
+
+      validateItem(result);
+
+      results.push(result);
+    } catch (err) {
+      console.error('Parse item error', err);
     }
   });
-  return arr;
+  return results;
 };
 
 API_event('getItems', () => {
