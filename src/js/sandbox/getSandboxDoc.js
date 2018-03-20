@@ -23,7 +23,7 @@ const getSandboxDoc = (html, location) => {
 
   Array.from(doc.querySelectorAll('*')).forEach(node => {
     Array.from(node.attributes).forEach(attr => {
-      if (/^on/.test(attr.name)) {
+      if (/^on/i.test(attr.name)) {
         replaceAttribute(node, attr);
       } else
       if (/^javascript:/.test(attr.value)) {
