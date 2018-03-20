@@ -8,30 +8,29 @@
 // @defaultLocale en
 // ==/UserScript==
 
-var kpGetImgFileName = function (url) {
-  var bigImgUrl = url.replace(/sm_film/, 'film');
-  return bigImgUrl;
+const kpGetImgFileName = url => {
+  return url.replace(/sm_film/, 'film');
 };
 
-var kpRmRuntime = function (text) {
+const kpRmRuntime = text => {
   return text.replace(/\s+\d+\s+.{3}\.$/, '').trim();
 };
 
-var kpGetYear = function (text) {
-  var m = /\s+\([^)]*([1-2]\d{3})[^)]*\)$/.exec(text);
+const kpGetYear = text => {
+  const m = /\s+\([^)]*([1-2]\d{3})[^)]*\)$/.exec(text);
   return m && parseInt(m[1]);
 };
 
-var kpRmYear = function (text) {
+const kpRmYear = text => {
   return text.replace(/\s+\([^)]*([1-2]\d{3})[^)]*\)$/, '').trim();
 };
 
-var spaceReplace = function (text) {
+const spaceReplace = text => {
   return text.replace(/[\s\xA0]/g, ' ');
 };
 
-var checkResult = function (obj) {
-  for (var key in obj) {
+const checkResult = obj => {
+  for (let key in obj) {
     obj[key] = obj[key] && spaceReplace(obj[key]).trim();
     if (typeof obj[key] !== 'string' || !obj[key]) {
       if (key === 'title_en') {
@@ -45,37 +44,37 @@ var checkResult = function (obj) {
   return true;
 };
 
-const onPageLoad = function (response) {
+const onPageLoad = response => {
   const content = response.body;
   const doc = API_getDoc(content, response.url);
 
-  var threeD = doc.querySelectorAll('div.filmsListNew > div.item div.threeD');
-  for (var i = 0, el; el = threeD[i]; i++) {
-    var parent = el.parentNode;
+  const threeD = doc.querySelectorAll('div.filmsListNew > div.item div.threeD');
+  for (let i = 0, el; el = threeD[i]; i++) {
+    const parent = el.parentNode;
     parent && parent.removeChild(el);
   }
 
-  var nodes = doc.querySelectorAll('div.filmsListNew > div.item');
-  var arr = [];
+  const nodes = doc.querySelectorAll('div.filmsListNew > div.item');
+  const arr = [];
   [].slice.call(nodes).forEach(function (el) {
-    var img = el.querySelector('div > a > img');
+    let img = el.querySelector('div > a > img');
     img = img && img.src;
     img = img && kpGetImgFileName(img);
 
-    var title = el.querySelector('div > div.name > a');
+    let title = el.querySelector('div > div.name > a');
     title = title && title.textContent.trim();
 
-    var titleEn = el.querySelector('div > div.name > span');
+    let titleEn = el.querySelector('div > div.name > span');
     titleEn = titleEn && titleEn.textContent.trim();
     titleEn = titleEn && kpRmRuntime(titleEn);
     if (/^\([^)]+\)$/.test(titleEn)) {
       titleEn = '';
     }
 
-    var url = el.querySelector('div > div.name > a');
+    let url = el.querySelector('div > div.name > a');
     url = url && url.href;
 
-    var obj = {
+    const obj = {
       img: img,
       title: title,
       title_en: titleEn,
@@ -83,7 +82,7 @@ const onPageLoad = function (response) {
     };
 
     if (obj.title_en) {
-      var year = kpGetYear(obj.title_en);
+      const year = kpGetYear(obj.title_en);
       if (year) {
         obj.title_en = kpRmYear(obj.title_en);
         obj.title_en += ' ' + year;
@@ -100,7 +99,7 @@ const onPageLoad = function (response) {
   return arr;
 };
 
-API_event('getItems', function () {
+API_event('getItems', () => {
   const items = [];
   let promise = Promise.resolve();
   ['0', '1', '2'].forEach(page => {
@@ -120,7 +119,7 @@ API_event('getItems', function () {
   return promise.then(() => items);
 });
 
-API_event('command', function (command) {
+API_event('command', command => {
   switch (command) {
     case 'update': {
       return 'ok';
