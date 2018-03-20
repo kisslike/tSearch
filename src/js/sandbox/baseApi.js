@@ -5,93 +5,44 @@ window.API_getDom = function (html) {
   return (new DOMParser()).parseFromString(html, 'text/html');
 };
 
-(function () {
-  const searchJs = /javascript/ig;
-  const blockHref = /\/\//;
-  const blockSrc = /src=(['"]?)/ig;
-  const blockSrcSet = /srcset=(['"]?)/ig;
-  const blockOnEvent = /on(\w+)=/ig;
+/**
+ * @returns {string}
+ */
+window.API_sanitizeHtml = a => a;
 
-  const deImg = /data:image\/gif,base64#blockurl#/g;
-  const deUrl = /about:blank#blockurl#/g;
-  const deJs = /tms-block-javascript/g;
-
-  /**
-   * @returns {string}
-   */
-  window.API_sanitizeHtml = function (str) {
-    return str.replace(searchJs, 'tms-block-javascript')
-      .replace(blockHref, '//about:blank#blockurl#')
-      .replace(blockSrc, 'src=$1data:image/gif,base64#blockurl#')
-      .replace(blockSrcSet, 'data-block-attr-srcset=$1')
-      .replace(blockOnEvent, 'data-block-event-$1=');
-  };
-
-  /**
-   * @returns {string}
-   */
-  window.API_deSanitizeHtml = function (str) {
-    return str.replace(deImg, '')
-      .replace(deUrl, '')
-      .replace(deJs, 'javascript');
-  };
-})();
+/**
+ * @returns {string}
+ */
+window.API_deSanitizeHtml = a => a;
 
 (function () {
-  const parseUrl = function (pageUrl, details) {
-    details = details || {};
-    const pathname = /([^#?]+)/.exec(pageUrl)[1];
-    let path = /(.+:\/\/.*)\//.exec(pathname);
-    if (path) {
-      path = path[1];
-    } else {
-      path = pageUrl;
+  class LinkNormalizer {
+    constructor(location) {
+      this.doc = document.implementation.createHTMLDocument('');
+
+      const base = this.doc.createElement('base');
+      base.href = location;
+      this.doc.head.appendChild(base);
+
+      this.link = document.createElement('a');
+      this.doc.body.appendChild(this.link);
     }
-    path += '/';
-    const result = {
-      protocol: /(.+:)\/\//.exec(pathname)[1],
-      origin: /(.+:\/\/[^\/]+)/.exec(pathname)[1],
-      path: path,
-      pathname: pathname
-    };
-    if (details.origin) {
-      result.origin = details.origin;
+    getUrl(href) {
+      this.link.setAttribute('href', href);
+      return this.link.href;
     }
-    if (details.path) {
-      result.path = details.path;
-    }
-    return result;
-  };
-  const urlParseCache = {};
+  }
+  const linkNormalizerCache = {};
   /**
    * @returns {string}
    */
-  window.API_normalizeUrl = function (pageUrl, value, details) {
-    if (/^magnet:/.test(value)) {
-      return value;
-    }
-    if (/^http/.test(value)) {
-      return value;
+  window.API_normalizeUrl = function (location, value) {
+    let linkNormalizer = linkNormalizerCache[location];
+    if (!linkNormalizer) {
+      linkNormalizer = linkNormalizerCache[location] = new LinkNormalizer(location);
     }
 
-    let parsedUrl = urlParseCache[pageUrl];
-    if (!parsedUrl) {
-      parsedUrl = urlParseCache[pageUrl] = parseUrl(pageUrl, details)
-    }
-
-    if (/^\/\//.test(value)) {
-      return parsedUrl.protocol + value;
-    }
-    if (/^\//.test(value)) {
-      return parsedUrl.origin + value;
-    }
-    if (/^\.\//.test(value)) {
-      return parsedUrl.path + value.substr(2);
-    }
-    if (/^\?/.test(value)) {
-      return parsedUrl.pathname + value;
-    }
-    return parsedUrl.path + value;
+    return linkNormalizer.getUrl(value);
   };
 })();
 

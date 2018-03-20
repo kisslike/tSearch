@@ -531,10 +531,7 @@ const exKit = {
   isUrlList: ['categoryUrl', 'url', 'downloadUrl', 'nextPageUrl'],
   unFilterKeyList: ['categoryTitle', 'categoryUrl', 'title', 'url', 'downloadUrl'],
   urlCheck: function (details, tracker, value) {
-    return API_normalizeUrl(details.responseUrl, value, {
-      origin: tracker.search.rootUrl,
-      path: tracker.search.baseUrl
-    });
+    return API_normalizeUrl(details.responseUrl, value);
   },
   matchSelector: function (result, details) {
     const _this = this;

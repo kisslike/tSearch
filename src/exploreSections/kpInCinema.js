@@ -32,7 +32,7 @@ var spaceReplace = function (text) {
 
 var checkResult = function (obj) {
   for (var key in obj) {
-    obj[key] = obj[key] && spaceReplace(API_deSanitizeHtml(obj[key])).trim();
+    obj[key] = obj[key] && spaceReplace(obj[key]).trim();
     if (typeof obj[key] !== 'string' || !obj[key]) {
       if (key === 'title_en') {
         // console.debug('Original title is not found!', obj);
