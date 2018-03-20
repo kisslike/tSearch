@@ -85,7 +85,10 @@ const PluginWorkerModel = types.model('PluginWorkerModel', {
         worker = new FrameWorker({
           pluginId: plugin.id
         }, self.api);
-        initPromise = worker.callFn('init', [plugin.code, plugin.meta.require.slice(0)]).catch(() => {
+        const info = {
+          locale: plugin.meta.locale
+        };
+        initPromise = worker.callFn('init', [plugin.code, plugin.meta.require.slice(0), info]).catch(() => {
           return void 0;
         }, err => {
           debug('init error', pluginId, err);

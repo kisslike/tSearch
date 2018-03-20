@@ -14,7 +14,9 @@ const runCode = code => {
 };
 
 const api = {
-  init: function (code, requireList) {
+  info: null,
+  init: function (code, requireList, info) {
+    api.info = info;
     return new Promise(r => window.require(requireList, r)).then(() => {
       return runCode(code);
     }).catch(err => {
@@ -44,6 +46,10 @@ window.API_event = function (name, callback) {
       return callback(query);
     });
   };
+};
+
+window.API_getInfo = function () {
+  return api.info;
 };
 
 window.API_request = function (options) {
