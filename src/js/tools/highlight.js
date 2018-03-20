@@ -7,7 +7,6 @@ const adapter = {
   createDocumentFragment() {
     return {
       nodeType: 11,
-      parentNode: null,
       childNodes: [],
       appendChild: adapter.appendChild
     };
@@ -25,7 +24,7 @@ const adapter = {
       parentNode: null,
       childNodes: [],
       appendChild: adapter.appendChild,
-      tagName: tagName.toUpperCase()
+      tagName: tagName
     }
   },
   appendChild(node) {
