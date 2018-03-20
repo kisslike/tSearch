@@ -1,17 +1,22 @@
 /**
- * @returns {DocumentFragment}
+ * @param {string} html
+ * @returns {Document}
  */
 window.API_getDom = function (html) {
   return (new DOMParser()).parseFromString(html, 'text/html');
 };
 
 /**
+ * @param {string} a
  * @returns {string}
+ * @deprecated
  */
 window.API_sanitizeHtml = a => a;
 
 /**
+ * @param {string} a
  * @returns {string}
+ * @deprecated
  */
 window.API_deSanitizeHtml = a => a;
 
@@ -34,11 +39,13 @@ window.API_deSanitizeHtml = a => a;
   }
   const linkNormalizerCache = {};
   /**
+   * @param {string} location
+   * @param {string} link
    * @returns {string}
    */
-  window.API_normalizeUrl = function (location, value) {
-    if (/(^https?|^magnet):/.test(value)) {
-      return value;
+  window.API_normalizeUrl = function (location, link) {
+    if (/(^https?|^magnet):/.test(link)) {
+      return link;
     }
 
     let linkNormalizer = linkNormalizerCache[location];
@@ -46,10 +53,15 @@ window.API_deSanitizeHtml = a => a;
       linkNormalizer = linkNormalizerCache[location] = new LinkNormalizer(location);
     }
 
-    return linkNormalizer.getUrl(value);
+    return linkNormalizer.getUrl(link);
   };
 })();
 
+/**
+ * @param {string} html
+ * @param {string} location
+ * @returns {Document}
+ */
 window.API_getDoc = (html, location) => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
