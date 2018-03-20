@@ -3,6 +3,41 @@ import escapeRegExp from 'lodash.escaperegexp';
 import sortByLength from "./sortByLength";
 import isBoundary from "./isBoundary";
 
+const adapter = {
+  createDocumentFragment() {
+    return {
+      nodeType: 11,
+      parentNode: null,
+      childNodes: [],
+      appendChild: adapter.appendChild
+    };
+  },
+  createTextNode(text) {
+    return {
+      nodeType: 3,
+      parentNode: null,
+      textContent: text
+    }
+  },
+  createElement(tagName) {
+    return {
+      nodeType: 1,
+      parentNode: null,
+      childNodes: [],
+      appendChild: adapter.appendChild,
+      tagName: tagName.toUpperCase()
+    }
+  },
+  appendChild(node) {
+    const pos = this.childNodes.indexOf(node);
+    if (pos !== -1) {
+      this.childNodes.splice(pos, 1);
+    }
+    this.childNodes.push(node);
+    node.parentNode = this;
+  }
+};
+
 const highlight = {
   getMap(query) {
     const words = query.split(/\s+/);
@@ -47,7 +82,7 @@ const highlight = {
   },
   getFragment(text, posMap) {
     let fragment, lastPos = 0;
-    const root = fragment = document.createDocumentFragment();
+    const root = fragment = adapter.createDocumentFragment();
     let pos;
     for (let i = 0, len = posMap.length; i < len; i++) {
       const item = posMap[i];
@@ -55,18 +90,18 @@ const highlight = {
       pos = item[1];
       const isClose = item[2];
       if (pos !== lastPos) {
-        fragment.appendChild(document.createTextNode(text.substr(lastPos, pos - lastPos)));
+        fragment.appendChild(adapter.createTextNode(text.substr(lastPos, pos - lastPos)));
       }
       lastPos = pos;
       if (!isClose) {
-        fragment.appendChild(fragment = document.createElement(tagName));
+        fragment.appendChild(fragment = adapter.createElement(tagName));
       } else {
         fragment = fragment.parentNode || root;
       }
     }
     pos = text.length;
     if (pos !== lastPos) {
-      fragment.appendChild(document.createTextNode(text.substr(lastPos, pos - lastPos)));
+      fragment.appendChild(adapter.createTextNode(text.substr(lastPos, pos - lastPos)));
     }
 
     return fragment;
@@ -74,7 +109,7 @@ const highlight = {
   getReactComponent(/**String*/tagName, /**Object*/details, text, posMap) {
     const fragment = this.getFragment(text, posMap);
     const getChildNodes = function (childNodes) {
-      return [].slice.call(childNodes).map(function (node) {
+      return Array.from(childNodes).map(function (node) {
         if (node.nodeType === 3) {
           return node.textContent;
         } else {
