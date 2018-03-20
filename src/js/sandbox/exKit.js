@@ -508,28 +508,8 @@ const exKit = {
   parseHtml: function (html, location) {
     return API_getDoc(html, location);
   },
-  contentFilterR: {
-    searchJs: /javascript/ig,
-    blockHref: /\/\//,
-    blockSrc: /src=(['"]?)/ig,
-    blockSrcSet: /srcset=(['"]?)/ig,
-    blockOnEvent: /on(\w+)=/ig
-  },
-  contentFilter: function (content) {
-    return content.replace(exKit.contentFilterR.searchJs, 'tms-block-javascript')
-      .replace(exKit.contentFilterR.blockHref, '//about:blank#blockurl#')
-      .replace(exKit.contentFilterR.blockSrc, 'src=$1data:image/gif,base64#blockurl#')
-      .replace(exKit.contentFilterR.blockSrcSet, 'data-block-attr-srcset=$1')
-      .replace(exKit.contentFilterR.blockOnEvent, 'data-block-event-$1=');
-  },
-  contentUnFilter: function (content) {
-    return content.replace(/data:image\/gif,base64#blockurl#/g, '')
-      .replace(/about:blank#blockurl#/g, '')
-      .replace(/tms-block-javascript/g, 'javascript');
-  },
   intList: ['categoryId', 'size', 'seed', 'peer', 'date'],
   isUrlList: ['categoryUrl', 'url', 'downloadUrl', 'nextPageUrl'],
-  unFilterKeyList: ['categoryTitle', 'categoryUrl', 'title', 'url', 'downloadUrl'],
   urlCheck: function (details, tracker, value) {
     return API_normalizeUrl(details.responseUrl, value);
   },
@@ -614,9 +594,6 @@ const exKit = {
       }
       value = intValue;
     } else {
-      if (exKit.unFilterKeyList.indexOf(key) !== -1) {
-        value = exKit.contentUnFilter(value);
-      }
       if (exKit.isUrlList.indexOf(key) !== -1) {
         value = exKit.urlCheck(details, tracker, value);
       }
@@ -707,9 +684,6 @@ const exKit = {
       }
       value = intValue;
     } else {
-      if (exKit.unFilterKeyList.indexOf(key) !== -1) {
-        value = exKit.contentUnFilter(value);
-      }
       if (exKit.isUrlList.indexOf(key) !== -1) {
         value = exKit.urlCheck(details, tracker, value);
       }
@@ -863,7 +837,7 @@ const exKit = {
     }
 
     return API_request(requestDetails).then(function (response) {
-      details.data = _this.contentFilter(response.body);
+      details.data = response.body;
       details.responseUrl = response.url;
       details.requestUrl = requestDetails.url;
     }).then(function () {
