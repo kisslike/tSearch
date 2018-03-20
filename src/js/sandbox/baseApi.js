@@ -37,6 +37,10 @@ window.API_deSanitizeHtml = a => a;
    * @returns {string}
    */
   window.API_normalizeUrl = function (location, value) {
+    if (/(^https?|^magnet):/.test(value)) {
+      return value;
+    }
+
     let linkNormalizer = linkNormalizerCache[location];
     if (!linkNormalizer) {
       linkNormalizer = linkNormalizerCache[location] = new LinkNormalizer(location);
