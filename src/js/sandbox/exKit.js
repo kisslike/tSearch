@@ -558,8 +558,8 @@ const exKit = {
     } else {
       value = node.textContent;
     }
-    if (typeof value === 'string') {
-      value = value.trim();
+    if (value) {
+      value = $.trim(value);
     }
 
     if (!value && search.onEmptySelectorValue[key]) {
@@ -648,8 +648,8 @@ const exKit = {
     } else {
       value = node.textContent;
     }
-    if (typeof value === 'string') {
-      value = value.replace(/\r?\n/g, ' ').trim();
+    if (value) {
+      value = $.trim(value.replace(/\r?\n/g, ' '));
     }
 
     if (!value && search.onEmptySelectorValue[key]) {
