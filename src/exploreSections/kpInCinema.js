@@ -38,6 +38,10 @@ const text = node => {
   return node && node.textContent || '';
 };
 
+const normText = node => {
+  return spaceReplace(text(node)).trim();
+};
+
 const prop = (node, prop) => {
   return node && node[prop];
 };
@@ -46,12 +50,12 @@ const parseItem = item => {
   const poster = kpGetImgFileName(prop(item.querySelector('.poster img[src]'), 'src') || '');
 
   const linkNode = item.querySelector('.info .name a');
-  let title = spaceReplace(text(linkNode)).trim();
+  let title = normText(linkNode);
   const url = prop(linkNode, 'href');
 
   let year = null;
   let titleOriginal = null;
-  const info = parseInfo(spaceReplace(text(item.querySelector('.info .name span'))).trim());
+  const info = parseInfo(normText(item.querySelector('.info .name span')));
   if (info) {
     titleOriginal = info.title;
     year = info.year;
