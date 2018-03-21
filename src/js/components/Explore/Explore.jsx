@@ -183,7 +183,7 @@ import exploreStyle from '../../../css/explore.less';
     if (item.posterError) {
       posterUrl = require('!url-loader!../../../img/no_poster.png');
     } else {
-      posterUrl = item.img;
+      posterUrl = item.poster;
     }
 
     const itemStyle = {

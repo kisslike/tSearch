@@ -22,8 +22,10 @@ const {types, getParent} = require('mobx-state-tree');
  * @typedef {{}} ExploreSectionItemM
  * Model:
  * @property {string} title
- * @property {string} img
+ * @property {string} titleOriginal
  * @property {string} url
+ * @property {string} poster
+ * @property {Object} extra
  * @property {boolean} posterError
  * Actions:
  * @property {function(boolean)} setPosterError
@@ -32,8 +34,9 @@ const {types, getParent} = require('mobx-state-tree');
 
 const sectionItemMode = types.model('sectionItemMode', {
   title: types.string,
-  img: types.maybe(types.string),
+  titleOriginal: types.maybe(types.string),
   url: types.string,
+  poster: types.maybe(types.string),
   extra: types.frozen,
   posterError: types.optional(types.boolean, false)
 }).actions(self => {

@@ -38,6 +38,7 @@ const onPageLoad = response => {
   const content = response.body;
   const doc = API_getDoc(content, response.url);
 
+  const ddBl = {};
   const results = [];
   Array.from(doc.querySelectorAll('div.filmsListNew > div.item')).forEach(function (item) {
     try {
@@ -51,32 +52,46 @@ const onPageLoad = response => {
       let url = null;
       const linkNode = item.querySelector('.info .name a');
       if (linkNode) {
-        title = spaceReplace(linkNode.textContent.trim());
+        title = spaceReplace(linkNode.textContent).trim();
         url = linkNode.href;
       }
 
       let year = null;
-      let titleEn = null;
+      let titleOriginal = null;
       const infoNode = item.querySelector('.info .name span');
       if (infoNode) {
         const info = parseInfo(spaceReplace(infoNode.textContent).trim());
         if (info) {
-          titleEn = info.title;
+          titleOriginal = info.title;
           year = info.year;
         }
       }
 
+      if (year) {
+        if (title) {
+          title += ' ' + year;
+        }
+        if (titleOriginal) {
+          titleOriginal += ' ' + year;
+        }
+      }
+
+      if (ddBl[url]) {
+        throw new Error('Url already exists');
+      }
+      ddBl[url] = true;
+
       const result = {
-        img: poster,
         title: title,
-        extra: {
-          year: year
-        },
         url: url
       };
 
-      if (titleEn) {
-        result.extra.titleEn = titleEn;
+      if (titleOriginal) {
+        result.titleOriginal = titleOriginal;
+      }
+
+      if (poster) {
+        result.poster = poster;
       }
 
       validateItem(result);
