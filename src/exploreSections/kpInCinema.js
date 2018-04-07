@@ -111,7 +111,7 @@ const onPageLoad = response => {
   return results;
 };
 
-API_event('getItems', () => {
+const getItems = () => {
   const items = [];
   let promise = Promise.resolve();
   ['0', '1', '2'].forEach(page => {
@@ -129,12 +129,16 @@ API_event('getItems', () => {
     });
   });
   return promise.then(() => items);
+};
+
+API_event('getItems', () => {
+  return getItems().then(items => ({items}));
 });
 
 API_event('command', command => {
   switch (command) {
     case 'update': {
-      return 'ok';
+      return getItems().then(items => ({items}));
     }
   }
 });

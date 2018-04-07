@@ -59,7 +59,7 @@ import exploreStyle from '../../../css/explore.less';
       );
     }
 
-    const actions = section.meta.getActions().map((action, i) => {
+    const actions = section.meta.actions.map((action, i) => {
       const classList = ['action'];
       if (action.isLoading) {
         classList.push('loading');
@@ -67,10 +67,10 @@ import exploreStyle from '../../../css/explore.less';
       switch (action.icon) {
         case 'update': {
           classList.push('action__update');
-          return <a key={i} href={"#"} onClick={action.handleClick} className={classList.join(' ')} title={action.title}/>;
+          return <a key={i} href={"#"} onClick={action.handleClick} className={classList.join(' ')} title={action.getTitle()}/>;
         }
         default: {
-          return <a key={i} href={"#"} onClick={action.handleClick} className={classList.join(' ')} title={action.title}>{action.title}</a>;
+          return <a key={i} href={"#"} onClick={action.handleClick} className={classList.join(' ')} title={action.getTitle()}>{action.getTitle()}</a>;
         }
       }
     });

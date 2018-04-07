@@ -58,7 +58,6 @@ const {types, destroy, getParent} = require('mobx-state-tree');
  * Actions:
  * Views:
  * @property {function:string} getName
- * @property {function:ExploreSectionMetaActionM[]} getActions
  */
 
 /**
@@ -71,6 +70,7 @@ const {types, destroy, getParent} = require('mobx-state-tree');
  * Actions:
  * @property {function(boolean)} setLoading
  * Views:
+ * @property {function:string} getTitle
  * @property {function} handleClick
  */
 
@@ -90,6 +90,11 @@ const exploreSectionMetaActionModel = types.model('exploreSectionMetaActionModel
   };
 }).views(/**ExploreSectionMetaActionM*/self => {
   return {
+    getTitle() {
+      /**@type {ExploreSectionMetaM}*/
+      const sectionMeta = getParent(self, 2);
+      return processLocale(self.title, sectionMeta.locale);
+    },
     handleClick(e) {
       e.preventDefault();
 
@@ -101,6 +106,9 @@ const exploreSectionMetaActionModel = types.model('exploreSectionMetaActionModel
           self.setLoading(false);
         }).then(result => {
           debug('Command result', self.command, result);
+          if (result.items) {
+            return section.cache.onGetItems(result.items);
+          }
         }, err => {
           debug('Command error', self.command, err);
         });
@@ -137,13 +145,6 @@ const exploreSectionMetaModel = types.model('exploreSectionMetaModel', {
   return {
     getName() {
       return processLocale(self.name, self.locale);
-    },
-    getActions() {
-      return self.actions.map(action => {
-        return Object.assign({}, action, {
-          title: processLocale(action.title, self.locale)
-        });
-      });
     }
   }
 });

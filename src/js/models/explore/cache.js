@@ -15,6 +15,7 @@ const {types, getParent} = require('mobx-state-tree');
  * Views:
  * @property {function:string} getKey
  * @property {function:boolean} isExpire
+ * @property {function(ExploreSectionItemM[]):Promise} onGetItems
  * @property {function:Promise} update
  */
 
@@ -72,10 +73,15 @@ const cacheModel = types.model('cacheModel', {
     isExpire() {
       return self.createTime + 24 * 60 * 60 * 60 < Date.now() / 1000;
     },
+    onGetItems(items) {
+      self.setData(items);
+      self.setCreateTime(Math.trunc(Date.now() / 1000));
+      return self.save();
+    },
     update() {
       self.setState('loading');
-      return getParent(self, 1).getItems().then(data => {
-        self.setData(data);
+      return getParent(self, 1).getItems().then(result => {
+        return self.onGetItems(result.data);
       }, err => {
         debug('Update error', err);
       }).then(() => {
