@@ -7,7 +7,7 @@ import requirejs from 'script-loader!requirejs/require';
 
 window.define('jquery', () => window.$ = window.jQuery = require('jquery'));
 window.define('moment', () => window.moment = require('moment'));
-window.define('exKit', () => require('./exKit'));
+window.define('exKit', () => require('./exKit').default);
 
 const runCode = code => {
   return eval(code);
