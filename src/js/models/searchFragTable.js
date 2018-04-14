@@ -1,6 +1,7 @@
 import sortResults from "../tools/sortResults";
+import {types, getParent, isAlive, detach, unprotect} from "mobx-state-tree";
+
 const debug = require('debug')('searchFragTable');
-const {types, getParent, isAlive, detach, unprotect} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} SearchFragTableM

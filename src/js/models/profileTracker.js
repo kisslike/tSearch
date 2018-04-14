@@ -1,7 +1,7 @@
 import trackerModel from './tracker';
 import blankSvg from '../../img/blank.svg';
 import trackerSearchModel from "./trackerSearch";
-const {types, resolveIdentifier, destroy, getParent} = require('mobx-state-tree');
+import {types, resolveIdentifier, destroy, getParent} from "mobx-state-tree";
 
 /**
  * @typedef {{}} ProfileTrackerM

@@ -7,8 +7,9 @@ import getSearchFragModelId from "../tools/getSearchFragModelId";
 import exploreModel from "./explore/explore";
 import sectionModel from "./explore/section";
 import pageModel from "./pageModel";
+import {types, destroy} from "mobx-state-tree";
+
 const debug = require('debug')('indexModel');
-const {types, destroy} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} IndexM

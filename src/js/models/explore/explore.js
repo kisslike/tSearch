@@ -1,6 +1,7 @@
 import sectionModel from "./section";
+import {types, resolveIdentifier} from "mobx-state-tree";
+
 const debug = require('debug')('explore');
-const {types, resolveIdentifier} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} ExploreM

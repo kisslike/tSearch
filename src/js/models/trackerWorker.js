@@ -1,6 +1,7 @@
 import PluginWorkerModel from "./pluginWorker";
+import {types} from "mobx-state-tree";
+
 const debug = require('debug')('trackerWorker');
-const {types} = require('mobx-state-tree');
 
 /**
  * @typedef {PluginWorkerM} TrackerWorkerM

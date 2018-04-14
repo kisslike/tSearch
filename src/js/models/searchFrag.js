@@ -1,7 +1,8 @@
 import searchFragTableModel from "./searchFragTable";
 import trackerSearchModel from "./trackerSearch";
+import {types, getParent, isAlive, destroy, resolveIdentifier} from "mobx-state-tree";
+
 const debug = require('debug')('searchFrag');
-const {types, getParent, isAlive, destroy, resolveIdentifier} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} SearchFragM

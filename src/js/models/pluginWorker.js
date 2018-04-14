@@ -1,8 +1,9 @@
 import FrameWorker from '../tools/frameWorker';
 import exKitRequest from '../tools/exKitRequest';
 import exKitBuildConnectRe from '../tools/exKitBuildConnectRe';
+import {types, getParent, isAlive} from "mobx-state-tree";
+
 const debug = require('debug')('worker');
-const {types, getParent, isAlive} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} PluginWorkerM

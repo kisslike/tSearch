@@ -1,8 +1,9 @@
 import escapeRegExp from 'lodash.escaperegexp';
 import sortByLength from "../tools/sortByLength";
 import uniq from 'lodash.uniq';
+import {types} from "mobx-state-tree";
+
 const debug = require('debug')('searchFrag');
-const {types} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} FilterM

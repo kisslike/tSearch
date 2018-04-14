@@ -2,9 +2,9 @@ import exploreSectionWorkerModel from "./sectionWorker";
 import processLocale from "../../tools/processLocale";
 import getLocale from "../../tools/getLocale";
 import cacheModel from "./cache";
+import {types, destroy, getParent} from "mobx-state-tree";
 
 const debug = require('debug')('exploreSectionModel');
-const {types, destroy, getParent} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} ExploreSectionM

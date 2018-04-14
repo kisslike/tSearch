@@ -1,5 +1,6 @@
+import {types, getParent} from "mobx-state-tree";
+
 const debug = require('debug')('cacheModel');
-const {types, getParent} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} CacheM

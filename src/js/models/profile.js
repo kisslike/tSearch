@@ -1,5 +1,5 @@
 import profileTrackerModel from './profileTracker';
-const {types} = require('mobx-state-tree');
+import {types} from "mobx-state-tree";
 
 /**
  * @typedef {{}} ProfileM

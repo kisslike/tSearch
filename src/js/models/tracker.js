@@ -1,5 +1,5 @@
 import trackerWorkerModel from './trackerWorker';
-const {types, destroy} = require('mobx-state-tree');
+import {types, destroy} from "mobx-state-tree";
 
 /**
  * @typedef {{}} TrackerM

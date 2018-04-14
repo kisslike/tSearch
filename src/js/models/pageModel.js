@@ -1,6 +1,7 @@
 import throttle from 'lodash.throttle';
+import {types} from "mobx-state-tree";
+
 const debug = require('debug')('pageModel');
-const {types} = require('mobx-state-tree');
 
 /**
  * @typedef {{}} PageM

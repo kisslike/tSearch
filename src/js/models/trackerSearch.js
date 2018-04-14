@@ -3,8 +3,9 @@ import moment from "moment/moment";
 import filesize from 'filesize';
 import highlight from "../tools/highlight";
 import rate from "../tools/rate";
+import {types, isAlive, clone} from "mobx-state-tree";
+
 const debug = require('debug')('trackerSearch');
-const {types, isAlive, clone} = require('mobx-state-tree');
 
 moment.locale(chrome.i18n.getUILanguage());
 
