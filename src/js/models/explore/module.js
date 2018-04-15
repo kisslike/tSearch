@@ -12,6 +12,7 @@ const debug = require('debug')('exploreModuleModel');
  * @property {string} id
  * @property {ExploreModuleMetaM} meta
  * @property {ExploreModuleInfoM} info
+ * @property {{url: string}} [authRequired]
  * @property {string} code
  * @property {ExploreSectionWorkerM} worker
  * @property {ExploreSectionItemM[]} items
@@ -20,6 +21,7 @@ const debug = require('debug')('exploreModuleModel');
  * @property {function} destroyWorker
  * @property {function(string)} setState
  * @property {function(ExploreSectionItemM[])} setItems
+ * @property {function({url:string}|null)} setAuthRequired
  * Views:
  * @property {function:Cache} getCache
  * @property {function(ExploreSectionItemM[]):Promise} saveItems
@@ -45,6 +47,9 @@ const exploreModuleModel = types.model('exploreModuleModel', {
     lastUpdate: types.optional(types.number, 0),
     disableAutoUpdate: types.optional(types.boolean, false),
   }),
+  authRequired: types.maybe(types.model({
+    url: types.string
+  })),
   code: types.string,
   worker: types.maybe(exploreSectionWorkerModel),
   items: types.optional(types.array(sectionItemMode), []),
@@ -65,7 +70,10 @@ const exploreModuleModel = types.model('exploreModuleModel', {
     },
     setItems(items) {
       self.items = items;
-    }
+    },
+    setAuthRequired(value) {
+      self.authRequired = value;
+    },
   };
 }).views(/**ExploreModuleM*/self => {
   const cache = new Cache(self.id);
@@ -85,30 +93,38 @@ const exploreModuleModel = types.model('exploreModuleModel', {
     },
     loadItems() {
       self.setState('loading');
+      self.setAuthRequired(null);
 
       return Promise.resolve().then(() => {
-        return cache.getData();
+        return cache.getData([]);
       }).then(cacheData => {
-        if (cache.isExpire(cacheData)) {
+        if (!cache.isExpire(cacheData)) {
+          self.setItems(cacheData.data);
+        } else {
           self.createWorker();
           return self.worker.getItems().finally(() => {
             self.destroyWorker();
-          }).then(response => {
+          }).then(async response => {
             const {items} = response;
-            return self.saveItems(items);
+            if (items) {
+              self.setItems(items);
+              await self.saveItems(items);
+            }
           });
-        } else {
-          return cacheData;
         }
-      }).then(cacheData => {
-        self.setItems(cacheData.data);
+      }).then(() => {
         self.setState('ready');
       }).catch(err => {
         debug('loadItems error', err);
+        if (err.message === 'AUTH') {
+          self.setAuthRequired({url: err.url});
+        }
         self.setState('error');
       });
     },
     sendCommand(command) {
+      self.setAuthRequired(null);
+
       self.createWorker();
       return self.worker.sendCommand(command).finally(() => {
         self.destroyWorker();
@@ -116,11 +132,14 @@ const exploreModuleModel = types.model('exploreModuleModel', {
         debug('Command result', command, result);
         const {items} = result;
         if (items) {
-          await self.saveItems(items);
           self.setItems(items);
+          await self.saveItems(items);
         }
       }).catch(err => {
         debug('sendCommand error', command, err);
+        if (err.message === 'AUTH') {
+          self.setAuthRequired({url: err.url});
+        }
       });
     }
   };

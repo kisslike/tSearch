@@ -89,6 +89,13 @@ const debug = require('debug')('Explore');
       }
     });
 
+    if (module.authRequired) {
+      actions.unshift(
+        <a key={'authRequired'} className="action  action__open" target="_blank" href={module.authRequired.url}
+           title={chrome.i18n.getMessage('login')}/>
+      );
+    }
+
     let pages = null;
     const content = [];
     const displayItemCount = this.getDisplayItemCount();
@@ -108,8 +115,16 @@ const debug = require('debug')('Explore');
       );
     });
 
+    const classList = ['section'];
+    if (module.state === 'loading') {
+      classList.push('section-loading');
+    } else
+    if (module.state === 'error') {
+      classList.push('section-error');
+    }
+
     return (
-      <li className="section">
+      <li className={classList.join(' ')}>
         <div className="section__head">
           <div className="section__move"/>
           <div className="section__title">{module.meta.getName()}</div>

@@ -26,12 +26,14 @@ class Cache {
   }
 
   /**
+   * @param {any} defaultValue
    * @return {Promise<CacheObject>}
    * @private
    */
-  loadCache() {
+  loadCache(defaultValue) {
     return promisifyApi(chrome.storage[this._storageType].get)({
       [this.getKey()]: {
+        data: defaultValue,
         insertTime: 0
       }
     }).then(storage => this._cache = storage[this.getKey()]);
@@ -53,11 +55,12 @@ class Cache {
   }
 
   /**
+   * @param {any} defaultValue
    * @return {Promise<CacheObject>}
    */
-  async getData() {
+  async getData(defaultValue) {
     if (!this._cache) {
-      this._cache = await this.loadCache();
+      this._cache = await this.loadCache(defaultValue);
     }
     return this._cache;
   }

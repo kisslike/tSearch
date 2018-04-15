@@ -43,8 +43,8 @@ const favoriteModuleModel = types.compose('favoriteModuleModel', exploreModuleMo
     loadItems() {
       self.setState('loading');
 
-      return cache.getData().then(cacheDate => {
-        return cacheDate.data || [];
+      return cache.getData([]).then(cacheDate => {
+        return cacheDate.data;
       }).then(items => {
         self.setItems(items);
         self.setState('ready');

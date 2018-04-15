@@ -47,6 +47,8 @@ const exploreModel = types.model('exploreModel', {
           storage.explorerSections = [{
             id: 'favorite'
           }, {
+            id: 'kpFavorites'
+          }, {
             id: 'kpInCinema'
           }, {
             id: 'kpPopular'
