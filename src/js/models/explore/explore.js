@@ -1,32 +1,10 @@
 import moduleModel from "./module";
-import {types, resolveIdentifier, applySnapshot} from "mobx-state-tree";
+import {types, applySnapshot} from "mobx-state-tree";
 import loadExploreModules from "../../tools/loadExploreModules";
 import promisifyApi from "../../tools/promisifyApi";
+import sectionModel from "./section";
 
 const debug = require('debug')('explore');
-
-/**
- * @typedef {{}} ExploreSectionM
- * Model:
- * @property {string} id
- * @property {string} [downloadURL]
- * Actions:
- * Views:
- * @property {ExploreModuleM} [module]
- */
-
-const sectionModel = types.model('sectionModel', {
-  id: types.identifier(types.string),
-  downloadURL: types.maybe(types.string),
-}).actions(/**ExploreSectionM*/self => {
-  return {};
-}).views(/**ExploreSectionM*/self => {
-  return {
-    get module() {
-      return resolveIdentifier(moduleModel, self, self.id);
-    },
-  };
-});
 
 /**
  * @typedef {{}} ExploreM

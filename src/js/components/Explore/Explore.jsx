@@ -51,11 +51,11 @@ const debug = require('debug')('Explore');
   }
   getDisplayItemCount() {
     const store = /**IndexM*/this.props.store;
-    const module = /**ExploreModuleM*/this.props.section.module;
+    const section = /**ExploreSectionM*/this.props.section;
 
-    const itemCount = Math.ceil((store.page.width - 175) / (module.width + 10 * 2)) - 1;
+    const itemCount = Math.ceil((store.page.width - 175) / (section.width + 10 * 2)) - 1;
 
-    return itemCount * module.lines;
+    return itemCount * section.lines;
   }
   handleSetPage(page) {
     this.setState({
@@ -188,7 +188,6 @@ const debug = require('debug')('Explore');
 
   render() {
     const section = /**ExploreSectionM*/this.props.section;
-    const module = /**ExploreModuleM*/section.module;
     const item = /**ExploreSectionItemM*/this.props.item;
 
     let posterUrl = null;
@@ -199,7 +198,7 @@ const debug = require('debug')('Explore');
     }
 
     const itemStyle = {
-      width: module.width
+      width: section.width
     };
 
     return (
