@@ -14,8 +14,7 @@ const outputPath = path.resolve('./dist/');
 const env = {
   targets: {
     browsers: ['Chrome >= 22']
-  },
-  exclude: ["transform-regenerator"]
+  }
 };
 
 if (isWatch) {
@@ -128,6 +127,18 @@ const config = {
     }),
   ]
 };
+
+if (!isWatch) {
+  Object.keys(config.entry).forEach(entryName => {
+    let value = config.entry[entryName];
+    if (!Array.isArray(value)) {
+      value = [value];
+    }
+    value.unshift('babel-polyfill');
+
+    config.entry[entryName] = value;
+  });
+}
 
 if (isWatch) {
   config.plugins.push(
