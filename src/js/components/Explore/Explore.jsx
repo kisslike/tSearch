@@ -160,7 +160,7 @@ const debug = require('debug')('Explore');
     }
 
     let content = null;
-    if (pages.length) {
+    if (pages.length > 1) {
       content = (
         <ul className="section__pages">{pages}</ul>
       )
