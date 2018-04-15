@@ -31,6 +31,7 @@ const favoriteModuleModel = types.compose('favoriteModuleModel', exploreModuleMo
   return {};
 }).views(/**ExploreFavoriteModuleM*/self => {
   const cache = self.getCache();
+  cache.setStorageType('sync');
 
   return {
     loadCache() {

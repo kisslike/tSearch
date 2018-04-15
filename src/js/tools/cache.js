@@ -8,7 +8,8 @@ import promisifyApi from "./promisifyApi";
 
 class Cache {
   constructor(id) {
-    this.id = id;
+    this._id = id;
+    this._storageType = 'local';
     this._cache = null;
   }
 
@@ -17,7 +18,11 @@ class Cache {
    * @private
    */
   getKey() {
-    return `cache_${this.id}`;
+    return `cache_${this._id}`;
+  }
+
+  setStorageType(type) {
+    this._storageType = type;
   }
 
   /**
@@ -25,7 +30,7 @@ class Cache {
    * @private
    */
   loadCache() {
-    return promisifyApi(chrome.storage.local.get)({
+    return promisifyApi(chrome.storage[this._storageType].get)({
       [this.getKey()]: {
         insertTime: 0
       }
@@ -62,7 +67,7 @@ class Cache {
    * @return {Promise<CacheObject>}
    */
   setData(data) {
-    return promisifyApi(chrome.storage.local.set)({
+    return promisifyApi(chrome.storage[this._storageType].set)({
       [this.getKey()]: this._cache = {
         data: data,
         insertTime: Math.trunc(Date.now() / 1000),
