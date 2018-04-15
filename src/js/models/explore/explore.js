@@ -6,7 +6,7 @@ import promisifyApi from "../../tools/promisifyApi";
 const debug = require('debug')('explore');
 
 /**
- * @typedef {ExploreModuleM} ExploreSectionM
+ * @typedef {{}} ExploreSectionM
  * Model:
  * @property {string} id
  * @property {string} [downloadURL]
