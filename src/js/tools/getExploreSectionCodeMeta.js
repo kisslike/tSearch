@@ -14,7 +14,7 @@ const fieldType = {
   supportURL: 'string',
   require: 'array',
   connect: '*array!connect',
-  action: '*array!action',
+  action: 'array!action',
   locale: 'object!locale',
   defaultLocale: 'string',
 };

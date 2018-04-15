@@ -4,8 +4,8 @@ import getExploreSectionCodeMeta from "./getExploreSectionCodeMeta";
 
 const loadExploreModules = () => {
   return Promise.all([
-    'kpInCinema',
-    /*'favorites',
+    'kpInCinema', 'kpPopular', 'kpSeries'
+    /*
     'kpFavorites', 'kpInCinema', 'kpSerials', 'kpPopular',
     'imdbInCinema', 'imdbPopular', 'imdbSerials',
     'ggGamesTop', 'ggGamesNew',*/

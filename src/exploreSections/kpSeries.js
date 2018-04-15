@@ -2,9 +2,8 @@
 // @name __MSG_name__
 // @connect *://*.kinopoisk.ru/*
 // @version 1.0
-// @action {"icon":"update","title":"__MSG_update__","command":"update"}
-// @locale ru {"name": "Кнопоиск: в кино", "update": "Обновить"}
-// @locale en {"name": "Kinopoisk: in cinema", "update": "Update"}
+// @locale ru {"name": "Сериалы"}
+// @locale en {"name": "Series"}
 // @defaultLocale en
 // ==/UserScript==
 
@@ -14,6 +13,15 @@ const kpGetImgFileName = url => {
 
 const spaceReplace = text => {
   return text.replace(/[\s\xA0]/g, ' ');
+};
+
+const parseTitleType = text => {
+  const m = /^(.*)\s+\([^)]+\)$/.exec(text);
+  if (m) {
+    return {
+      title: m[1]
+    };
+  }
 };
 
 const parseInfo = text => {
@@ -47,15 +55,25 @@ const prop = (node, prop) => {
 };
 
 const parseItem = item => {
-  const poster = kpGetImgFileName(prop(item.querySelector('.poster img[src]'), 'src') || '');
-
-  const linkNode = item.querySelector('.info .name a');
-  let title = normText(linkNode);
+  const linkNode = item.querySelector('td~td > div > a');
   const url = prop(linkNode, 'href');
+
+  let title = null;
+  const titleType = parseTitleType(normText(linkNode));
+  if (titleType) {
+    title = titleType.title;
+  }
+
+  const imgNode = item.querySelector('.poster img[src]');
+  const href = prop(imgNode, 'src');
+  if (/spacer\.gif$/.test(href)) {
+    imgNode.src = imgNode.title;
+  }
+  const poster = kpGetImgFileName(prop(imgNode, 'src') || '');
 
   let year = null;
   let titleOriginal = null;
-  const info = parseInfo(normText(item.querySelector('.info .name span')));
+  const info = parseInfo(normText(item.querySelector('td~td > div > a~span')));
   if (info) {
     titleOriginal = info.title;
     year = info.year;
@@ -92,7 +110,7 @@ const onPageLoad = response => {
 
   const ddBl = {};
   const results = [];
-  Array.from(doc.querySelectorAll('div.filmsListNew > div.item')).forEach(item => {
+  Array.from(doc.querySelectorAll('#itemList > tbody > tr')).forEach(item => {
     try {
       const result = parseItem(item);
 
@@ -112,33 +130,14 @@ const onPageLoad = response => {
 };
 
 const getItems = () => {
-  const items = [];
-  let promise = Promise.resolve();
-  ['0', '1', '2'].forEach(page => {
-    promise = promise.then(() => {
-      return API_request({
-        method: 'GET',
-        url: `https://www.kinopoisk.ru/afisha/new/page/${page}/`
-      }).then(response => {
-        return onPageLoad(response);
-      }).then(_items => {
-        items.push(..._items);
-      }, err => {
-        console.error('Page load error', err);
-      });
-    });
+  return API_request({
+    method: 'GET',
+    url: 'http://www.kinopoisk.ru/top/lists/45/perpage/100/'
+  }).then(response => {
+    return onPageLoad(response);
   });
-  return promise.then(() => items);
 };
 
 API_event('getItems', () => {
   return getItems().then(items => ({items}));
-});
-
-API_event('command', command => {
-  switch (command) {
-    case 'update': {
-      return getItems().then(items => ({items}));
-    }
-  }
 });

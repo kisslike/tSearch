@@ -104,7 +104,7 @@ const debug = require('debug')('Explore');
 
     pageItems.forEach((item, i) => {
       return content.push(
-        <ExploreSectionItem key={i} section={section} item={item}/>
+        <ExploreSectionItem key={from + i} section={section} item={item}/>
       );
     });
 

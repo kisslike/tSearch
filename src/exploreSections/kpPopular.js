@@ -2,22 +2,17 @@
 // @name __MSG_name__
 // @connect *://*.kinopoisk.ru/*
 // @version 1.0
-// @action {"icon":"update","title":"__MSG_update__","command":"update"}
-// @locale ru {"name": "Кнопоиск: в кино", "update": "Обновить"}
-// @locale en {"name": "Kinopoisk: in cinema", "update": "Update"}
+// @locale ru {"name": "Фильмы"}
+// @locale en {"name": "Movies"}
 // @defaultLocale en
 // ==/UserScript==
-
-const kpGetImgFileName = url => {
-  return url.replace(/sm_film/, 'film');
-};
 
 const spaceReplace = text => {
   return text.replace(/[\s\xA0]/g, ' ');
 };
 
-const parseInfo = text => {
-  const m = /^(?:(.*)\s+|)\((\d{4})[^)]*\)(?:\s+\d+\s+.{3}\.)?$/.exec(text);
+const parseTitleTypeYears = text => {
+  const m = /^(.*)\s+\((?:[^,]+,\s)?(\d{4})(?:\s[^)]+)?\)$/.exec(text);
   if (m) {
     return {
       title: m[1],
@@ -47,19 +42,27 @@ const prop = (node, prop) => {
 };
 
 const parseItem = item => {
-  const poster = kpGetImgFileName(prop(item.querySelector('.poster img[src]'), 'src') || '');
-
-  const linkNode = item.querySelector('.info .name a');
-  let title = normText(linkNode);
+  const linkNode = item.querySelectorAll('a')[1];
   const url = prop(linkNode, 'href');
 
+  let title = null;
   let year = null;
-  let titleOriginal = null;
-  const info = parseInfo(normText(item.querySelector('.info .name span')));
+  const info = parseTitleTypeYears(normText(linkNode));
   if (info) {
-    titleOriginal = info.title;
+    title = info.title;
     year = info.year;
   }
+
+  let poster = null;
+  const m = /-(\d+)\/$/.exec(url);
+  if (m) {
+    const tmpNode = linkNode.cloneNode();
+    tmpNode.href = `/images/film/${m[1]}.jpg`;
+    item.appendChild(tmpNode);
+    poster = tmpNode.href;
+  }
+
+  let titleOriginal = normText(item.querySelector('i'));
 
   if (year) {
     if (title) {
@@ -92,7 +95,7 @@ const onPageLoad = response => {
 
   const ddBl = {};
   const results = [];
-  Array.from(doc.querySelectorAll('div.filmsListNew > div.item')).forEach(item => {
+  Array.from(doc.querySelectorAll('div.stat > div.el')).forEach(item => {
     try {
       const result = parseItem(item);
 
@@ -112,33 +115,14 @@ const onPageLoad = response => {
 };
 
 const getItems = () => {
-  const items = [];
-  let promise = Promise.resolve();
-  ['0', '1', '2'].forEach(page => {
-    promise = promise.then(() => {
-      return API_request({
-        method: 'GET',
-        url: `https://www.kinopoisk.ru/afisha/new/page/${page}/`
-      }).then(response => {
-        return onPageLoad(response);
-      }).then(_items => {
-        items.push(..._items);
-      }, err => {
-        console.error('Page load error', err);
-      });
-    });
+  return API_request({
+    method: 'GET',
+    url: 'http://www.kinopoisk.ru/popular/day/now/perpage/200/'
+  }).then(response => {
+    return onPageLoad(response);
   });
-  return promise.then(() => items);
 };
 
 API_event('getItems', () => {
   return getItems().then(items => ({items}));
-});
-
-API_event('command', command => {
-  switch (command) {
-    case 'update': {
-      return getItems().then(items => ({items}));
-    }
-  }
 });
