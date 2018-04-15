@@ -5,7 +5,6 @@ import searchFragModel from "./searchFrag";
 import filterModel from "./filters";
 import getSearchFragModelId from "../tools/getSearchFragModelId";
 import exploreModel from "./explore/explore";
-import sectionModel from "./explore/section";
 import pageModel from "./pageModel";
 import {types, destroy} from "mobx-state-tree";
 
@@ -21,7 +20,6 @@ const debug = require('debug')('indexModel');
  * @property {SearchFragM} searchFrag
  * @property {FilterM} filter
  * @property {ExploreM} explore
- * @property {ExploreSectionM[]} exploreSections
  * @property {PageM[]} page
  * Actions:
  * @property {function(string)} createSearch
@@ -40,7 +38,6 @@ const indexModel = types.model('indexModel', {
   searchFrag: types.maybe(searchFragModel),
   filter: types.optional(filterModel, {}),
   explore: types.optional(exploreModel, {}),
-  exploreSections: types.array(sectionModel),
   page: types.optional(pageModel, {}),
 }).preProcessSnapshot(snapshot => {
   if (!snapshot.profiles.length) {
@@ -72,19 +69,6 @@ const indexModel = types.model('indexModel', {
         }
       }]
     });
-  }
-  if (!snapshot.explore) {
-    snapshot.explore = {};
-  }
-  if (!snapshot.explore.items) {
-    snapshot.explore.items = [
-      {
-        id: 'kpInCinema',
-        meta: {
-          name: 'kpInCinema'
-        }
-      }
-    ];
   }
   const profileFound = snapshot.profiles.some(profile => {
     return snapshot.profile === profile.name;

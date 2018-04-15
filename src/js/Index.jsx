@@ -12,7 +12,8 @@ import loadTrackers from './tools/loadTrackers';
 import {HashRouter, Route, Link} from 'react-router-dom';
 import SearchFrag from './components/SearchFrag';
 import Explore from "./components/Explore";
-import loadExploreSections from "./tools/loadExploreSections";
+import promisifyApi from "./tools/promisifyApi";
+
 const debug = require('debug')('Index');
 const qs = require('querystring');
 
@@ -31,22 +32,15 @@ const qs = require('querystring');
     this.load();
   }
   load() {
-    new Promise(r => chrome.storage.local.get({
+    return promisifyApi(chrome.storage.local.get)({
       profile: null,
       profiles: [],
       trackers: [],
-      exploreSections: [],
-    }, r)).then(storage => {
+    }).then(storage => {
       return Promise.resolve().then(() => {
         if (storage.trackers.length === 0) {
           return loadTrackers().then(trackers => {
             storage.trackers.push(...trackers);
-          });
-        }
-      }).then(() => {
-        if (storage.exploreSections.length === 0) {
-          return loadExploreSections().then(section => {
-            storage.exploreSections.push(...section);
           });
         }
       }).then(() => {

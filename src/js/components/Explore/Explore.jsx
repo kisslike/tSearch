@@ -1,25 +1,39 @@
 import React from 'react';
 import {observer} from 'mobx-react';
+import exploreStyle from '../../../css/explore.less';
+
 const debug = require('debug')('Explore');
 
-import exploreStyle from '../../../css/explore.less';
 
 @observer class Explore extends React.Component {
   render() {
     /**@type {IndexM}*/
     const store = this.props.store;
 
-    const sections = store.explore.getSections().map(section => {
-      return (
-        <ExploreSection key={section.id} section={section} store={store}/>
-      );
-    });
+    switch (store.explore.state) {
+      case 'loading': {
+        return 'Explore loading...';
+      }
+      case 'ready': {
+        const sections = store.explore.getSections().map(module => {
+          return (
+            <ExploreSection key={module.id} module={module} store={store}/>
+          );
+        });
 
-    return (
-      <ul className="explore">
-        {sections}
-      </ul>
-    );
+        return (
+          <ul className="explore">
+            {sections}
+          </ul>
+        );
+      }
+      case 'error': {
+        return 'Explore error';
+      }
+      default: {
+        return null;
+      }
+    }
   }
 }
 
@@ -37,11 +51,11 @@ import exploreStyle from '../../../css/explore.less';
     /**@type {IndexM}*/
     const store = this.props.store;
     /**@type {ExploreSectionM}*/
-    const section = this.props.section;
+    const module = this.props.module;
 
-    const itemCount = Math.ceil((store.page.width - 175) / (section.width + 10 * 2)) - 1;
+    const itemCount = Math.ceil((store.page.width - 175) / (module.width + 10 * 2)) - 1;
 
-    return itemCount * section.lines;
+    return itemCount * module.lines;
   }
   handleSetPage(page) {
     this.setState({
@@ -50,16 +64,16 @@ import exploreStyle from '../../../css/explore.less';
   }
   render() {
     /**@type {ExploreSectionM}*/
-    const section = this.props.section;
+    const module = this.props.module;
 
     let openSite = null;
-    if (section.meta.siteURL) {
+    if (module.meta.siteURL) {
       openSite = (
-        <a className="action action__open" target="_blank" href={section.meta.siteURL} title={chrome.i18n.getMessage('goToTheWebsite')}/>
+        <a className="action action__open" target="_blank" href={module.meta.siteURL} title={chrome.i18n.getMessage('goToTheWebsite')}/>
       );
     }
 
-    const actions = section.meta.actions.map((action, i) => {
+    const actions = module.meta.actions.map((action, i) => {
       const classList = ['action'];
       if (action.isLoading) {
         classList.push('loading');
@@ -77,7 +91,7 @@ import exploreStyle from '../../../css/explore.less';
 
     let pages = null;
     const content = [];
-    const cache = section.getCache();
+    const cache = module.getCache();
     if (cache.state === 'ready') {
       const displayItemCount = this.getDisplayItemCount();
       const from = displayItemCount * this.state.page;
@@ -90,7 +104,7 @@ import exploreStyle from '../../../css/explore.less';
 
       items.forEach((item, i) => {
         return content.push(
-          <ExploreSectionItem key={i} section={section} item={item}/>
+          <ExploreSectionItem key={i} module={module} item={item}/>
         );
       });
     }
@@ -99,7 +113,7 @@ import exploreStyle from '../../../css/explore.less';
       <li className="section">
         <div className="section__head">
           <div className="section__move"/>
-          <div className="section__title">{section.meta.getName()}</div>
+          <div className="section__title">{module.meta.getName()}</div>
           <div className="section__actions">
             {openSite}
             {actions}
@@ -175,7 +189,7 @@ import exploreStyle from '../../../css/explore.less';
 
   render() {
     /**@type ExploreSectionM*/
-    const section = this.props.section;
+    const module = this.props.module;
     /**@type ExploreSectionItemM*/
     const item = this.props.item;
 
@@ -187,7 +201,7 @@ import exploreStyle from '../../../css/explore.less';
     }
 
     const itemStyle = {
-      width: section.width
+      width: module.width
     };
 
     return (

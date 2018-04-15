@@ -4,10 +4,10 @@ import getLocale from "../../tools/getLocale";
 import cacheModel from "./cache";
 import {types, destroy, getParent} from "mobx-state-tree";
 
-const debug = require('debug')('exploreSectionModel');
+const debug = require('debug')('exploreModuleModel');
 
 /**
- * @typedef {{}} ExploreSectionM
+ * @typedef {{}} ExploreModuleM
  * Model:
  * @property {string} id
  * @property {ExploreSectionMetaM} meta
@@ -100,7 +100,7 @@ const exploreSectionMetaActionModel = types.model('exploreSectionMetaActionModel
 
       if (!self.isLoading) {
         self.setLoading(true);
-        /**@type {ExploreSectionM}*/
+        /**@type {ExploreModuleM}*/
         const section = getParent(self, 3);
         section.sendCommand(self.command).finally(() => {
           self.setLoading(false);
@@ -149,7 +149,7 @@ const exploreSectionMetaModel = types.model('exploreSectionMetaModel', {
   }
 });
 
-const exploreSectionModel = types.model('exploreSectionModel', {
+const exploreModuleModel = types.model('exploreModuleModel', {
   id: types.identifier(types.string),
   meta: exploreSectionMetaModel,
   info: types.model('exploreSectionInfo', {
@@ -161,7 +161,7 @@ const exploreSectionModel = types.model('exploreSectionModel', {
   cache: types.maybe(cacheModel),
   lines: types.optional(types.number, 2),
   width: types.optional(types.number, 120),
-}).actions(/**ExploreSectionM*/self => {
+}).actions(/**ExploreModuleM*/self => {
   return {
     createWorker() {
       if (!self.worker) {
@@ -182,7 +182,7 @@ const exploreSectionModel = types.model('exploreSectionModel', {
       return self.cache;
     },
   };
-}).views(/**ExploreSectionM*/self => {
+}).views(/**ExploreModuleM*/self => {
   return {
     getItems() {
       if (!self.worker) {
@@ -203,4 +203,4 @@ const exploreSectionModel = types.model('exploreSectionModel', {
   };
 });
 
-export default exploreSectionModel;
+export default exploreModuleModel;
