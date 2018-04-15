@@ -112,6 +112,15 @@ const exploreModuleModel = types.model('exploreModuleModel', {
       }
       return self.worker.sendCommand(command).finally(() => {
         self.destroyWorker();
+      }).then(async result => {
+        debug('Command result', command, result);
+        const {items} = result;
+        if (items) {
+          await self.saveItems(items);
+          self.setItems(items);
+        }
+      }).catch(err => {
+        debug('sendCommand error', command, err);
       });
     }
   };

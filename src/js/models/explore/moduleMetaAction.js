@@ -45,15 +45,8 @@ const exploreModuleMetaActionModel = types.model('exploreModuleMetaActionModel',
         const module = /**ExploreModuleM*/getParent(self, 3);
         module.sendCommand(self.command).finally(() => {
           self.setLoading(false);
-        }).then(async result => {
-          const {items} = result;
-          debug('Command result', self.command, result);
-          if (items) {
-            await module.saveItems(items);
-            module.setItems(items);
-          }
         }).catch(err => {
-          debug('Command error', self.command, err);
+          debug('handleClick error', self.command, err);
         });
       }
     }
