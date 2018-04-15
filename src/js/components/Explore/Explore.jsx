@@ -176,13 +176,17 @@ const debug = require('debug')('Explore');
   constructor() {
     super();
 
+    this.state = {
+      posterError: false
+    };
+
     this.handlePosterError = this.handlePosterError.bind(this);
   }
 
   handlePosterError(e) {
-    const item = /**ExploreSectionItemM*/this.props.item;
-
-    item.setPosterError(true);
+    this.setState({
+      posterError: true
+    });
   }
 
   render() {
@@ -190,7 +194,7 @@ const debug = require('debug')('Explore');
     const item = /**ExploreSectionItemM*/this.props.item;
 
     let posterUrl = null;
-    if (item.posterError) {
+    if (this.state.posterError) {
       posterUrl = require('!url-loader!../../../img/no_poster.png');
     } else {
       posterUrl = item.poster;

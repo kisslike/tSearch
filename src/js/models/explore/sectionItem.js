@@ -8,9 +8,7 @@ import {types, getRoot, clone} from "mobx-state-tree";
  * @property {string} url
  * @property {string} poster
  * @property {Object} extra
- * @property {boolean} posterError
  * Actions:
- * @property {function(boolean)} setPosterError
  * Views:
  * @property {function} handleAddFavorite
  * @property {function} handleEditFavorite
@@ -24,13 +22,8 @@ const sectionItemMode = types.model('sectionItemMode', {
   url: types.string,
   poster: types.maybe(types.string),
   extra: types.frozen,
-  posterError: types.optional(types.boolean, false)
 }).actions(self => {
-  return {
-    setPosterError(value) {
-      self.posterError = value;
-    },
-  };
+  return {};
 }).views(self => {
   return {
     handleAddFavorite(e) {
