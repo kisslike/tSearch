@@ -9,7 +9,7 @@ const debug = require('debug')('favoriteModuleModel');
  * Model:
  * Actions:
  * Views:
- * @property {function:ExploreSectionItemM[]} getCacheItems
+ * @property {function:Promise} loadCache
  * @property {function(ExploreSectionItemM):Promise} addItem
  * @property {function(ExploreSectionItemM):Promise} removeItem
  */
@@ -33,15 +33,18 @@ const favoriteModuleModel = types.compose('favoriteModuleModel', exploreModuleMo
   const cache = self.getCache();
 
   return {
-    getCacheItems() {
-      return cache.getData().then(cacheDate => {
-        return cacheDate.data || [];
-      });
+    loadCache() {
+      if (!cache.isLoaded()) {
+        return this.loadItems();
+      }
+      return Promise.resolve();
     },
     loadItems() {
       self.setState('loading');
 
-      return self.getCacheItems().then(items => {
+      return cache.getData().then(cacheDate => {
+        return cacheDate.data || [];
+      }).then(items => {
         self.setItems(items);
         self.setState('ready');
       }).catch(err => {
@@ -50,22 +53,22 @@ const favoriteModuleModel = types.compose('favoriteModuleModel', exploreModuleMo
       });
     },
     addItem(item) {
-      const items = self.items.slice(0);
-      items.push(item);
-      self.setItems(items);
-      return self.saveItems(items);
-    },
-    removeItem(item) {
-      return Promise.resolve().then(() => {
+      return self.loadCache().then(() => {
         const items = self.items.slice(0);
-        const pos = items.indexOf(item);
-        if (pos === -1) {
-          throw new Error('Item is not found!');
-        }
-        items.splice(pos, 1);
+        items.push(item);
         self.setItems(items);
         return self.saveItems(items);
       });
+    },
+    removeItem(item) {
+      const items = self.items.slice(0);
+      const pos = items.indexOf(item);
+      if (pos === -1) {
+        throw new Error('Item is not found!');
+      }
+      items.splice(pos, 1);
+      self.setItems(items);
+      return self.saveItems(items);
     },
     sendCommand() {}
   };
