@@ -102,6 +102,7 @@ const exploreModuleModel = types.model('exploreModuleModel', {
         self.setItems(cacheData.data);
         self.setState('ready');
       }).catch(err => {
+        debug('loadItems error', err);
         self.setState('error');
       });
     },
