@@ -11,7 +11,7 @@ const debug = require('debug')('exploreModuleModel');
  * Model:
  * @property {string} id
  * @property {ExploreModuleMetaM} meta
- * @property {ExploreSectionInfoM} info
+ * @property {ExploreModuleInfoM} info
  * @property {string} code
  * @property {ExploreSectionWorkerM} worker
  * @property {ExploreSectionItemM[]} items
@@ -29,7 +29,7 @@ const debug = require('debug')('exploreModuleModel');
  */
 
 /**
- * @typedef {{}} ExploreSectionInfoM
+ * @typedef {{}} ExploreModuleInfoM
  * Model:
  * @property {number} lastUpdate
  * @property {boolean} disableAutoUpdate
@@ -41,7 +41,7 @@ const exploreModuleModel = types.model('exploreModuleModel', {
   id: types.identifier(types.string),
   state: types.optional(types.string, 'idle'), // idle, loading, ready, error
   meta: exploreModuleMetaModel,
-  info: types.model('exploreSectionInfo', {
+  info: types.model('exploreModuleInfo', {
     lastUpdate: types.optional(types.number, 0),
     disableAutoUpdate: types.optional(types.boolean, false),
   }),

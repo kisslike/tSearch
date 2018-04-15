@@ -25,6 +25,7 @@ import exploreModuleMetaActionModel from "./moduleMetaAction";
  * @property {Object<string,string>} locale
  * Actions:
  * Views:
+ * @property {function:Object} getLocale
  * @property {function:string} getName
  */
 
@@ -45,17 +46,20 @@ const exploreModuleMetaModel = types.model('exploreModuleMetaModel', {
   actions: types.optional(types.array(exploreModuleMetaActionModel), []),
   locales: types.frozen,
   defaultLocale: types.maybe(types.string),
-  locale: types.frozen,
 }).actions(/**ExploreModuleMetaM*/self => {
-  return {
-    afterCreate() {
-      self.locale = getLocale(self.defaultLocale, self.locales);
-    },
-  };
+  return {};
 }).views(/**ExploreModuleMetaM*/self => {
+  let locale = null;
+
   return {
+    getLocale() {
+      if (!locale) {
+        locale = getLocale(self.defaultLocale, self.locales);
+      }
+      return locale;
+    },
     getName() {
-      return processLocale(self.name, self.locale);
+      return processLocale(self.name, self.getLocale());
     }
   }
 });

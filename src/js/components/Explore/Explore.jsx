@@ -200,9 +200,23 @@ const debug = require('debug')('Explore');
       width: section.width
     };
 
+    const actions = [];
+    if (section.id === 'favorite') {
+      actions.push(
+        <div key={'rmFavorite'} onClick={item.handleRemoveFavorite} className="action__rmFavorite" title={chrome.i18n.getMessage('removeFromFavorite')}/>,
+        <div key={'move'} className="action__move" title={chrome.i18n.getMessage('move')}/>,
+        <div key={'edit'} onClick={item.handleEditFavorite} className="action__edit" title={chrome.i18n.getMessage('edit')}/>,
+      );
+    } else {
+      actions.push(
+        <div key={'favorite'} onClick={item.handleAddFavorite} className="action__favorite" title={chrome.i18n.getMessage('addInFavorite')}/>,
+      );
+    }
+
     return (
       <li className="section__poster poster" style={itemStyle}>
         <div className="poster__image">
+          {actions}
           <div className="action__quick_search" title={chrome.i18n.getMessage('quickSearch')}>{'?'}</div>
           <a className="image__more_link" href={item.url} target="_blank" title={chrome.i18n.getMessage('readMore')}/>
           <a className="image__search_link" href={"#"} title={item.title}>

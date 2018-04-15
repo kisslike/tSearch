@@ -1,5 +1,6 @@
 import {resolveIdentifier, types} from "mobx-state-tree";
 import moduleModel from "./module";
+import favoriteModuleModel from "./favoriteModule";
 
 
 /**
@@ -25,7 +26,11 @@ const sectionModel = types.model('sectionModel', {
 }).views(/**ExploreSectionM*/self => {
   return {
     get module() {
-      return resolveIdentifier(moduleModel, self, self.id);
+      if (self.id === 'favorite') {
+        return resolveIdentifier(favoriteModuleModel, self, self.id);
+      } else {
+        return resolveIdentifier(moduleModel, self, self.id);
+      }
     },
   };
 });

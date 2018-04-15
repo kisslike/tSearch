@@ -35,7 +35,7 @@ const exploreModuleMetaActionModel = types.model('exploreModuleMetaActionModel',
   return {
     getTitle() {
       const sectionMeta = /**ExploreModuleMetaM*/getParent(self, 2);
-      return processLocale(self.title, sectionMeta.locale);
+      return processLocale(self.title, sectionMeta.getLocale());
     },
     handleClick(e) {
       e.preventDefault();

@@ -3,6 +3,7 @@ import {types, applySnapshot} from "mobx-state-tree";
 import loadExploreModules from "../../tools/loadExploreModules";
 import promisifyApi from "../../tools/promisifyApi";
 import sectionModel from "./section";
+import favoriteModuleModel from "./favoriteModule";
 
 const debug = require('debug')('explore');
 
@@ -12,6 +13,7 @@ const debug = require('debug')('explore');
  * @property {string} state
  * @property {ExploreSectionM[]} sections
  * @property {ExploreModuleM[]} modules
+ * @property {ExploreFavoriteModuleM} favouriteModule
  * Actions:
  * @property {string} setState
  * Views:
@@ -21,6 +23,9 @@ const exploreModel = types.model('exploreModel', {
   state: types.optional(types.string, 'idle'), // idle, loading, ready, error
   sections: types.optional(types.array(sectionModel), []),
   modules: types.optional(types.array(moduleModel), []),
+  favouriteModule: types.optional(favoriteModuleModel, {
+    id: 'favorite'
+  }),
 }).actions(/**ExploreM*/self => {
   return {
     setState(value) {
@@ -40,6 +45,8 @@ const exploreModel = types.model('exploreModel', {
         }
         if (!storage.explorerSections.length) {
           storage.explorerSections = [{
+            id: 'favorite'
+          }, {
             id: 'kpInCinema'
           }];
         }

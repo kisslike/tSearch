@@ -1,4 +1,4 @@
-import {types} from "mobx-state-tree";
+import {types, getRoot, clone} from "mobx-state-tree";
 
 /**
  * @typedef {{}} ExploreSectionItemM
@@ -12,6 +12,10 @@ import {types} from "mobx-state-tree";
  * Actions:
  * @property {function(boolean)} setPosterError
  * Views:
+ * @property {function} handleAddFavorite
+ * @property {function} handleEditFavorite
+ * @property {function} handlePostMoveFavorite
+ * @property {function} handleRemoveFavorite
  */
 
 const sectionItemMode = types.model('sectionItemMode', {
@@ -25,7 +29,26 @@ const sectionItemMode = types.model('sectionItemMode', {
   return {
     setPosterError(value) {
       self.posterError = value;
-    }
+    },
+  };
+}).views(self => {
+  return {
+    handleAddFavorite(e) {
+      e.preventDefault();
+      const explore = /**ExploreM*/getRoot(self).explore;
+      explore.favouriteModule.addItem(clone(self));
+    },
+    handleEditFavorite(e) {
+      e.preventDefault();
+    },
+    handlePostMoveFavorite(e) {
+      e.preventDefault();
+    },
+    handleRemoveFavorite(e) {
+      e.preventDefault();
+      const explore = /**ExploreM*/getRoot(self).explore;
+      explore.favouriteModule.removeItem(self);
+    },
   };
 });
 
