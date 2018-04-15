@@ -68,7 +68,7 @@ const exploreModuleModel = types.model('exploreModuleModel', {
     }
   };
 }).views(/**ExploreModuleM*/self => {
-  let cache = new Cache(self.id);
+  const cache = new Cache(self.id);
 
   return {
     getCache() {
