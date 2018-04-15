@@ -1,6 +1,7 @@
 import {getParent, types} from "mobx-state-tree";
 import processLocale from "../../tools/processLocale";
 
+const debug = require('debug')('moduleMeta');
 
 /**
  * @typedef {{}} ExploreModuleMetaActionM
@@ -33,8 +34,7 @@ const exploreModuleMetaActionModel = types.model('exploreModuleMetaActionModel',
 }).views(/**ExploreModuleMetaActionM*/self => {
   return {
     getTitle() {
-      /**@type {ExploreModuleMetaM}*/
-      const sectionMeta = getParent(self, 2);
+      const sectionMeta = /**ExploreModuleMetaM*/getParent(self, 2);
       return processLocale(self.title, sectionMeta.locale);
     },
     handleClick(e) {
@@ -42,16 +42,17 @@ const exploreModuleMetaActionModel = types.model('exploreModuleMetaActionModel',
 
       if (!self.isLoading) {
         self.setLoading(true);
-        /**@type {ExploreModuleM}*/
-        const section = getParent(self, 3);
-        section.sendCommand(self.command).finally(() => {
+        const module = /**ExploreModuleM*/getParent(self, 3);
+        module.sendCommand(self.command).finally(() => {
           self.setLoading(false);
-        }).then(result => {
+        }).then(async result => {
+          const {items} = result;
           debug('Command result', self.command, result);
-          if (result.items) {
-            return section.cache.onGetItems(result.items);
+          if (items) {
+            await module.saveItems(items);
+            module.setItems(items);
           }
-        }, err => {
+        }).catch(err => {
           debug('Command error', self.command, err);
         });
       }

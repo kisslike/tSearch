@@ -1,7 +1,8 @@
 import exploreSectionWorkerModel from "./sectionWorker";
-import cacheModel from "./cache";
 import {types, destroy} from "mobx-state-tree";
 import exploreModuleMetaModel from "./moduleMeta";
+import sectionItemMode from "./sectionItem";
+import Cache from "../../tools/cache";
 
 const debug = require('debug')('exploreModuleModel');
 
@@ -13,13 +14,16 @@ const debug = require('debug')('exploreModuleModel');
  * @property {ExploreSectionInfoM} info
  * @property {string} code
  * @property {ExploreSectionWorkerM} worker
- * @property {CacheM} cache
+ * @property {ExploreSectionItemM[]} items
  * Actions:
  * @property {function} createWorker
  * @property {function} destroyWorker
- * @property {function:CacheM} getCache
+ * @property {function(string)} setState
+ * @property {function(ExploreSectionItemM[])} setItems
  * Views:
- * @property {function} getItems
+ * @property {function(ExploreSectionItemM[]):Promise} saveItems
+ * @property {function:ExploreSectionItemM[]} getItems
+ * @property {function} loadItems
  * @property {function(string)} sendCommand
  */
 
@@ -34,6 +38,7 @@ const debug = require('debug')('exploreModuleModel');
 
 const exploreModuleModel = types.model('exploreModuleModel', {
   id: types.identifier(types.string),
+  state: types.optional(types.string, 'idle'), // idle, loading, ready, error
   meta: exploreModuleMetaModel,
   info: types.model('exploreSectionInfo', {
     lastUpdate: types.optional(types.number, 0),
@@ -41,7 +46,7 @@ const exploreModuleModel = types.model('exploreModuleModel', {
   }),
   code: types.string,
   worker: types.maybe(exploreSectionWorkerModel),
-  cache: types.maybe(cacheModel),
+  items: types.optional(types.array(sectionItemMode), []),
 }).actions(/**ExploreModuleM*/self => {
   return {
     createWorker() {
@@ -54,23 +59,50 @@ const exploreModuleModel = types.model('exploreModuleModel', {
         destroy(self.worker);
       }
     },
-    getCache() {
-      if (!self.cache) {
-        self.cache = {
-          id: self.id
-        };
-      }
-      return self.cache;
+    setState(value) {
+      self.state = value;
     },
+    setItems(items) {
+      self.items = items;
+    }
   };
 }).views(/**ExploreModuleM*/self => {
+  let cache = new Cache(self.id);
+
   return {
+    saveItems(items) {
+      return cache.setData(items);
+    },
     getItems() {
-      if (!self.worker) {
-        self.createWorker();
+      if (!cache.isLoaded()) {
+        self.loadItems();
       }
-      return self.worker.getItems().finally(() => {
-        self.destroyWorker();
+      return self.items;
+    },
+    loadItems() {
+      self.setState('loading');
+
+      return Promise.resolve().then(() => {
+        return cache.getData();
+      }).then(cacheData => {
+        if (cache.isExpire(cacheData)) {
+          if (!self.worker) {
+            self.createWorker();
+          }
+          return self.worker.getItems().finally(() => {
+            self.destroyWorker();
+          }).then(response => {
+            const {items} = response;
+            return self.saveItems(items);
+          });
+        } else {
+          return cacheData;
+        }
+      }).then(cacheData => {
+        self.setItems(cacheData.data);
+        self.setState('ready');
+      }).catch(err => {
+        self.setState('error');
       });
     },
     sendCommand(command) {

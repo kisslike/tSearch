@@ -91,23 +91,22 @@ const debug = require('debug')('Explore');
 
     let pages = null;
     const content = [];
-    const cache = module.getCache();
-    if (cache.state === 'ready') {
-      const displayItemCount = this.getDisplayItemCount();
-      const from = displayItemCount * this.state.page;
+    const displayItemCount = this.getDisplayItemCount();
+    const from = displayItemCount * this.state.page;
 
-      pages = (
-        <ExploreSectionPages page={this.state.page} itemCount={cache.data.length} displayCount={displayItemCount} onSetPage={this.handleSetPage}/>
+    const items = module.getItems();
+
+    pages = (
+      <ExploreSectionPages page={this.state.page} itemCount={items.length} displayCount={displayItemCount} onSetPage={this.handleSetPage}/>
+    );
+
+    const pageItems = items.slice(from, from + displayItemCount);
+
+    pageItems.forEach((item, i) => {
+      return content.push(
+        <ExploreSectionItem key={i} section={section} item={item}/>
       );
-
-      const items = cache.data.slice(from, from + displayItemCount);
-
-      items.forEach((item, i) => {
-        return content.push(
-          <ExploreSectionItem key={i} section={section} item={item}/>
-        );
-      });
-    }
+    });
 
     return (
       <li className="section">
