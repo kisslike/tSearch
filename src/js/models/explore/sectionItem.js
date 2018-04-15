@@ -22,9 +22,9 @@ const sectionItemMode = types.model('sectionItemMode', {
   url: types.string,
   poster: types.maybe(types.string),
   extra: types.frozen,
-}).actions(self => {
+}).actions(/**ExploreSectionItemM*/self => {
   return {};
-}).views(self => {
+}).views(/**ExploreSectionItemM*/self => {
   return {
     handleAddFavorite(e) {
       e.preventDefault();
