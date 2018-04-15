@@ -96,14 +96,13 @@ const debug = require('debug')('Explore');
       );
     }
 
-    let pages = null;
     const content = [];
     const displayItemCount = this.getDisplayItemCount();
     const from = displayItemCount * this.state.page;
 
     const items = module.getItems();
 
-    pages = (
+    const pages = (
       <ExploreSectionPages page={this.state.page} itemCount={items.length} displayCount={displayItemCount} onSetPage={this.handleSetPage}/>
     );
 
@@ -121,6 +120,10 @@ const debug = require('debug')('Explore');
     } else
     if (module.state === 'error') {
       classList.push('section-error');
+    }
+
+    if (module.id === 'favorite' && !items.length) {
+      classList.push('section-empty');
     }
 
     return (
