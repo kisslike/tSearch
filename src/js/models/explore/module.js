@@ -21,6 +21,7 @@ const debug = require('debug')('exploreModuleModel');
  * @property {function(string)} setState
  * @property {function(ExploreSectionItemM[])} setItems
  * Views:
+ * @property {function:Cache} getCache
  * @property {function(ExploreSectionItemM[]):Promise} saveItems
  * @property {function:ExploreSectionItemM[]} getItems
  * @property {function} loadItems
@@ -70,6 +71,9 @@ const exploreModuleModel = types.model('exploreModuleModel', {
   let cache = new Cache(self.id);
 
   return {
+    getCache() {
+      return cache;
+    },
     saveItems(items) {
       return cache.setData(items);
     },
@@ -86,9 +90,7 @@ const exploreModuleModel = types.model('exploreModuleModel', {
         return cache.getData();
       }).then(cacheData => {
         if (cache.isExpire(cacheData)) {
-          if (!self.worker) {
-            self.createWorker();
-          }
+          self.createWorker();
           return self.worker.getItems().finally(() => {
             self.destroyWorker();
           }).then(response => {
@@ -107,9 +109,7 @@ const exploreModuleModel = types.model('exploreModuleModel', {
       });
     },
     sendCommand(command) {
-      if (!self.worker) {
-        self.createWorker();
-      }
+      self.createWorker();
       return self.worker.sendCommand(command).finally(() => {
         self.destroyWorker();
       }).then(async result => {
