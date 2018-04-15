@@ -1,10 +1,8 @@
 const debug = require('debug')('loadExploreSections');
-const popsicle = require('popsicle');
-import {StatusCodeError} from "./errors";
 import getExploreSectionCodeMeta from "./getExploreSectionCodeMeta";
 
 
-const loadExploreSections = () => {
+const loadExploreModules = () => {
   return Promise.all([
     'kpInCinema',
     /*'favorites',
@@ -12,24 +10,22 @@ const loadExploreSections = () => {
     'imdbInCinema', 'imdbPopular', 'imdbSerials',
     'ggGamesTop', 'ggGamesNew',*/
   ].map(id => {
-    return popsicle.get('./exploreSections/' + id + '.js').then(response => {
-      if (!/^2/.test('' + response.status)) {
-        throw new StatusCodeError(response.status, response.body, null, response);
-      }
-
+    return fetch('./exploreSections/' + id + '.js').then(response => {
+      return response.text();
+    }).then(response => {
       return {
         id: id,
-        meta: getExploreSectionCodeMeta(response.body),
+        meta: getExploreSectionCodeMeta(response),
         info: {
           lastUpdate: 0,
           disableAutoUpdate: false,
         },
-        code: response.body,
-      }
+        code: response,
+      };
     }).catch(function (err) {
       debug('Load explore section error', err);
     });
   }));
 };
 
-export default loadExploreSections;
+export default loadExploreModules;

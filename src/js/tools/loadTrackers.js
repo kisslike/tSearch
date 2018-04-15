@@ -1,6 +1,4 @@
 const debug = require('debug')('loadTrackers');
-const popsicle = require('popsicle');
-import {StatusCodeError} from "./errors";
 import getTrackerCodeMeta from "./getTrackerCodeMeta";
 
 
@@ -12,19 +10,17 @@ const loadTrackers = () => {
     'opentorrent', 'piratebit', 'rgfootball', 'rutor',
     'rutracker', 'tapochek', 'tfile', 'thepiratebay'
   ].map(id => {
-    return popsicle.get('./trackers/' + id + '.js').then(response => {
-      if (!/^2/.test('' + response.status)) {
-        throw new StatusCodeError(response.status, response.body, null, response);
-      }
-
+    return fetch('./trackers/' + id + '.js').then(response => {
+      return response.text();
+    }).then(response => {
       return {
         id: id,
-        meta: getTrackerCodeMeta(response.body),
+        meta: getTrackerCodeMeta(response),
         info: {
           lastUpdate: 0,
           disableAutoUpdate: false,
         },
-        code: response.body,
+        code: response,
       }
     }).catch(function (err) {
       debug('Load tracker error', err);
