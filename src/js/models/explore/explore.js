@@ -15,7 +15,6 @@ const debug = require('debug')('explore');
  * Actions:
  * @property {string} setState
  * Views:
- * @property {function:ExploreModuleM[]} getSections
  */
 
 const exploreModel = types.model('exploreModel', {
@@ -52,11 +51,6 @@ const exploreModel = types.model('exploreModel', {
       }).catch(err => {
         debug('Load explore error', err);
         self.setState('error');
-      });
-    },
-    getSections() {
-      return self.sections.map(section => {
-        return section;
       });
     }
   };

@@ -15,7 +15,7 @@ const debug = require('debug')('Explore');
       }
       case 'ready': {
         const sections = [];
-        store.explore.getSections().forEach(section => {
+        store.explore.sections.forEach(section => {
           if (section.module) {
             sections.push(
               <ExploreSection key={section.id} section={section} store={store}/>
