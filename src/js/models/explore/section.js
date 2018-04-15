@@ -17,6 +17,7 @@ import moduleModel from "./module";
 const sectionModel = types.model('sectionModel', {
   id: types.identifier(types.string),
   downloadURL: types.maybe(types.string),
+  collapsed: types.optional(types.boolean, false),
   lines: types.optional(types.number, 2),
   width: types.optional(types.number, 120),
 }).actions(/**ExploreSectionM*/self => {
