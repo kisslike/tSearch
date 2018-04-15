@@ -6,30 +6,18 @@ import promisifyApi from "../../tools/promisifyApi";
 const debug = require('debug')('explore');
 
 /**
- * @typedef {{}} ExploreSectionMetaM
+ * @typedef {ExploreModuleM} ExploreSectionM
  * Model:
+ * @property {string} id
  * @property {string} [downloadURL]
  * Actions:
  * Views:
- */
-
-const exploreSectionMetaModel = types.model('exploreSectionMetaModel', {
-  downloadURL: types.maybe(types.string),
-});
-
-/**
- * @typedef {{}} ExploreSectionM
- * Model:
- * @property {string} id
- * @property {ExploreSectionMetaM} meta
- * Actions:
- * Views:
- * @property {ExploreModuleM} module
+ * @property {ExploreModuleM} [module]
  */
 
 const sectionModel = types.model('sectionModel', {
   id: types.identifier(types.string),
-  meta: types.optional(exploreSectionMetaModel, {})
+  downloadURL: types.maybe(types.string),
 }).actions(/**ExploreSectionM*/self => {
   return {};
 }).views(/**ExploreSectionM*/self => {
@@ -49,7 +37,7 @@ const sectionModel = types.model('sectionModel', {
  * Actions:
  * @property {string} setState
  * Views:
- * @property {string} getSections
+ * @property {function:ExploreModuleM[]} getSections
  */
 
 const exploreModel = types.model('exploreModel', {
@@ -90,8 +78,8 @@ const exploreModel = types.model('exploreModel', {
     },
     getSections() {
       return self.sections.map(section => {
-        return section.module;
-      }).filter(a => !!a);
+        return section;
+      });
     }
   };
 });

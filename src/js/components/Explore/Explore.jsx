@@ -7,18 +7,20 @@ const debug = require('debug')('Explore');
 
 @observer class Explore extends React.Component {
   render() {
-    /**@type {IndexM}*/
-    const store = this.props.store;
+    const store = /**IndexM*/this.props.store;
 
     switch (store.explore.state) {
       case 'loading': {
         return 'Explore loading...';
       }
       case 'ready': {
-        const sections = store.explore.getSections().map(module => {
-          return (
-            <ExploreSection key={module.id} module={module} store={store}/>
-          );
+        const sections = [];
+        store.explore.getSections().forEach(section => {
+          if (section.module) {
+            sections.push(
+              <ExploreSection key={section.id} section={section} store={store}/>
+            );
+          }
         });
 
         return (
@@ -48,10 +50,8 @@ const debug = require('debug')('Explore');
     this.handleSetPage = this.handleSetPage.bind(this);
   }
   getDisplayItemCount() {
-    /**@type {IndexM}*/
-    const store = this.props.store;
-    /**@type {ExploreSectionM}*/
-    const module = this.props.module;
+    const store = /**IndexM*/this.props.store;
+    const module = /**ExploreModuleM*/this.props.section.module;
 
     const itemCount = Math.ceil((store.page.width - 175) / (module.width + 10 * 2)) - 1;
 
@@ -63,8 +63,8 @@ const debug = require('debug')('Explore');
     });
   }
   render() {
-    /**@type {ExploreSectionM}*/
-    const module = this.props.module;
+    const section = /**ExploreSectionM*/this.props.section;
+    const module = /**ExploreModuleM*/section.module;
 
     let openSite = null;
     if (module.meta.siteURL) {
@@ -104,7 +104,7 @@ const debug = require('debug')('Explore');
 
       items.forEach((item, i) => {
         return content.push(
-          <ExploreSectionItem key={i} module={module} item={item}/>
+          <ExploreSectionItem key={i} section={section} item={item}/>
         );
       });
     }
@@ -181,17 +181,15 @@ const debug = require('debug')('Explore');
   }
 
   handlePosterError(e) {
-    /**@type ExploreSectionItemM*/
-    const item = this.props.item;
+    const item = /**ExploreSectionItemM*/this.props.item;
 
     item.setPosterError(true);
   }
 
   render() {
-    /**@type ExploreSectionM*/
-    const module = this.props.module;
-    /**@type ExploreSectionItemM*/
-    const item = this.props.item;
+    const section = /**ExploreSectionM*/this.props.section;
+    const module = /**ExploreModuleM*/section.module;
+    const item = /**ExploreSectionItemM*/this.props.item;
 
     let posterUrl = null;
     if (item.posterError) {
