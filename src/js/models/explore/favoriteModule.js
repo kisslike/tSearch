@@ -12,6 +12,7 @@ const debug = require('debug')('favoriteModuleModel');
  * @property {function:Promise} loadCache
  * @property {function(ExploreSectionItemM):Promise} addItem
  * @property {function(ExploreSectionItemM):Promise} removeItem
+ * @property {function(number, number|null, number|null):Promise} moveItem
  */
 
 const favoriteModuleModel = types.compose('favoriteModuleModel', exploreModuleModel, types.model({
@@ -93,7 +94,7 @@ const favoriteModuleModel = types.compose('favoriteModuleModel', exploreModuleMo
       }
 
       self.setItems(items);
-      self.saveItems(items);
+      return self.saveItems(items);
     },
     sendCommand() {}
   };
