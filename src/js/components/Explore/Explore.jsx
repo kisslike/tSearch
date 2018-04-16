@@ -178,8 +178,9 @@ const debug = require('debug')('Explore');
 
     this.handleMouseEnter = this.handleMouseEnter.bind(this);
   }
-  handleMouseEnter(index, e) {
-    this.props.onSetPage(index);
+  handleMouseEnter(e) {
+    const page = parseInt(e.target.dataset.page, 10);
+    this.props.onSetPage(page);
   }
   render() {
     const page = this.props.page;
@@ -200,7 +201,7 @@ const debug = require('debug')('Explore');
         classList.push('item-active');
       }
       pages.push(
-        <li key={i} className={classList.join(' ')} onMouseEnter={this.handleMouseEnter.bind(this, i)}>{i + 1}</li>
+        <li key={i} className={classList.join(' ')} data-page={i} onMouseEnter={this.handleMouseEnter}>{i + 1}</li>
       );
     }
 
