@@ -44,10 +44,12 @@ const debug = require('debug')('Explore');
     super();
 
     this.state = {
-      page: 0
+      page: 0,
+      minBodyHeight: 0,
     };
 
     this.handleSetPage = this.handleSetPage.bind(this);
+    this.handleCollapse = this.handleCollapse.bind(this);
   }
   getDisplayItemCount() {
     const store = /**IndexM*/this.props.store;
@@ -58,9 +60,20 @@ const debug = require('debug')('Explore');
     return itemCount * section.lines;
   }
   handleSetPage(page) {
+    const bodyHeight = this.refs.bodyNode.clientHeight;
+    if (bodyHeight > this.state.minBodyHeight) {
+      this.state.minBodyHeight = bodyHeight;
+    }
     this.setState({
       page: page
     });
+  }
+  handleCollapse(e) {
+    if (e.target.classList.contains('section__head') || e.target.classList.contains('section__collapses')) {
+      e.preventDefault();
+      const section = /**ExploreSectionM*/this.props.section;
+      section.toggleCollapse();
+    }
   }
   render() {
     const section = /**ExploreSectionM*/this.props.section;
@@ -96,23 +109,31 @@ const debug = require('debug')('Explore');
       );
     }
 
-    const content = [];
     const displayItemCount = this.getDisplayItemCount();
-    const from = displayItemCount * this.state.page;
-
     const items = module.getItems();
 
-    const pages = (
-      <ExploreSectionPages page={this.state.page} itemCount={items.length} displayCount={displayItemCount} onSetPage={this.handleSetPage}/>
-    );
+    let page = this.state.page;
+    let from = 0;
+    let pageItems = null;
 
-    const pageItems = items.slice(from, from + displayItemCount);
+    while (!pageItems || (pageItems.length === 0 && page > 0)) {
+      if (pageItems) {
+        page--;
+      }
+      from = displayItemCount * page;
+      pageItems = items.slice(from, from + displayItemCount);
+    }
 
+    const content = [];
     pageItems.forEach((item, i) => {
       return content.push(
         <ExploreSectionItem key={from + i} section={section} item={item}/>
       );
     });
+
+    const pages = (
+      <ExploreSectionPages page={page} itemCount={items.length} displayCount={displayItemCount} onSetPage={this.handleSetPage}/>
+    );
 
     const classList = ['section'];
     if (module.state === 'loading') {
@@ -126,9 +147,13 @@ const debug = require('debug')('Explore');
       classList.push('section-empty');
     }
 
+    if (section.collapsed) {
+      classList.push('section-collapsed');
+    }
+
     return (
       <li className={classList.join(' ')}>
-        <div className="section__head">
+        <div className="section__head" onClick={this.handleCollapse}>
           <div className="section__move"/>
           <div className="section__title">{module.meta.getName()}</div>
           <div className="section__actions">
@@ -139,7 +164,9 @@ const debug = require('debug')('Explore');
           <div className="section__collapses"/>
         </div>
         {pages}
-        <ul className="section__body">{content}</ul>
+        <ul ref="bodyNode" className="section__body" style={{
+          minHeight: this.state.minBodyHeight
+        }}>{content}</ul>
       </li>
     );
   }

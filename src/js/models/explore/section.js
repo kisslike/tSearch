@@ -11,6 +11,7 @@ import favoriteModuleModel from "./favoriteModule";
  * @property {number} lines
  * @property {number} width
  * Actions:
+ * @property {function} toggleCollapse
  * Views:
  * @property {ExploreModuleM} [module]
  */
@@ -22,7 +23,11 @@ const sectionModel = types.model('sectionModel', {
   lines: types.optional(types.number, 2),
   width: types.optional(types.number, 120),
 }).actions(/**ExploreSectionM*/self => {
-  return {};
+  return {
+    toggleCollapse() {
+      self.collapsed = !self.collapsed;
+    },
+  };
 }).views(/**ExploreSectionM*/self => {
   return {
     get module() {
