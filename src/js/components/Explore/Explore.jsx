@@ -18,6 +18,7 @@ const Sortable = require('sortablejs');
     if (!node) {
       if (this.sortable) {
         this.sortable.destroy();
+        this.sortable = null;
         // debug('destroy');
       }
     } else
@@ -158,51 +159,60 @@ const Sortable = require('sortablejs');
     const module = /**ExploreModuleM*/section.module;
 
     let openSite = null;
-    if (module.meta.siteURL) {
-      openSite = (
-        <a className="action action__open" target="_blank" href={module.meta.siteURL} title={chrome.i18n.getMessage('goToTheWebsite')}/>
-      );
-    }
-
-    const actions = module.meta.actions.map((action, i) => {
-      const classList = ['action'];
-      if (action.isLoading) {
-        classList.push('loading');
-      }
-      switch (action.icon) {
-        case 'update': {
-          classList.push('action__update');
-          return <a key={i} href={"#"} onClick={action.handleClick} className={classList.join(' ')} title={action.getTitle()}/>;
-        }
-        default: {
-          return <a key={i} href={"#"} onClick={action.handleClick} className={classList.join(' ')} title={action.getTitle()}>{action.getTitle()}</a>;
-        }
-      }
-    });
-
-    /*if (module.authRequired) {
-      actions.unshift(
-        <a key={'authRequired'} className="action  action__open" target="_blank" href={module.authRequired.url}
-           title={chrome.i18n.getMessage('login')}/>
-      );
-    }*/
-
+    let actions = null;
     let options = null;
-    if (this.state.showOptions) {
-      options = (
-        <div className={'section__setup'}>
-          <input ref={'itemZoom'} onChange={this.handleItemZoomChange} defaultValue={section.zoom} type="range" className="setup__size_range" min="1" max="150"/>
-          <a onClick={this.handleResetItemZoom} className="setup__size_default" href="#" title={chrome.i18n.getMessage('default')}/>
-          <select ref={'rowCount'} onChange={this.handleRowCuntChange} defaultValue={section.rowCount} className="setup__lines">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-          </select>
-        </div>
-      );
+    if (!section.collapsed) {
+      if (module.meta.siteURL) {
+        openSite = (
+          <a className="action action__open" target="_blank" href={module.meta.siteURL}
+             title={chrome.i18n.getMessage('goToTheWebsite')}/>
+        );
+      }
+
+      actions = module.meta.actions.map((action, i) => {
+        const classList = ['action'];
+        if (action.isLoading) {
+          classList.push('loading');
+        }
+        switch (action.icon) {
+          case 'update': {
+            classList.push('action__update');
+            return <a key={i} href={"#"} onClick={action.handleClick} className={classList.join(' ')}
+                      title={action.getTitle()}/>;
+          }
+          default: {
+            return <a key={i} href={"#"} onClick={action.handleClick} className={classList.join(' ')}
+                      title={action.getTitle()}>{action.getTitle()}</a>;
+          }
+        }
+      });
+
+      /*if (module.authRequired) {
+        actions.unshift(
+          <a key={'authRequired'} className="action  action__open" target="_blank" href={module.authRequired.url}
+             title={chrome.i18n.getMessage('login')}/>
+        );
+      }*/
+
+      if (this.state.showOptions) {
+        options = (
+          <div className={'section__setup'}>
+            <input ref={'itemZoom'} onChange={this.handleItemZoomChange} defaultValue={section.zoom} type="range"
+                   className="setup__size_range" min="1" max="150"/>
+            <a onClick={this.handleResetItemZoom} className="setup__size_default" href="#"
+               title={chrome.i18n.getMessage('default')}/>
+            <select ref={'rowCount'} onChange={this.handleRowCuntChange} defaultValue={section.rowCount}
+                    className="setup__lines">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+            </select>
+          </div>
+        );
+      }
     }
 
     return (
@@ -226,29 +236,42 @@ const Sortable = require('sortablejs');
     const displayItemCount = this.getDisplayItemCount();
     const items = module.getItems();
 
-    let page = this.state.page;
-    let from = 0;
-    let pageItems = null;
+    let pages = null;
+    let content = null;
 
-    while (!pageItems || (pageItems.length === 0 && page > 0)) {
-      if (pageItems) {
-        page--;
+    if (!section.collapsed) {
+      let pageNumber = this.state.page;
+      let from = 0;
+      let pageItems = null;
+
+      while (!pageItems || (pageItems.length === 0 && pageNumber > 0)) {
+        if (pageItems) {
+          pageNumber--;
+        }
+        from = displayItemCount * pageNumber;
+        pageItems = items.slice(from, from + displayItemCount);
       }
-      from = displayItemCount * page;
-      pageItems = items.slice(from, from + displayItemCount);
+
+      const contentItems = pageItems.map((item, i) => {
+        return (
+          <ExploreSectionItem key={[from + i, item.url].join(':')} data-index={from + i} section={section} item={item}/>
+        );
+      });
+
+
+      pages = (
+        <ExploreSectionPages page={pageNumber} itemCount={items.length} displayCount={displayItemCount}
+                             onSetPage={this.handleSetPage}/>
+      );
+
+      content = (
+        <ul ref={this.refBody} className="section__body" style={{
+          minHeight: this.state.minBodyHeight
+        }}>{contentItems}</ul>
+      );
     }
 
-    const content = pageItems.map((item, i) => {
-      return (
-        <ExploreSectionItem key={[from + i, item.url].join(':')} data-index={from + i} section={section} item={item}/>
-      );
-    });
-
-    const pages = (
-      <ExploreSectionPages page={page} itemCount={items.length} displayCount={displayItemCount} onSetPage={this.handleSetPage}/>
-    );
-
-    return {pages, content};
+    return {pages, content, contentLength: items.length};
   }
   refBody(node) {
     this.bodyNode = node;
@@ -258,6 +281,7 @@ const Sortable = require('sortablejs');
       if (!node) {
         if (this.sortable) {
           this.sortable.destroy();
+          this.sortable = null;
           // debug('destroy');
         }
       } else
@@ -291,7 +315,7 @@ const Sortable = require('sortablejs');
 
     const head = this.getHead();
 
-    const {pages, content} = this.getBody();
+    const {pages, content, contentLength} = this.getBody();
 
     const classList = ['section'];
     if (module.state === 'loading') {
@@ -304,7 +328,7 @@ const Sortable = require('sortablejs');
       classList.push('section-error');
     }
 
-    if (module.id === 'favorite' && !content.length) {
+    if (module.id === 'favorite' && !contentLength) {
       classList.push('section-empty');
     }
 
@@ -316,9 +340,7 @@ const Sortable = require('sortablejs');
       <li data-index={this.props['data-index']} className={classList.join(' ')}>
         {head}
         {pages}
-        <ul ref={this.refBody} className="section__body" style={{
-          minHeight: this.state.minBodyHeight
-        }}>{content}</ul>
+        {content}
       </li>
     );
   }
