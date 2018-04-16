@@ -6,6 +6,9 @@ import sectionModel from "./section";
 import favoriteModuleModel from "./favoriteModule";
 
 const debug = require('debug')('explore');
+const promiseLimit = require('promise-limit');
+
+const limitOne = promiseLimit(1);
 
 /**
  * @typedef {{}} ExploreM
@@ -18,6 +21,7 @@ const debug = require('debug')('explore');
  * @property {function(ExploreSectionM[])} setSections
  * @property {string} setState
  * Views:
+ * @property {function:Promise} saveSections
  * @property {function(number,number|null,number|null)} moveSection
  */
 
@@ -39,6 +43,12 @@ const exploreModel = types.model('exploreModel', {
   };
 }).views(/**ExploreM*/self => {
   return {
+    saveSections() {
+      const sections = self.sections.slice(0);
+      return limitOne(() => {
+        return promisifyApi(chrome.storage.local.set)({explorerSections: sections});
+      });
+    },
     moveSection(index, prevIndex, nextIndex) {
       const sections = self.sections.slice(0);
       const item = sections[index];
@@ -71,6 +81,7 @@ const exploreModel = types.model('exploreModel', {
       }).then(async storage => {
         if (!storage.explorerModules.length) {
           storage.explorerModules = await loadExploreModules();
+          await promisifyApi(chrome.storage.local.set)({explorerModules: storage.explorerModules});
         }
         if (!storage.explorerSections.length) {
           storage.explorerSections = [{
@@ -94,6 +105,7 @@ const exploreModel = types.model('exploreModel', {
           }, {
             id: 'ggGamesTop'
           }];
+          await promisifyApi(chrome.storage.local.set)({explorerSections: storage.explorerSections});
         }
         applySnapshot(self, Object.assign({}, {
           sections: storage.explorerSections,

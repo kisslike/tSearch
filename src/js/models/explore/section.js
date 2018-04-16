@@ -1,4 +1,4 @@
-import {resolveIdentifier, types} from "mobx-state-tree";
+import {resolveIdentifier, types, getParent} from "mobx-state-tree";
 import moduleModel from "./module";
 import favoriteModuleModel from "./favoriteModule";
 
@@ -11,11 +11,12 @@ import favoriteModuleModel from "./favoriteModule";
  * @property {number} rowCount
  * @property {number} zoom
  * Actions:
- * @property {function} toggleCollapse
- * @property {function(number)} setItemZoom
- * @property {function(number)} setRowCount
+ * @property {function:Promise} toggleCollapse
+ * @property {function(number):Promise} setItemZoom
+ * @property {function(number):Promise} setRowCount
  * Views:
  * @property {ExploreModuleM} [module]
+ * @property {function:Promise} saveSection
  */
 
 const sectionModel = types.model('sectionModel', {
@@ -28,12 +29,15 @@ const sectionModel = types.model('sectionModel', {
   return {
     toggleCollapse() {
       self.collapsed = !self.collapsed;
+      return self.saveSection();
     },
     setItemZoom(size) {
       self.zoom = size;
+      return self.saveSection();
     },
     setRowCount(count) {
       self.rowCount = count;
+      return self.saveSection();
     },
   };
 }).views(/**ExploreSectionM*/self => {
@@ -45,6 +49,10 @@ const sectionModel = types.model('sectionModel', {
         return resolveIdentifier(moduleModel, self, self.id);
       }
     },
+    saveSection() {
+      const sections = getParent(self, 2);
+      return sections.saveSections();
+    }
   };
 });
 

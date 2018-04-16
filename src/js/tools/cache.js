@@ -1,5 +1,9 @@
 import promisifyApi from "./promisifyApi";
 
+const promiseLimit = require('promise-limit');
+
+const limitOne = promiseLimit(1);
+
 /**
  * @typedef {{}} CacheObject
  * @property {number} [insertTime]
@@ -70,11 +74,15 @@ class Cache {
    * @return {Promise<CacheObject>}
    */
   setData(data) {
-    return promisifyApi(chrome.storage[this._storageType].set)({
-      [this.getKey()]: this._cache = {
-        data: data,
-        insertTime: Math.trunc(Date.now() / 1000),
-      }
+    this._cache = {
+      data: data,
+      insertTime: Math.trunc(Date.now() / 1000),
+    };
+
+    return limitOne(() => {
+      return promisifyApi(chrome.storage[this._storageType].set)({
+        [this.getKey()]: this._cache
+      });
     }).then(() => this._cache);
   }
 }
