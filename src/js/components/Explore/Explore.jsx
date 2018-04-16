@@ -3,6 +3,7 @@ import {observer} from 'mobx-react';
 import exploreStyle from '../../../css/explore.less';
 
 const debug = require('debug')('Explore');
+const Sortable = require('sortablejs');
 
 
 @observer class Explore extends React.Component {
@@ -55,6 +56,10 @@ const debug = require('debug')('Explore');
     this.handleItemZoomChange = this.handleItemZoomChange.bind(this);
     this.handleRowCuntChange = this.handleRowCuntChange.bind(this);
     this.handleResetItemZoom = this.handleResetItemZoom.bind(this);
+    this.refBody = this.refBody.bind(this);
+
+    this.bodyNode = null;
+    this.sortable = null;
   }
   getDisplayItemCount() {
     const store = /**IndexM*/this.props.store;
@@ -65,7 +70,7 @@ const debug = require('debug')('Explore');
     return itemCount * section.rowCount;
   }
   handleSetPage(page) {
-    const bodyHeight = this.refs.bodyNode.clientHeight;
+    const bodyHeight = this.bodyNode.clientHeight;
     if (bodyHeight > this.state.minBodyHeight) {
       this.state.minBodyHeight = bodyHeight;
     }
@@ -192,7 +197,7 @@ const debug = require('debug')('Explore');
 
     const content = pageItems.map((item, i) => {
       return (
-        <ExploreSectionItem key={from + i} section={section} item={item}/>
+        <ExploreSectionItem key={[from + i, item.url].join(':')} data-index={from + i} section={section} item={item}/>
       );
     });
 
@@ -201,6 +206,38 @@ const debug = require('debug')('Explore');
     );
 
     return {pages, content};
+  }
+  refBody(node) {
+    this.bodyNode = node;
+
+    const section = /**ExploreSectionM*/this.props.section;
+    if (section.id === 'favorite') {
+      if (!node) {
+        if (this.sortable) {
+          this.sortable.destroy();
+          // debug('destroy');
+        }
+      } else
+      if (this.sortable) {
+        // debug('update');
+      } else {
+        // debug('create');
+        this.sortable = new Sortable(node, {
+          handle: '.action__move',
+          onEnd(e) {
+            const itemNode = e.item;
+            const prevNode = itemNode.previousElementSibling;
+            const nextNode = itemNode.nextElementSibling;
+            const index = parseInt(itemNode.dataset.index, 10);
+            const prev = prevNode && parseInt(prevNode.dataset.index, 10);
+            const next = nextNode && parseInt(nextNode.dataset.index, 10);
+
+            const module = /**ExploreModuleM*/section.module;
+            module.moveItem(index, prev, next);
+          }
+        });
+      }
+    }
   }
   render() {
     const section = /**ExploreSectionM*/this.props.section;
@@ -233,7 +270,7 @@ const debug = require('debug')('Explore');
       <li className={classList.join(' ')}>
         {head}
         {pages}
-        <ul ref="bodyNode" className="section__body" style={{
+        <ul ref={this.refBody} className="section__body" style={{
           minHeight: this.state.minBodyHeight
         }}>{content}</ul>
       </li>
@@ -333,7 +370,7 @@ const debug = require('debug')('Explore');
     }
 
     return (
-      <li className="section__poster poster" style={itemStyle}>
+      <li className="section__poster poster" style={itemStyle} data-index={this.props['data-index']}>
         <div className="poster__image">
           {actions}
           <div className="action__quick_search" title={chrome.i18n.getMessage('quickSearch')}>{'?'}</div>

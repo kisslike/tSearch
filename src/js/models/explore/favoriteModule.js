@@ -71,6 +71,30 @@ const favoriteModuleModel = types.compose('favoriteModuleModel', exploreModuleMo
       self.setItems(items);
       return self.saveItems(items);
     },
+    moveItem(index, prevIndex, nextIndex) {
+      const items = self.items.slice(0);
+      const item = items[index];
+      const prevItem = items[prevIndex];
+      const nextItem = items[nextIndex];
+
+      items.splice(index, 1);
+
+      if (prevItem) {
+        const pos = items.indexOf(prevItem);
+        if (pos !== -1) {
+          items.splice(pos + 1, 0, item);
+        }
+      } else
+      if (nextItem) {
+        const pos = items.indexOf(nextItem);
+        if (pos !== -1) {
+          items.splice(pos, 0, item);
+        }
+      }
+
+      self.setItems(items);
+      self.saveItems(items);
+    },
     sendCommand() {}
   };
 });
