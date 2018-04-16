@@ -4,10 +4,9 @@ import getExploreSectionCodeMeta from "./getExploreSectionCodeMeta";
 
 const loadExploreModules = () => {
   return Promise.all([
-    'kpFavorites', 'kpInCinema', 'kpPopular', 'kpSeries'
+    'kpFavorites', 'kpInCinema', 'kpPopular', 'kpSeries',
+    'imdbInCinema', 'imdbPopular', 'imdbSeries',
     /*
-    'kpFavorites', 'kpInCinema', 'kpSerials', 'kpPopular',
-    'imdbInCinema', 'imdbPopular', 'imdbSerials',
     'ggGamesTop', 'ggGamesNew',*/
   ].map(id => {
     return fetch('./exploreSections/' + id + '.js').then(response => {

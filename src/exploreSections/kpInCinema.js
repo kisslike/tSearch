@@ -2,8 +2,8 @@
 // @name __MSG_name__
 // @connect *://*.kinopoisk.ru/*
 // @version 1.0
-// @locale ru {"name": "Кнопоиск: в кино", "update": "Обновить"}
-// @locale en {"name": "Kinopoisk: in cinema", "update": "Update"}
+// @locale ru {"name": "Кнопоиск: в кино"}
+// @locale en {"name": "Kinopoisk: in cinema"}
 // @defaultLocale en
 // ==/UserScript==
 

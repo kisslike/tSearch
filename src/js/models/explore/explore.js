@@ -51,9 +51,15 @@ const exploreModel = types.model('exploreModel', {
           }, {
             id: 'kpInCinema'
           }, {
+            id: 'imdbInCinema'
+          }, {
             id: 'kpPopular'
           }, {
+            id: 'imdbPopular'
+          }, {
             id: 'kpSeries'
+          }, {
+            id: 'imdbSeries'
           }];
         }
         applySnapshot(self, Object.assign({}, {

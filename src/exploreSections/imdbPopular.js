@@ -1,37 +1,22 @@
 // ==UserScript==
 // @name __MSG_name__
-// @connect *://*.kinopoisk.ru/*
+// @connect *://*.imdb.com/*
 // @version 1.0
-// @locale ru {"name": "Сериалы"}
-// @locale en {"name": "Series"}
+// @locale ru {"name": "IMDB: Фильмы"}
+// @locale en {"name": "IMDB: Movies"}
 // @defaultLocale en
 // ==/UserScript==
 
-const kpGetImgFileName = url => {
-  return url.replace(/sm_film/, 'film');
+const imdbGetImgFilename = url => {
+  return url.replace(/(\/images\/.+)_V1.*$/, '$1_V1_SX120_.jpg');
 };
 
 const spaceReplace = text => {
   return text.replace(/[\s\xA0]/g, ' ');
 };
 
-const parseTitleType = text => {
-  const m = /^(.*)\s+\([^)]+\)$/.exec(text);
-  if (m) {
-    return {
-      title: m[1]
-    };
-  }
-};
-
-const parseInfo = text => {
-  const m = /^(?:(.*)\s+|)\((\d{4})[^)]*\)(?:\s+\d+\s+.{3}\.)?$/.exec(text);
-  if (m) {
-    return {
-      title: m[1],
-      year: parseInt(m[2], 10)
-    };
-  }
+const rmRef = url => {
+  return url.replace(/\?ref.*$/, '');
 };
 
 const validateItem = item => {
@@ -50,41 +35,40 @@ const normText = node => {
   return spaceReplace(text(node)).trim();
 };
 
+const normYear = text => {
+  const m = /\((\d{4})\)$/.exec(text);
+  if (m) {
+    return m[1];
+  }
+};
+
 const prop = (node, prop) => {
   return node && node[prop];
 };
 
 const parseItem = item => {
-  const linkNode = item.querySelector('td~td > div > a');
-  const url = prop(linkNode, 'href');
-
-  let title = null;
-  const titleType = parseTitleType(normText(linkNode));
-  if (titleType) {
-    title = titleType.title;
+  const imgNode = item.querySelector('.lister-item-image img[loadlate]');
+  if (imgNode) {
+    imgNode.src = imgNode.getAttribute('loadlate');
   }
+  const poster = imdbGetImgFilename(prop(imgNode, 'src') || '');
 
-  const imgNode = item.querySelector('.poster img[src]');
-  const href = prop(imgNode, 'src');
-  if (/spacer\.gif$/.test(href)) {
-    imgNode.src = imgNode.title;
-  }
-  const poster = kpGetImgFileName(prop(imgNode, 'src') || '');
+  const linkNode = item.querySelector('.lister-item-header > a');
+  const url = rmRef(prop(linkNode, 'href'));
+  let title = normText(linkNode);
 
-  let titleOriginal = null;
-  const info = parseInfo(normText(item.querySelector('td~td > div > a~span')));
-  if (info) {
-    titleOriginal = info.title;
+  const year = normYear(normText(item.querySelector('.lister-item-header > a + span')));
+
+  if (year) {
+    if (title) {
+      title += ' ' + year;
+    }
   }
 
   const result = {
     title: title,
     url: url
   };
-
-  if (titleOriginal) {
-    result.titleOriginal = titleOriginal;
-  }
 
   if (poster) {
     result.poster = poster;
@@ -99,7 +83,7 @@ const onPageLoad = response => {
 
   const ddBl = {};
   const results = [];
-  Array.from(doc.querySelectorAll('#itemList > tbody > tr')).forEach(item => {
+  Array.from(doc.querySelectorAll('.lister-list > .lister-item')).forEach(item => {
     try {
       const result = parseItem(item);
 
@@ -121,7 +105,7 @@ const onPageLoad = response => {
 const getItems = () => {
   return API_request({
     method: 'GET',
-    url: 'http://www.kinopoisk.ru/top/lists/45/perpage/100/'
+    url: `http://www.imdb.com/search/title?count=100&title_type=feature`
   }).then(response => {
     return onPageLoad(response);
   });
