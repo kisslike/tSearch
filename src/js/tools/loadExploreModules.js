@@ -6,8 +6,7 @@ const loadExploreModules = () => {
   return Promise.all([
     'kpFavorites', 'kpInCinema', 'kpPopular', 'kpSeries',
     'imdbInCinema', 'imdbPopular', 'imdbSeries',
-    /*
-    'ggGamesTop', 'ggGamesNew',*/
+    'ggGamesNew', 'ggGamesTop',
   ].map(id => {
     return fetch('./exploreSections/' + id + '.js').then(response => {
       return response.text();

@@ -60,6 +60,10 @@ const exploreModel = types.model('exploreModel', {
             id: 'kpSeries'
           }, {
             id: 'imdbSeries'
+          }, {
+            id: 'ggGamesNew'
+          }, {
+            id: 'ggGamesTop'
           }];
         }
         applySnapshot(self, Object.assign({}, {
