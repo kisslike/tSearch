@@ -71,7 +71,7 @@ const exploreModel = types.model('exploreModel', {
       }
 
       self.setSections(sections);
-      // return self.saveSections(sections);
+      return self.saveSections();
     },
     afterCreate() {
       self.setState('loading');
