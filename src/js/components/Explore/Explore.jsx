@@ -185,7 +185,7 @@ const debug = require('debug')('Explore');
     if (this.state.showOptions) {
       options = (
         <div className={'section__setup'}>
-          <input ref={'itemZoom'} onChange={this.handleItemZoomChange} defaultValue={section.zoom} type="range" className="setup__size_range" min="0" max="200"/>
+          <input ref={'itemZoom'} onChange={this.handleItemZoomChange} defaultValue={section.zoom} type="range" className="setup__size_range" min="1" max="200"/>
           <a onClick={this.handleResetItemZoom} className="setup__size_default" href="#" title={chrome.i18n.getMessage('default')}/>
           <select ref={'rowCount'} onChange={this.handleRowCuntChange} defaultValue={section.rowCount} className="setup__lines">
             <option value="1">1</option>
