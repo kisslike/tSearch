@@ -27,7 +27,10 @@ const Sortable = require('sortablejs');
       // debug('create');
       const self = this;
       this.sortable = new Sortable(node, {
+        group: 'sections',
         handle: '.section__move',
+        draggable: '.section',
+        animation: 150,
         onStart() {
           node.classList.add('explore-sort');
         },
@@ -263,7 +266,10 @@ const Sortable = require('sortablejs');
       } else {
         // debug('create');
         this.sortable = new Sortable(node, {
+          group: 'favorite',
           handle: '.action__move',
+          draggable: '.section__poster',
+          animation: 150,
           onEnd(e) {
             const itemNode = e.item;
             const prevNode = itemNode.previousElementSibling;
