@@ -44,8 +44,8 @@ const exploreModel = types.model('exploreModel', {
 }).views(/**ExploreM*/self => {
   return {
     saveSections() {
-      const sections = self.sections.slice(0);
       return limitOne(() => {
+        const sections = self.sections.slice(0);
         return promisifyApi(chrome.storage.local.set)({explorerSections: sections});
       });
     },
