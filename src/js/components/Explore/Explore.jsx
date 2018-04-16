@@ -105,7 +105,7 @@ const debug = require('debug')('Explore');
     this.refs.itemZoom.value = 100;
     section.setItemZoom(100);
   }
-  render() {
+  getHead() {
     const section = /**ExploreSectionM*/this.props.section;
     const module = /**ExploreModuleM*/section.module;
 
@@ -132,12 +132,48 @@ const debug = require('debug')('Explore');
       }
     });
 
-    if (module.authRequired) {
+    /*if (module.authRequired) {
       actions.unshift(
         <a key={'authRequired'} className="action  action__open" target="_blank" href={module.authRequired.url}
            title={chrome.i18n.getMessage('login')}/>
       );
+    }*/
+
+    let options = null;
+    if (this.state.showOptions) {
+      options = (
+        <div className={'section__setup'}>
+          <input ref={'itemZoom'} onChange={this.handleItemZoomChange} defaultValue={section.zoom} type="range" className="setup__size_range" min="1" max="150"/>
+          <a onClick={this.handleResetItemZoom} className="setup__size_default" href="#" title={chrome.i18n.getMessage('default')}/>
+          <select ref={'rowCount'} onChange={this.handleRowCuntChange} defaultValue={section.rowCount} className="setup__lines">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+        </div>
+      );
     }
+
+    return (
+      <div className="section__head" onClick={this.handleCollapse}>
+        <div className="section__move"/>
+        <div className="section__title">{module.meta.getName()}</div>
+        <div className="section__actions">
+          {openSite}
+          {actions}
+          <a href={"#"} onClick={this.handleOptionsClick} className="action action__setup" title={chrome.i18n.getMessage('setupView')}/>
+          {options}
+        </div>
+        <div className="section__collapses"/>
+      </div>
+    );
+  }
+  getBody() {
+    const section = /**ExploreSectionM*/this.props.section;
+    const module = /**ExploreModuleM*/section.module;
 
     const displayItemCount = this.getDisplayItemCount();
     const items = module.getItems();
@@ -154,9 +190,8 @@ const debug = require('debug')('Explore');
       pageItems = items.slice(from, from + displayItemCount);
     }
 
-    const content = [];
-    pageItems.forEach((item, i) => {
-      return content.push(
+    const content = pageItems.map((item, i) => {
+      return (
         <ExploreSectionItem key={from + i} section={section} item={item}/>
       );
     });
@@ -165,15 +200,28 @@ const debug = require('debug')('Explore');
       <ExploreSectionPages page={page} itemCount={items.length} displayCount={displayItemCount} onSetPage={this.handleSetPage}/>
     );
 
+    return {pages, content};
+  }
+  render() {
+    const section = /**ExploreSectionM*/this.props.section;
+    const module = /**ExploreModuleM*/section.module;
+
+    const head = this.getHead();
+
+    const {pages, content} = this.getBody();
+
     const classList = ['section'];
     if (module.state === 'loading') {
       classList.push('section-loading');
+    } else
+    if (module.authRequired) {
+      classList.push('section-login');
     } else
     if (module.state === 'error') {
       classList.push('section-error');
     }
 
-    if (module.id === 'favorite' && !items.length) {
+    if (module.id === 'favorite' && !content.length) {
       classList.push('section-empty');
     }
 
@@ -181,37 +229,9 @@ const debug = require('debug')('Explore');
       classList.push('section-collapsed');
     }
 
-    let options = null;
-    if (this.state.showOptions) {
-      options = (
-        <div className={'section__setup'}>
-          <input ref={'itemZoom'} onChange={this.handleItemZoomChange} defaultValue={section.zoom} type="range" className="setup__size_range" min="1" max="200"/>
-          <a onClick={this.handleResetItemZoom} className="setup__size_default" href="#" title={chrome.i18n.getMessage('default')}/>
-          <select ref={'rowCount'} onChange={this.handleRowCuntChange} defaultValue={section.rowCount} className="setup__lines">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-          </select>
-        </div>
-      );
-    }
-
     return (
       <li className={classList.join(' ')}>
-        <div className="section__head" onClick={this.handleCollapse}>
-          <div className="section__move"/>
-          <div className="section__title">{module.meta.getName()}</div>
-          <div className="section__actions">
-            {openSite}
-            {actions}
-            <a href={"#"} onClick={this.handleOptionsClick} className="action action__setup" title={chrome.i18n.getMessage('setupView')}/>
-            {options}
-          </div>
-          <div className="section__collapses"/>
-        </div>
+        {head}
         {pages}
         <ul ref="bodyNode" className="section__body" style={{
           minHeight: this.state.minBodyHeight

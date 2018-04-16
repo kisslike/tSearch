@@ -1,5 +1,6 @@
 // ==UserScript==
 // @name __MSG_name__
+// @siteURL https://www.kinopoisk.ru
 // @connect *://*.kinopoisk.ru/*
 // @version 1.0
 // @action {"icon":"update","title":"__MSG_update__","command":"update"}
