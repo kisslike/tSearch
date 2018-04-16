@@ -7,6 +7,46 @@ const Sortable = require('sortablejs');
 
 
 @observer class Explore extends React.Component {
+  constructor() {
+    super();
+
+    this.refSections = this.refSections.bind(this);
+
+    this.sortable = null;
+  }
+  refSections(node) {
+    if (!node) {
+      if (this.sortable) {
+        this.sortable.destroy();
+        // debug('destroy');
+      }
+    } else
+    if (this.sortable) {
+      // debug('update');
+    } else {
+      // debug('create');
+      const self = this;
+      this.sortable = new Sortable(node, {
+        handle: '.section__move',
+        onStart() {
+          node.classList.add('explore-sort');
+        },
+        onEnd(e) {
+          node.classList.remove('explore-sort');
+
+          const itemNode = e.item;
+          const prevNode = itemNode.previousElementSibling;
+          const nextNode = itemNode.nextElementSibling;
+          const index = parseInt(itemNode.dataset.index, 10);
+          const prev = prevNode && parseInt(prevNode.dataset.index, 10);
+          const next = nextNode && parseInt(nextNode.dataset.index, 10);
+
+          const store = /**IndexM*/self.props.store;
+          store.explore.moveSection(index, prev, next);
+        }
+      });
+    }
+  }
   render() {
     const store = /**IndexM*/this.props.store;
 
@@ -16,16 +56,16 @@ const Sortable = require('sortablejs');
       }
       case 'ready': {
         const sections = [];
-        store.explore.sections.forEach(section => {
+        store.explore.sections.forEach((section, index) => {
           if (section.module) {
             sections.push(
-              <ExploreSection key={section.id} section={section} store={store}/>
+              <ExploreSection key={section.id} data-index={index} section={section} store={store}/>
             );
           }
         });
 
         return (
-          <ul className="explore">
+          <ul ref={this.refSections} className="explore">
             {sections}
           </ul>
         );
@@ -267,7 +307,7 @@ const Sortable = require('sortablejs');
     }
 
     return (
-      <li className={classList.join(' ')}>
+      <li data-index={this.props['data-index']} className={classList.join(' ')}>
         {head}
         {pages}
         <ul ref={this.refBody} className="section__body" style={{

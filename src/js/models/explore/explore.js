@@ -15,8 +15,10 @@ const debug = require('debug')('explore');
  * @property {ExploreModuleM[]} modules
  * @property {ExploreFavoriteModuleM} favouriteModule
  * Actions:
+ * @property {function(ExploreSectionM[])} setSections
  * @property {string} setState
  * Views:
+ * @property {function(number,number|null,number|null)} moveSection
  */
 
 const exploreModel = types.model('exploreModel', {
@@ -28,12 +30,39 @@ const exploreModel = types.model('exploreModel', {
   }),
 }).actions(/**ExploreM*/self => {
   return {
+    setSections(sections) {
+      self.sections = sections;
+    },
     setState(value) {
       self.state = value;
     }
   };
 }).views(/**ExploreM*/self => {
   return {
+    moveSection(index, prevIndex, nextIndex) {
+      const sections = self.sections.slice(0);
+      const item = sections[index];
+      const prevItem = sections[prevIndex];
+      const nextItem = sections[nextIndex];
+
+      sections.splice(index, 1);
+
+      if (prevItem) {
+        const pos = sections.indexOf(prevItem);
+        if (pos !== -1) {
+          sections.splice(pos + 1, 0, item);
+        }
+      } else
+      if (nextItem) {
+        const pos = sections.indexOf(nextItem);
+        if (pos !== -1) {
+          sections.splice(pos, 0, item);
+        }
+      }
+
+      self.setSections(sections);
+      // return self.saveSections(sections);
+    },
     afterCreate() {
       self.setState('loading');
       return promisifyApi(chrome.storage.local.get)({
