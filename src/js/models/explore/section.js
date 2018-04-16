@@ -8,10 +8,12 @@ import favoriteModuleModel from "./favoriteModule";
  * Model:
  * @property {string} id
  * @property {string} [downloadURL]
- * @property {number} lines
- * @property {number} width
+ * @property {number} rowCount
+ * @property {number} zoom
  * Actions:
  * @property {function} toggleCollapse
+ * @property {function(number)} setItemZoom
+ * @property {function(number)} setRowCount
  * Views:
  * @property {ExploreModuleM} [module]
  */
@@ -20,12 +22,18 @@ const sectionModel = types.model('sectionModel', {
   id: types.identifier(types.string),
   downloadURL: types.maybe(types.string),
   collapsed: types.optional(types.boolean, false),
-  lines: types.optional(types.number, 2),
-  width: types.optional(types.number, 120),
+  rowCount: types.optional(types.number, 2),
+  zoom: types.optional(types.number, 100),
 }).actions(/**ExploreSectionM*/self => {
   return {
     toggleCollapse() {
       self.collapsed = !self.collapsed;
+    },
+    setItemZoom(size) {
+      self.zoom = size;
+    },
+    setRowCount(count) {
+      self.rowCount = count;
     },
   };
 }).views(/**ExploreSectionM*/self => {

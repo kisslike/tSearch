@@ -46,18 +46,23 @@ const debug = require('debug')('Explore');
     this.state = {
       page: 0,
       minBodyHeight: 0,
+      showOptions: false,
     };
 
     this.handleSetPage = this.handleSetPage.bind(this);
     this.handleCollapse = this.handleCollapse.bind(this);
+    this.handleOptionsClick = this.handleOptionsClick.bind(this);
+    this.handleItemZoomChange = this.handleItemZoomChange.bind(this);
+    this.handleRowCuntChange = this.handleRowCuntChange.bind(this);
+    this.handleResetItemZoom = this.handleResetItemZoom.bind(this);
   }
   getDisplayItemCount() {
     const store = /**IndexM*/this.props.store;
     const section = /**ExploreSectionM*/this.props.section;
 
-    const itemCount = Math.ceil((store.page.width - 175) / (section.width + 10 * 2)) - 1;
+    const itemCount = Math.ceil((store.page.width - 175) / (120 * section.zoom / 100 + 10 * 2)) - 1;
 
-    return itemCount * section.lines;
+    return itemCount * section.rowCount;
   }
   handleSetPage(page) {
     const bodyHeight = this.refs.bodyNode.clientHeight;
@@ -74,6 +79,31 @@ const debug = require('debug')('Explore');
       const section = /**ExploreSectionM*/this.props.section;
       section.toggleCollapse();
     }
+  }
+  handleOptionsClick(e) {
+    e.preventDefault();
+    this.setState({
+      showOptions: !this.state.showOptions
+    });
+  }
+  handleItemZoomChange(e) {
+    this.state.minBodyHeight = 0;
+    const zoom = parseInt(this.refs.itemZoom.value, 10);
+    const section = /**ExploreSectionM*/this.props.section;
+    section.setItemZoom(zoom);
+  }
+  handleRowCuntChange(e) {
+    this.state.minBodyHeight = 0;
+    const count = parseInt(this.refs.rowCount.value, 10);
+    const section = /**ExploreSectionM*/this.props.section;
+    section.setRowCount(count);
+  }
+  handleResetItemZoom(e) {
+    e.preventDefault();
+    this.state.minBodyHeight = 0;
+    const section = /**ExploreSectionM*/this.props.section;
+    this.refs.itemZoom.value = 100;
+    section.setItemZoom(100);
   }
   render() {
     const section = /**ExploreSectionM*/this.props.section;
@@ -151,6 +181,24 @@ const debug = require('debug')('Explore');
       classList.push('section-collapsed');
     }
 
+    let options = null;
+    if (this.state.showOptions) {
+      options = (
+        <div className={'section__setup'}>
+          <input ref={'itemZoom'} onChange={this.handleItemZoomChange} defaultValue={section.zoom} type="range" className="setup__size_range" min="0" max="200"/>
+          <a onClick={this.handleResetItemZoom} className="setup__size_default" href="#" title={chrome.i18n.getMessage('default')}/>
+          <select ref={'rowCount'} onChange={this.handleRowCuntChange} defaultValue={section.rowCount} className="setup__lines">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+        </div>
+      );
+    }
+
     return (
       <li className={classList.join(' ')}>
         <div className="section__head" onClick={this.handleCollapse}>
@@ -159,7 +207,8 @@ const debug = require('debug')('Explore');
           <div className="section__actions">
             {openSite}
             {actions}
-            <a href={"#"} className="action action__setup" title={chrome.i18n.getMessage('setupView')}/>
+            <a href={"#"} onClick={this.handleOptionsClick} className="action action__setup" title={chrome.i18n.getMessage('setupView')}/>
+            {options}
           </div>
           <div className="section__collapses"/>
         </div>
@@ -247,7 +296,7 @@ const debug = require('debug')('Explore');
     }
 
     const itemStyle = {
-      width: section.width
+      zoom: section.zoom / 100
     };
 
     const actions = [];
