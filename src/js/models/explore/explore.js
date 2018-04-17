@@ -80,7 +80,7 @@ const exploreModel = types.model('exploreModel', {
     },
     async loadModule(id) {
       if (id === 'favorite') {
-        return self.favouriteModule;
+        return null;
       }
 
       let module = self.modules.get(id);
