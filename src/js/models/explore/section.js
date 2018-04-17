@@ -58,6 +58,10 @@ const sectionModel = types.model('sectionModel', {
       const sections = getParent(self, 2);
       return sections.saveSections();
     },
+    postProcessSnapshot(snapshot) {
+      snapshot.state = undefined;
+      return snapshot;
+    },
     afterCreate() {
       self.setState('loading');
       const sections = getParent(self, 2);

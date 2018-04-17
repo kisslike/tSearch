@@ -59,7 +59,7 @@ const favoriteModuleModel = types.compose('favoriteModuleModel', exploreModuleMo
         const items = self.items.slice(0);
         items.push(item);
         self.setItems(items);
-        return self.saveItems(items);
+        return self.saveItems();
       });
     },
     removeItem(item) {
@@ -70,7 +70,7 @@ const favoriteModuleModel = types.compose('favoriteModuleModel', exploreModuleMo
       }
       items.splice(pos, 1);
       self.setItems(items);
-      return self.saveItems(items);
+      return self.saveItems();
     },
     moveItem(index, prevIndex, nextIndex) {
       const items = self.items.slice(0);
@@ -94,7 +94,7 @@ const favoriteModuleModel = types.compose('favoriteModuleModel', exploreModuleMo
       }
 
       self.setItems(items);
-      return self.saveItems(items);
+      return self.saveItems();
     },
     sendCommand() {}
   };

@@ -1,5 +1,5 @@
 import moduleModel from "./module";
-import {types, applySnapshot} from "mobx-state-tree";
+import {types, applySnapshot, getSnapshot} from "mobx-state-tree";
 import promisifyApi from "../../tools/promisifyApi";
 import sectionModel from "./section";
 import favoriteModuleModel from "./favoriteModule";
@@ -50,7 +50,7 @@ const exploreModel = types.model('exploreModel', {
   return {
     saveSections() {
       return limitOne(() => {
-        const sections = self.sections.slice(0);
+        const sections = getSnapshot(self.sections);
         return promisifyApi(chrome.storage.local.set)({explorerSections: sections});
       });
     },

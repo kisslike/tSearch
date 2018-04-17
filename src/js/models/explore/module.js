@@ -1,5 +1,5 @@
 import exploreSectionWorkerModel from "./sectionWorker";
-import {types, destroy} from "mobx-state-tree";
+import {types, destroy, getSnapshot} from "mobx-state-tree";
 import exploreModuleMetaModel from "./moduleMeta";
 import sectionItemMode from "./sectionItem";
 import Cache from "../../tools/cache";
@@ -24,7 +24,7 @@ const debug = require('debug')('exploreModuleModel');
  * @property {function({url:string}|null)} setAuthRequired
  * Views:
  * @property {function:Cache} getCache
- * @property {function(ExploreSectionItemM[]):Promise} saveItems
+ * @property {function:Promise} saveItems
  * @property {function:ExploreSectionItemM[]} getItems
  * @property {function} loadItems
  * @property {function(string)} sendCommand
@@ -82,8 +82,8 @@ const exploreModuleModel = types.model('exploreModuleModel', {
     getCache() {
       return cache;
     },
-    saveItems(items) {
-      return cache.setData(items);
+    saveItems() {
+      return cache.setData(getSnapshot(self.items));
     },
     getItems() {
       if (!cache.isLoaded()) {
@@ -108,7 +108,7 @@ const exploreModuleModel = types.model('exploreModuleModel', {
             const {items} = response;
             if (items) {
               self.setItems(items);
-              await self.saveItems(items);
+              await self.saveItems();
             }
           });
         }
@@ -133,7 +133,7 @@ const exploreModuleModel = types.model('exploreModuleModel', {
         const {items} = result;
         if (items) {
           self.setItems(items);
-          await self.saveItems(items);
+          await self.saveItems();
         }
       }).catch(err => {
         debug('sendCommand error', command, err);
