@@ -1,9 +1,9 @@
 import moduleModel from "./module";
 import {types, applySnapshot} from "mobx-state-tree";
-import loadExploreModules from "../../tools/loadExploreModules";
 import promisifyApi from "../../tools/promisifyApi";
 import sectionModel from "./section";
 import favoriteModuleModel from "./favoriteModule";
+import loadExploreModule from "../../tools/loadExploreModule";
 
 const debug = require('debug')('explore');
 const promiseLimit = require('promise-limit');
@@ -20,15 +20,17 @@ const limitOne = promiseLimit(1);
  * Actions:
  * @property {function(ExploreSectionM[])} setSections
  * @property {string} setState
+ * @property {function(ExploreFavoriteModuleM)} putModule
  * Views:
  * @property {function:Promise} saveSections
  * @property {function(number,number|null,number|null)} moveSection
+ * @property {function(string):Promise<ExploreFavoriteModuleM>} loadModule
  */
 
 const exploreModel = types.model('exploreModel', {
   state: types.optional(types.string, 'idle'), // idle, loading, ready, error
   sections: types.optional(types.array(sectionModel), []),
-  modules: types.optional(types.array(moduleModel), []),
+  modules: types.optional(types.map(moduleModel), {}),
   favouriteModule: types.optional(favoriteModuleModel, {
     id: 'favorite'
   }),
@@ -39,6 +41,9 @@ const exploreModel = types.model('exploreModel', {
     },
     setState(value) {
       self.state = value;
+    },
+    putModule(module) {
+      self.modules.put(module);
     }
   };
 }).views(/**ExploreM*/self => {
@@ -73,16 +78,32 @@ const exploreModel = types.model('exploreModel', {
       self.setSections(sections);
       return self.saveSections();
     },
+    async loadModule(id) {
+      if (id === 'favorite') {
+        return self.favouriteModule;
+      }
+
+      let module = self.modules.get(id);
+      if (!module) {
+        const key = `exploreModule_${id}`;
+        module = await promisifyApi(chrome.storage.local.get)({
+          [key]: null
+        }).then(storage => storage[key]);
+        if (!module) {
+          module = await loadExploreModule(id);
+          if (module) {
+            await promisifyApi(chrome.storage.local.set)({[key]: module});
+          }
+        }
+        self.putModule(module);
+      }
+      return module;
+    },
     afterCreate() {
       self.setState('loading');
       return promisifyApi(chrome.storage.local.get)({
-        explorerSections: [],
-        explorerModules: []
+        explorerSections: []
       }).then(async storage => {
-        if (!storage.explorerModules.length) {
-          storage.explorerModules = await loadExploreModules();
-          await promisifyApi(chrome.storage.local.set)({explorerModules: storage.explorerModules});
-        }
         if (!storage.explorerSections.length) {
           storage.explorerSections = [{
             id: 'favorite'
@@ -108,8 +129,7 @@ const exploreModel = types.model('exploreModel', {
           await promisifyApi(chrome.storage.local.set)({explorerSections: storage.explorerSections});
         }
         applySnapshot(self, Object.assign({}, {
-          sections: storage.explorerSections,
-          modules: storage.explorerModules
+          sections: storage.explorerSections
         }));
         self.setState('ready');
       }).catch(err => {

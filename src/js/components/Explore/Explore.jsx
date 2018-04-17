@@ -61,7 +61,7 @@ const Sortable = require('sortablejs');
       case 'ready': {
         const sections = [];
         store.explore.sections.forEach((section, index) => {
-          if (section.module) {
+          if (section.state === 'done' && section.module) {
             sections.push(
               <ExploreSection key={section.id} data-index={index} section={section} store={store}/>
             );

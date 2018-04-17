@@ -14,6 +14,7 @@ import favoriteModuleModel from "./favoriteModule";
  * @property {function:Promise} toggleCollapse
  * @property {function(number):Promise} setItemZoom
  * @property {function(number):Promise} setRowCount
+ * @property {function(string)} setState
  * Views:
  * @property {ExploreModuleM} [module]
  * @property {function:Promise} saveSection
@@ -21,6 +22,7 @@ import favoriteModuleModel from "./favoriteModule";
 
 const sectionModel = types.model('sectionModel', {
   id: types.identifier(types.string),
+  state: types.optional(types.string, 'idle'), // loading, done
   downloadURL: types.maybe(types.string),
   collapsed: types.optional(types.boolean, false),
   rowCount: types.optional(types.number, 2),
@@ -39,6 +41,9 @@ const sectionModel = types.model('sectionModel', {
       self.rowCount = count;
       return self.saveSection();
     },
+    setState(value) {
+      self.state = value;
+    }
   };
 }).views(/**ExploreSectionM*/self => {
   return {
@@ -52,6 +57,13 @@ const sectionModel = types.model('sectionModel', {
     saveSection() {
       const sections = getParent(self, 2);
       return sections.saveSections();
+    },
+    afterCreate() {
+      self.setState('loading');
+      const sections = getParent(self, 2);
+      sections.loadModule(self.id).then(() => {
+        self.setState('done');
+      });
     }
   };
 });
