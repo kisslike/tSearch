@@ -444,6 +444,7 @@ const Sortable = require('sortablejs');
 
   handleDialogClose(e) {
     this.setState({
+      posterError: false,
       edit: false
     });
   }
