@@ -1,4 +1,4 @@
-import profileModel from './profile';
+import profileModel from './profile/profile';
 import trackerModel from './tracker';
 import searchFormModel from "./searchForm";
 import searchFragModel from "./searchFrag";
@@ -7,6 +7,8 @@ import getSearchFragModelId from "../tools/getSearchFragModelId";
 import exploreModel from "./explore/explore";
 import pageModel from "./pageModel";
 import {types, destroy} from "mobx-state-tree";
+import promisifyApi from "../tools/promisifyApi";
+import loadTrackerModule from "../tools/loadTrackerModule";
 
 const debug = require('debug')('indexModel');
 
@@ -22,64 +24,36 @@ const debug = require('debug')('indexModel');
  * @property {ExploreM} explore
  * @property {PageM[]} page
  * Actions:
+ * @property {function(string)} setState
+ * @property {function(ProfileM[])} setProfiles
  * @property {function(string)} createSearch
  * @property {function} clearSearch
  * @property {function(string)} setProfile
+ * @property {function(TrackerM)} putTrackerModule
  * Views:
  * @property {function} onProfileChange
+ * @property {function(string)} loadTrackerModule
  * @property {function} afterCreate
  */
 
 const indexModel = types.model('indexModel', {
-  profile: types.reference(profileModel),
-  profiles: types.array(profileModel),
-  trackers: types.array(trackerModel),
+  state: types.optional(types.string, 'idle'), // idle, loading, ready, error
+  profile: types.maybe(types.reference(profileModel)),
+  profiles: types.optional(types.array(profileModel), []),
+  trackers: types.optional(types.map(trackerModel), {}),
   searchForm: types.optional(searchFormModel, {}),
   searchFrag: types.maybe(searchFragModel),
   filter: types.optional(filterModel, {}),
   explore: types.optional(exploreModel, {}),
   page: types.optional(pageModel, {}),
-}).preProcessSnapshot(snapshot => {
-  if (!snapshot.profiles.length) {
-    snapshot.profiles.push({
-      name: 'Default',
-      profileTrackers: [{
-        id: 'rutracker',
-        meta: {
-          name: 'rutracker'
-        }
-      }, {
-        id: 'nnmclub',
-        meta: {
-          name: 'nnmclub'
-        }
-      }, {
-        id: 'rutracker1',
-        meta: {
-          name: 'rutracker1'
-        }
-      }]
-    });
-    snapshot.profiles.push({
-      name: 'Default 2',
-      profileTrackers: [{
-        id: 'nnmclub1',
-        meta: {
-          name: 'nnmclub1'
-        }
-      }]
-    });
-  }
-  const profileFound = snapshot.profiles.some(profile => {
-    return snapshot.profile === profile.name;
-  });
-  if (!profileFound) {
-    snapshot.profile = snapshot.profiles[0].name;
-  }
-
-  return snapshot;
 }).actions(/**IndexM*/self => {
   return {
+    setState(value) {
+      self.state = value;
+    },
+    setProfiles(profiles) {
+      self.profiles = profiles;
+    },
     createSearch(query) {
       self.searchFrag = searchFragModel.create({
         id: getSearchFragModelId(),
@@ -94,21 +68,83 @@ const indexModel = types.model('indexModel', {
     },
     setProfile(name) {
       self.profile = name;
-      self.onProfileChange();
     },
+    putTrackerModule(module) {
+      self.trackers.put(module);
+    }
   };
 }).views(/**IndexM*/self => {
   return {
-    onProfileChange() {
-      self.profiles.forEach(profile => {
-        if (self.profile !== profile) {
-          profile.stop();
+    async loadTrackerModule(id) {
+      let module = self.trackers.get(id);
+      if (!module) {
+        const key = `trackerModule_${id}`;
+        module = await promisifyApi(chrome.storage.local.get)({
+          [key]: null
+        }).then(storage => storage[key]);
+        if (!module) {
+          module = await loadTrackerModule(id);
+          /*if (module) {
+            await promisifyApi(chrome.storage.local.set)({[key]: module});
+          }*/
         }
-      });
-      self.profile.start();
+        if (module) {
+          self.putTrackerModule(module);
+        }
+      }
+      return module;
     },
     afterCreate() {
-      self.onProfileChange();
+      self.setState('loading');
+      promisifyApi(chrome.storage.local.get)({
+        profile: null,
+        profiles: [],
+      }).then(storage => {
+        if (!storage.profiles.length) {
+          storage.profiles.push({
+            name: 'Default',
+            trackers: [{
+              id: 'rutracker',
+              meta: {
+                name: 'rutracker'
+              }
+            }, {
+              id: 'nnmclub',
+              meta: {
+                name: 'nnmclub'
+              }
+            }, {
+              id: 'rutracker1',
+              meta: {
+                name: 'rutracker1'
+              }
+            }]
+          });
+          storage.profiles.push({
+            name: 'Default 2',
+            trackers: [{
+              id: 'nnmclub1',
+              meta: {
+                name: 'nnmclub1'
+              }
+            }]
+          });
+        }
+        self.setProfiles(storage.profiles);
+
+        const profileFound = self.profiles.some(profile => {
+          return storage.profile === profile.name;
+        });
+        if (!profileFound) {
+          storage.profile = storage.profiles[0].name;
+        }
+        self.setProfile(storage.profile);
+      }).then(() => {
+        self.setState('ready');
+      }).catch(err => {
+        debug('index load error', err);
+        self.setState('error');
+      });
     }
   };
 });

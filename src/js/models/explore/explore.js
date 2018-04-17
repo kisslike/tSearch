@@ -95,7 +95,9 @@ const exploreModel = types.model('exploreModel', {
             await promisifyApi(chrome.storage.local.set)({[key]: module});
           }
         }
-        self.putModule(module);
+        if (module) {
+          self.putModule(module);
+        }
       }
       return module;
     },

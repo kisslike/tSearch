@@ -14,7 +14,7 @@ moment.locale(chrome.i18n.getUILanguage());
  * Model:
  * @property {string} id
  * @property {string} query
- * @property {TrackerM} tracker
+ * @property {TrackerM} trackerModule
  * @property {ProfileTrackerInfoM} trackerInfo
  * @property {string} readyState
  * @property {{url:string}} authRequired
@@ -108,7 +108,7 @@ const trackerResultModel = types.model('trackerResultModel', {
 const trackerSearchModel = types.model('trackerSearchModel', {
   id: types.identifier(types.string),
   query: types.string,
-  tracker: types.reference(trackerModel),
+  trackerModule: types.reference(trackerModel),
   trackerInfo: profileTrackerInfoModel,
   readyState: types.optional(types.string, 'idle'), // idle, loading, success, error
   authRequired: types.maybe(types.model({
@@ -136,7 +136,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       let index = 0;
       const results = result.results.filter(result => {
         if (!result.title || !result.url) {
-          debug('[' + self.tracker.id + ']', 'Skip torrent:', result);
+          debug('[' + self.trackerModule.id + ']', 'Skip torrent:', result);
           return false;
         } else {
           ['size', 'seed', 'peer', 'date'].forEach(key => {
@@ -221,13 +221,13 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       });
     },
     search() {
-      return self.wrapSearchPromise(self.tracker.id, 'search', self.tracker.worker.search(self.query));
+      return self.wrapSearchPromise(self.trackerModule.id, 'search', self.trackerModule.worker.search(self.query));
     },
     searchNext() {
       const nextQuery = self.nextQuery;
       self.setNextQuery(null);
       if (nextQuery) {
-        return self.wrapSearchPromise(self.tracker.id, 'searchNext', self.tracker.worker.searchNext(nextQuery));
+        return self.wrapSearchPromise(self.trackerModule.id, 'searchNext', self.trackerModule.worker.searchNext(nextQuery));
       } else {
         return Promise.resolve();
       }

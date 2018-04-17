@@ -38,12 +38,12 @@ const searchFragModel = types.model('searchFragModel', {
         index: self.tables.length
       }));
       self.profile.getSelectedProfileTrackers().forEach(profileTracker => {
-        const tracker = profileTracker.tracker;
-        if (tracker) {
+        const trackerModule = profileTracker.trackerModule;
+        if (trackerModule) {
           const trackerSearch = trackerSearchModel.create({
-            id: self.id + '_' + tracker.id,
+            id: self.id + '_' + trackerModule.id,
             query: self.query,
-            tracker: tracker,
+            trackerModule: trackerModule,
             trackerInfo: profileTracker.getInfo()
           });
           self.trackerSearchList.push(trackerSearch);
@@ -79,7 +79,7 @@ const searchFragModel = types.model('searchFragModel', {
     },
     getSelectedTrackerSearch() {
       return self.profile.getSelectedProfileTrackers().map(profileTracker => {
-        return self.getSearchTrackerByTracker(profileTracker.tracker);
+        return self.getSearchTrackerByTracker(profileTracker.trackerModule);
       }).filter(a => !!a);
     },
     getTrackerResultCount(trackerSearch) {

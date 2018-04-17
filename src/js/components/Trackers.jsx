@@ -6,7 +6,7 @@ import {observer} from "mobx-react/index";
   render() {
     /**@type {IndexM}*/
     const store = this.props.store;
-    const trackers = store.profile.profileTrackers.map(profileTracker => {
+    const trackers = store.profile.trackers.map(profileTracker => {
       return (
         <ProfileTracker key={profileTracker.id} profileTracker={profileTracker} store={store}/>
       );
@@ -38,11 +38,11 @@ import {observer} from "mobx-react/index";
     /**@type {ProfileTrackerM}*/
     const profileTracker = this.props.profileTracker;
 
-    const tracker = profileTracker.tracker;
+    const tracker = profileTracker.trackerModule;
     let icon = null;
     const iconClassList = [];
 
-    const trackerSearch = store.searchFrag && store.searchFrag.getSearchTrackerByTracker(profileTracker.tracker);
+    const trackerSearch = store.searchFrag && store.searchFrag.getSearchTrackerByTracker(profileTracker.trackerModule);
     if (trackerSearch) {
       if (trackerSearch.readyState === 'loading') {
         iconClassList.push('tracker__icon-loading');

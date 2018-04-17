@@ -9,11 +9,9 @@ import {observer} from 'mobx-react';
 import ProfileSelect from './components/ProfileSelect';
 import ScrollTop from './components/ScrollTop';
 import Trackers from './components/Trackers';
-import loadTrackers from './tools/loadTrackers';
 import {HashRouter, Route, Link} from 'react-router-dom';
 import SearchFrag from './components/SearchFrag';
 import Explore from "./components/Explore";
-import promisifyApi from "./tools/promisifyApi";
 
 const debug = require('debug')('Index');
 const qs = require('querystring');
@@ -23,44 +21,24 @@ const qs = require('querystring');
   constructor() {
     super();
 
-    this.state = {
-      loading: true,
-      store: null
-    };
-
-    this.store = null;
-
-    this.load();
-  }
-  load() {
-    return promisifyApi(chrome.storage.local.get)({
-      profile: null,
-      profiles: [],
-      trackers: [],
-    }).then(storage => {
-      return Promise.resolve().then(() => {
-        if (storage.trackers.length === 0) {
-          return loadTrackers().then(trackers => {
-            storage.trackers.push(...trackers);
-          });
-        }
-      }).then(() => {
-        this.setState({
-          loading: false,
-          store: indexModel.create(storage)
-        });
-      });
-    });
+    this.store = indexModel.create({});
   }
   render() {
-    if (this.state.loading) {
-      return (
-        'Loading...'
-      );
-    } else {
-      return (
-        <Main store={this.state.store}/>
-      );
+    if (this.store.state === 'loading') {
+      return ('Loading...');
+    } else
+    if (this.store.state === 'error') {
+      return ('Error');
+    } else
+    if (this.store.state === 'ready') {
+      if (this.store.profile.state === 'loading') {
+        return ('Loading profile...');
+      } else
+      if (this.store.profile.state === 'done') {
+        return (
+          <Main store={this.store}/>
+        );
+      }
     }
   }
 }

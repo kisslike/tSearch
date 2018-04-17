@@ -6,9 +6,10 @@ import {types} from "mobx-state-tree";
  * Model:
  * @property {boolean} isEnabled
  * @property {string} name
- * @property {ProfileTrackerM[]} profileTrackers
+ * @property {ProfileTrackerM[]} trackers
  * Actions:
  * Views:
+ * @property {string} state
  * @property {function:ProfileTrackerM[]} getSelectedProfileTrackers
  * @property {function:TrackerM[]} getTrackers
  * @property {function(string):ProfileTrackerM} getProfileTrackerById
@@ -18,43 +19,34 @@ import {types} from "mobx-state-tree";
 
 const profileModel = types.model('profileModel', {
   name: types.identifier(types.string),
-  profileTrackers: types.optional(types.array(profileTrackerModel), []),
+  trackers: types.optional(types.array(profileTrackerModel), []),
 }).actions(/**ProfileM*/self => {
   return {
 
   };
 }).views(/**ProfileM*/self => {
   return {
+    get state() {
+      return self.trackers.every(tracker => tracker.state === 'done') ? 'done' : 'loading';
+    },
     getSelectedProfileTrackers() {
-      let result = self.profileTrackers.filter(a => a.selected);
+      let result = self.trackers.filter(a => a.selected);
       if (result.length === 0) {
-        result = self.profileTrackers;
+        result = self.trackers;
       }
       return result;
     },
     getTrackers() {
-      return self.profileTrackers.map(profileTracker => profileTracker.tracker).filter(a => !!a);
+      return self.trackers.map(tracker => tracker.trackerModule).filter(a => !!a);
     },
     getProfileTrackerById(id) {
       let result = null;
-      self.profileTrackers.some(profileTracker => {
-        if (profileTracker.id === id) {
-          result = profileTracker;
+      self.trackers.some(tracker => {
+        if (tracker.id === id) {
+          result = tracker;
         }
       });
       return result;
-    },
-    start() {
-      const trackers = self.getTrackers();
-      trackers.forEach(tracker => {
-        tracker.createWorker();
-      });
-    },
-    stop() {
-      const trackers = self.getTrackers();
-      trackers.forEach(tracker => {
-        tracker.destroyWorker();
-      });
     },
   };
 });

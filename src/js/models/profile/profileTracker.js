@@ -1,11 +1,14 @@
-import trackerModel from './tracker';
-import blankSvg from '../../img/blank.svg';
-import trackerSearchModel from "./trackerSearch";
-import {types, resolveIdentifier, destroy, getParent} from "mobx-state-tree";
+import trackerModel from '../tracker';
+import blankSvg from '../../../img/blank.svg';
+import trackerSearchModel from "../trackerSearch";
+import {types, resolveIdentifier, destroy, getParent, getRoot} from "mobx-state-tree";
+
+const debug = require('debug')('profileTracker');
 
 /**
  * @typedef {{}} ProfileTrackerM
  * Model:
+ * @property {string} state
  * @property {string} id
  * @property {ProfileTrackerMetaM} meta
  * @property {boolean} selected
@@ -13,7 +16,7 @@ import {types, resolveIdentifier, destroy, getParent} from "mobx-state-tree";
  * @property {function(boolean)} setSelected
  * @property {function(boolean)} applySelected
  * Views:
- * @property {TrackerM} tracker
+ * @property {TrackerM} trackerModule
  * @property {function:ProfileTrackerInfoM} getInfo
  * @property {function(number):TrackerResultM[]} getSearchResultsPage
  * @property {function:number} getSearchPageCount
@@ -36,6 +39,7 @@ const profileTrackerMetaModel = types.model('profileTrackerMetaModel', {
 });
 
 const profileTrackerModel = types.model('profileTrackerModel', {
+  state: types.optional(types.string, 'idle'), // idle, loading, done
   id: types.string,
   meta: profileTrackerMetaModel,
   selected: types.optional(types.boolean, false),
@@ -44,10 +48,13 @@ const profileTrackerModel = types.model('profileTrackerModel', {
     setSelected(value) {
       self.selected = value;
     },
+    setState(value) {
+      self.state = value;
+    },
     applySelected(value) {
       /**@type {ProfileM}*/
       const profile = getParent(self, 2);
-      profile.profileTrackers.forEach(profileTracker => {
+      profile.trackers.forEach(profileTracker => {
         if (value) {
           profileTracker.setSelected(profileTracker === self);
         } else {
@@ -57,9 +64,13 @@ const profileTrackerModel = types.model('profileTrackerModel', {
     }
   };
 }).views(/**ProfileTrackerM*/self => {
+  let readyPromise = null;
   let styleNode = null;
   return {
-    get tracker() {
+    get readyPromise() {
+      return readyPromise;
+    },
+    get trackerModule() {
       return resolveIdentifier(trackerModel, self, self.id);
     },
     getInfo() {
@@ -73,12 +84,12 @@ const profileTrackerModel = types.model('profileTrackerModel', {
       const className = 'icon_' + self.id;
       if (!styleNode) {
         let icon = null;
-        if (self.tracker) {
-          if (self.tracker.meta.icon64) {
-            icon = JSON.stringify(self.tracker.meta.icon64);
+        if (self.trackerModule) {
+          if (self.trackerModule.meta.icon64) {
+            icon = JSON.stringify(self.trackerModule.meta.icon64);
           }
-          if (self.tracker.meta.icon) {
-            icon = JSON.stringify(self.tracker.meta.icon);
+          if (self.trackerModule.meta.icon) {
+            icon = JSON.stringify(self.trackerModule.meta.icon);
           }
         }
         if (!icon) {
@@ -101,6 +112,15 @@ const profileTrackerModel = types.model('profileTrackerModel', {
         }
         styleNode = null;
       }
+    },
+    afterCreate() {
+      self.setState('loading');
+      const indexModel = /**IndexM*/getRoot(self);
+      readyPromise = indexModel.loadTrackerModule(self.id).catch(err => {
+        debug('loadTrackerModule error', self.id, err);
+      }).then(() => {
+        self.setState('done');
+      });
     }
   };
 });
