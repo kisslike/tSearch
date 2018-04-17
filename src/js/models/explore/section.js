@@ -2,6 +2,7 @@ import {resolveIdentifier, types, getParent} from "mobx-state-tree";
 import moduleModel from "./module";
 import favoriteModuleModel from "./favoriteModule";
 
+const debug = require('debug')('section');
 
 /**
  * @typedef {{}} ExploreSectionM
@@ -65,7 +66,9 @@ const sectionModel = types.model('sectionModel', {
     afterCreate() {
       self.setState('loading');
       const sections = getParent(self, 2);
-      sections.loadModule(self.id).then(() => {
+      sections.loadModule(self.id).catch(err => {
+        debug('loadModule error', self.id, err);
+      }).then(() => {
         self.setState('done');
       });
     }
