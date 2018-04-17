@@ -141,7 +141,14 @@ const exploreModuleModel = types.model('exploreModuleModel', {
           self.setAuthRequired({url: err.url});
         }
       });
-    }
+    },
+    postProcessSnapshot(snapshot) {
+      snapshot.state = undefined;
+      snapshot.authRequired = undefined;
+      snapshot.worker = undefined;
+      snapshot.items = undefined;
+      return snapshot;
+    },
   };
 });
 
