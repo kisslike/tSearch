@@ -1,6 +1,7 @@
 import React from 'react';
 import {observer} from 'mobx-react';
 import exploreStyle from '../../../css/explore.less';
+import Dialog from "../Dialog";
 
 const debug = require('debug')('Explore');
 const Sortable = require('sortablejs');
@@ -397,15 +398,53 @@ const Sortable = require('sortablejs');
     super();
 
     this.state = {
-      posterError: false
+      posterError: false,
+      edit: false
     };
 
     this.handlePosterError = this.handlePosterError.bind(this);
+    this.handleEditFavorite = this.handleEditFavorite.bind(this);
+    this.handleDialogSave = this.handleDialogSave.bind(this);
+    this.handleDialogCancel = this.handleDialogCancel.bind(this);
+    this.handleDialogClose = this.handleDialogClose.bind(this);
   }
 
   handlePosterError(e) {
     this.setState({
       posterError: true
+    });
+  }
+
+  handleEditFavorite(e) {
+    this.setState({
+      edit: true
+    });
+  }
+
+  handleDialogSave(e) {
+    e.preventDefault();
+
+    const item = /**ExploreSectionItemM*/this.props.item;
+
+    item.updateProps({
+      title: this.refs.titleNode.value,
+      titleOriginal: this.refs.titleOriginalNode.value,
+      poster: this.refs.posterNode.value,
+      url: this.refs.urlNode.value,
+    }).then(() => {
+      this.handleDialogClose();
+    });
+  }
+
+  handleDialogCancel(e) {
+    e.preventDefault();
+
+    this.handleDialogClose();
+  }
+
+  handleDialogClose(e) {
+    this.setState({
+      edit: false
     });
   }
 
@@ -429,7 +468,7 @@ const Sortable = require('sortablejs');
       actions.push(
         <div key={'rmFavorite'} onClick={item.handleRemoveFavorite} className="action__rmFavorite" title={chrome.i18n.getMessage('removeFromFavorite')}/>,
         <div key={'move'} className="action__move" title={chrome.i18n.getMessage('move')}/>,
-        <div key={'edit'} onClick={item.handleEditFavorite} className="action__edit" title={chrome.i18n.getMessage('edit')}/>,
+        <div key={'edit'} onClick={this.handleEditFavorite} className="action__edit" title={chrome.i18n.getMessage('edit')}/>,
       );
     } else {
       actions.push(
@@ -437,8 +476,31 @@ const Sortable = require('sortablejs');
       );
     }
 
+    let dialog = null;
+    if (this.state.edit) {
+      dialog = (
+        <Dialog className={'dialog-poster_edit'} onClose={this.handleDialogClose}>
+          <form onSubmit={this.handleDialogSave}>
+            <span className="dialog__label">{chrome.i18n.getMessage('title')}</span>
+            <input ref={'titleNode'} className="input__input" name="title" type="text" defaultValue={item.title}/>
+            <span className="dialog__label">{chrome.i18n.getMessage('title')}</span>
+            <input ref={'titleOriginalNode'} className="input__input" name="titleOriginal" type="text" defaultValue={item.titleOriginal}/>
+            <span className="dialog__label">{chrome.i18n.getMessage('imageUrl')}</span>
+            <input ref={'posterNode'} className="input__input" name="poster" type="text" defaultValue={item.poster}/>
+            <span className="dialog__label">{chrome.i18n.getMessage('descUrl')}</span>
+            <input ref={'urlNode'} className="input__input" name="url" type="text" defaultValue={item.url}/>
+            <div className="dialog__button_box">
+              <input className="button button-save" type="submit" value={chrome.i18n.getMessage('save')}/>
+              <input className="button button-cancel" type="button" onClick={this.handleDialogCancel} value={chrome.i18n.getMessage('cancel')}/>
+            </div>
+          </form>
+        </Dialog>
+      );
+    }
+
     return (
       <li className="section__poster poster" style={itemStyle} data-index={this.props['data-index']}>
+        {dialog}
         <div className="poster__image">
           {actions}
           <div className="action__quick_search" title={chrome.i18n.getMessage('quickSearch')}>{'?'}</div>

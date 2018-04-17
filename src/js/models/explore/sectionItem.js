@@ -1,4 +1,4 @@
-import {types, getRoot, clone} from "mobx-state-tree";
+import {types, getRoot, getParent, clone} from "mobx-state-tree";
 
 /**
  * @typedef {{}} ExploreSectionItemM
@@ -23,19 +23,20 @@ const sectionItemMode = types.model('sectionItemMode', {
   poster: types.maybe(types.string),
   extra: types.frozen,
 }).actions(/**ExploreSectionItemM*/self => {
-  return {};
+  return {
+    updateProps(props) {
+      Object.assign(self, props);
+
+      const module = getParent(self, 2);
+      return module.saveItems();
+    }
+  };
 }).views(/**ExploreSectionItemM*/self => {
   return {
     handleAddFavorite(e) {
       e.preventDefault();
       const explore = /**ExploreM*/getRoot(self).explore;
       explore.favouriteModule.addItem(clone(self));
-    },
-    handleEditFavorite(e) {
-      e.preventDefault();
-    },
-    handlePostMoveFavorite(e) {
-      e.preventDefault();
     },
     handleRemoveFavorite(e) {
       e.preventDefault();
