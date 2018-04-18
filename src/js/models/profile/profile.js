@@ -4,7 +4,6 @@ import {types} from "mobx-state-tree";
 /**
  * @typedef {{}} ProfileM
  * Model:
- * @property {boolean} isEnabled
  * @property {string} name
  * @property {ProfileTrackerM[]} trackers
  * Actions:
@@ -26,9 +25,6 @@ const profileModel = types.model('profileModel', {
   };
 }).views(/**ProfileM*/self => {
   return {
-    get state() {
-      return self.trackers.every(tracker => tracker.state === 'done') ? 'done' : 'loading';
-    },
     getSelectedProfileTrackers() {
       let result = self.trackers.filter(a => a.selected);
       if (result.length === 0) {

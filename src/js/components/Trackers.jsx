@@ -6,10 +6,13 @@ import {observer} from "mobx-react/index";
   render() {
     /**@type {IndexM}*/
     const store = this.props.store;
-    const trackers = store.profile.trackers.map(profileTracker => {
-      return (
-        <ProfileTracker key={profileTracker.id} profileTracker={profileTracker} store={store}/>
-      );
+    const trackers = [];
+    store.profile.trackers.forEach(profileTracker => {
+      if (profileTracker.state === 'done') {
+        trackers.push(
+          <ProfileTracker key={profileTracker.id} profileTracker={profileTracker} store={store}/>
+        );
+      }
     });
     return (
       <div className="tracker__list">

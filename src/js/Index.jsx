@@ -31,14 +31,9 @@ const qs = require('querystring');
       return ('Error');
     } else
     if (this.store.state === 'ready') {
-      if (this.store.profile.state === 'loading') {
-        return ('Loading profile...');
-      } else
-      if (this.store.profile.state === 'done') {
-        return (
-          <Main store={this.store}/>
-        );
-      }
+      return (
+        <Main store={this.store}/>
+      );
     }
   }
 }

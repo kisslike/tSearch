@@ -6,9 +6,10 @@ import filterModel from "./filters";
 import getSearchFragModelId from "../tools/getSearchFragModelId";
 import exploreModel from "./explore/explore";
 import pageModel from "./pageModel";
-import {types, destroy} from "mobx-state-tree";
+import {types, destroy, getSnapshot} from "mobx-state-tree";
 import promisifyApi from "../tools/promisifyApi";
 import loadTrackerModule from "../tools/loadTrackerModule";
+import profileTemplateModel from "./profile/profileTemplate";
 
 const debug = require('debug')('indexModel');
 
@@ -31,6 +32,7 @@ const debug = require('debug')('indexModel');
  * @property {function(string)} setProfile
  * @property {function(TrackerM)} putTrackerModule
  * Views:
+ * @property {function(string):Object} getProfileItem
  * @property {function} onProfileChange
  * @property {function(string)} loadTrackerModule
  * @property {function} afterCreate
@@ -38,8 +40,8 @@ const debug = require('debug')('indexModel');
 
 const indexModel = types.model('indexModel', {
   state: types.optional(types.string, 'idle'), // idle, loading, ready, error
-  profile: types.maybe(types.reference(profileModel)),
-  profiles: types.optional(types.array(profileModel), []),
+  profile: types.maybe(profileModel),
+  profiles: types.optional(types.array(profileTemplateModel), []),
   trackers: types.optional(types.map(trackerModel), {}),
   searchForm: types.optional(searchFormModel, {}),
   searchFrag: types.maybe(searchFragModel),
@@ -67,7 +69,10 @@ const indexModel = types.model('indexModel', {
       }
     },
     setProfile(name) {
-      self.profile = name;
+      const profileItem = self.getProfileItem(name);
+      if (profileItem) {
+        self.profile = getSnapshot(profileItem);
+      }
     },
     putTrackerModule(module) {
       self.trackers.put(module);
@@ -75,6 +80,15 @@ const indexModel = types.model('indexModel', {
   };
 }).views(/**IndexM*/self => {
   return {
+    getProfileItem(name) {
+      let result = null;
+      self.profiles.some(profile => {
+        if (profile.name === name) {
+          return result = profile;
+        }
+      });
+      return result;
+    },
     async loadTrackerModule(id) {
       let module = self.trackers.get(id);
       if (!module) {

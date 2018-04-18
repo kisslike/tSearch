@@ -210,6 +210,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
               self.setAuthRequired({
                 url: result.url
               });
+              self.setReadyState('idle');
             } else {
               self.setReadyState('error');
             }
