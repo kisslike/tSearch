@@ -21,7 +21,7 @@ const debug = require('debug')('searchFrag');
  * @property {function:TrackerSearchM[]} getSelectedTrackerSearch
  * @property {function(TrackerSearchM):number} getTrackerResultCount
  * @property {function(TrackerSearchM):number} getTrackerVisibleResultCount
- * @property {function(TrackerM):number} getSearchTrackerByTracker
+ * @property {function(ProfileM):number} getSearchTrackerByTracker
  */
 
 const searchFragModel = types.model('searchFragModel', {
@@ -38,17 +38,13 @@ const searchFragModel = types.model('searchFragModel', {
         index: self.tables.length
       }));
       self.profile.getSelectedProfileTrackers().forEach(profileTracker => {
-        const trackerModule = profileTracker.trackerModule;
-        if (trackerModule) {
-          const trackerSearch = trackerSearchModel.create({
-            id: self.id + '_' + trackerModule.id,
-            query: self.query,
-            trackerModule: trackerModule,
-            trackerInfo: profileTracker.getInfo()
-          });
-          self.trackerSearchList.push(trackerSearch);
-          trackerSearch.search();
-        }
+        const trackerSearch = trackerSearchModel.create({
+          id: self.id + '_' + profileTracker.id,
+          query: self.query,
+          profileTracker: profileTracker
+        });
+        self.trackerSearchList.push(trackerSearch);
+        trackerSearch.search();
       });
     },
     searchNext() {
@@ -79,7 +75,7 @@ const searchFragModel = types.model('searchFragModel', {
     },
     getSelectedTrackerSearch() {
       return self.profile.getSelectedProfileTrackers().map(profileTracker => {
-        return self.getSearchTrackerByTracker(profileTracker.trackerModule);
+        return self.getSearchTrackerByTracker(profileTracker);
       }).filter(a => !!a);
     },
     getTrackerResultCount(trackerSearch) {
@@ -92,10 +88,8 @@ const searchFragModel = types.model('searchFragModel', {
         return sum + table.getTrackerVisibleResultCount(trackerSearch);
       }, 0);
     },
-    getSearchTrackerByTracker(tracker) {
-      if (tracker) {
-        return resolveIdentifier(trackerSearchModel, self, self.id + '_' + tracker.id);
-      }
+    getSearchTrackerByTracker(profile) {
+      return resolveIdentifier(trackerSearchModel, self, self.id + '_' + profile.id);
     },
   };
 });

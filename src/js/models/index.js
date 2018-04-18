@@ -6,7 +6,7 @@ import filterModel from "./filters";
 import getSearchFragModelId from "../tools/getSearchFragModelId";
 import exploreModel from "./explore/explore";
 import pageModel from "./pageModel";
-import {types, destroy, getSnapshot} from "mobx-state-tree";
+import {types, destroy, resolveIdentifier, getSnapshot} from "mobx-state-tree";
 import promisifyApi from "../tools/promisifyApi";
 import loadTrackerModule from "../tools/loadTrackerModule";
 import profileTemplateModel from "./profile/profileTemplate";
@@ -32,7 +32,6 @@ const debug = require('debug')('indexModel');
  * @property {function(string)} setProfile
  * @property {function(TrackerM)} putTrackerModule
  * Views:
- * @property {function(string):Object} getProfileItem
  * @property {function} onProfileChange
  * @property {function(string)} loadTrackerModule
  * @property {function} afterCreate
@@ -69,7 +68,7 @@ const indexModel = types.model('indexModel', {
       }
     },
     setProfile(name) {
-      const profileItem = self.getProfileItem(name);
+      const profileItem = resolveIdentifier(profileTemplateModel, self, name);
       if (profileItem) {
         self.profile = getSnapshot(profileItem);
       }
@@ -80,15 +79,6 @@ const indexModel = types.model('indexModel', {
   };
 }).views(/**IndexM*/self => {
   return {
-    getProfileItem(name) {
-      let result = null;
-      self.profiles.some(profile => {
-        if (profile.name === name) {
-          return result = profile;
-        }
-      });
-      return result;
-    },
     async loadTrackerModule(id) {
       let module = self.trackers.get(id);
       if (!module) {

@@ -1,6 +1,5 @@
 import trackerModel from '../tracker';
 import blankSvg from '../../../img/blank.svg';
-import trackerSearchModel from "../trackerSearch";
 import {types, resolveIdentifier, destroy, getParent, getRoot} from "mobx-state-tree";
 
 const debug = require('debug')('profileTracker');
@@ -16,6 +15,7 @@ const debug = require('debug')('profileTracker');
  * @property {function(boolean)} setSelected
  * @property {function(boolean)} applySelected
  * Views:
+ * @property {Promise} readyPromise
  * @property {TrackerM} trackerModule
  * @property {function:ProfileTrackerInfoM} getInfo
  * @property {function(number):TrackerResultM[]} getSearchResultsPage
@@ -40,7 +40,7 @@ const profileTrackerMetaModel = types.model('profileTrackerMetaModel', {
 
 const profileTrackerModel = types.model('profileTrackerModel', {
   state: types.optional(types.string, 'idle'), // idle, loading, done
-  id: types.string,
+  id: types.identifier(types.string),
   meta: profileTrackerMetaModel,
   selected: types.optional(types.boolean, false),
 }).actions(/**ProfileTrackerM*/self => {

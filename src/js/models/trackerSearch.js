@@ -3,7 +3,8 @@ import moment from "moment/moment";
 import filesize from 'filesize';
 import highlight from "../tools/highlight";
 import rate from "../tools/rate";
-import {types, isAlive, clone} from "mobx-state-tree";
+import {types, isAlive} from "mobx-state-tree";
+import profileTrackerModel from "./profile/profileTracker";
 
 const debug = require('debug')('trackerSearch');
 
@@ -14,8 +15,7 @@ moment.locale(chrome.i18n.getUILanguage());
  * Model:
  * @property {string} id
  * @property {string} query
- * @property {TrackerM} trackerModule
- * @property {ProfileTrackerInfoM} trackerInfo
+ * @property {ProfileTrackerM} profileTracker
  * @property {string} readyState
  * @property {{url:string}} authRequired
  * @property {string} url
@@ -31,7 +31,7 @@ moment.locale(chrome.i18n.getUILanguage());
  * @property {function:Object} getQueryHighlightMap
  * @property {function:Object} getQueryRateScheme
  * @property {function(number):TrackerResultM[]} getResultsPage
- * @property {function(string, string, Promise):Promise} wrapSearchPromise
+ * @property {function(string, string, function:Promise):Promise} wrapSearchPromise
  * @property {function:Promise} search
  * @property {function:Promise} searchNext
  */
@@ -108,8 +108,7 @@ const trackerResultModel = types.model('trackerResultModel', {
 const trackerSearchModel = types.model('trackerSearchModel', {
   id: types.identifier(types.string),
   query: types.string,
-  trackerModule: types.reference(trackerModel),
-  trackerInfo: profileTrackerInfoModel,
+  profileTracker: types.reference(profileTrackerModel),
   readyState: types.optional(types.string, 'idle'), // idle, loading, success, error
   authRequired: types.maybe(types.model({
     url: types.string
@@ -136,7 +135,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       let index = 0;
       const results = result.results.filter(result => {
         if (!result.title || !result.url) {
-          debug('[' + self.trackerModule.id + ']', 'Skip torrent:', result);
+          debug('[' + self.profileTracker.id + ']', 'Skip torrent:', result);
           return false;
         } else {
           ['size', 'seed', 'peer', 'date'].forEach(key => {
@@ -150,7 +149,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
             }
           });
           result.id = self.id + '_' + pageIndex + '_' + index++;
-          result.trackerInfo = clone(self.trackerInfo);
+          result.trackerInfo = self.profileTracker.getInfo();
           result.titleHighlightMap = highlight.getTextMap(result.title, queryHighlightMap);
           result.rate = rate.getRate(result, queryRateScheme);
           result.quality = result.rate.sum;
@@ -184,9 +183,9 @@ const trackerSearchModel = types.model('trackerSearchModel', {
         return self.pages[index].results;
       }
     },
-    wrapSearchPromise(trackerId, type, promise) {
+    wrapSearchPromise(trackerId, type, fn) {
       self.setReadyState('loading');
-      return promise.then(result => {
+      return fn().then(result => {
         if (!result.success) {
           const err = new Error('Error');
           err.code = 'NOT_SUCCESS';
@@ -222,13 +221,33 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       });
     },
     search() {
-      return self.wrapSearchPromise(self.trackerModule.id, 'search', self.trackerModule.worker.search(self.query));
+      return self.wrapSearchPromise(self.profileTracker.id, 'search', () => {
+        return self.profileTracker.readyPromise.then(() => {
+          const trackerModule = self.profileTracker.trackerModule;
+          if (!trackerModule) {
+            const err = new Error('MODULE_NOT_FOUND');
+            err.code = 'MODULE_NOT_FOUND';
+            throw err;
+          }
+          return trackerModule.worker.search(self.query);
+        });
+      });
     },
     searchNext() {
       const nextQuery = self.nextQuery;
       self.setNextQuery(null);
       if (nextQuery) {
-        return self.wrapSearchPromise(self.trackerModule.id, 'searchNext', self.trackerModule.worker.searchNext(nextQuery));
+        return self.wrapSearchPromise(self.profileTracker.id, 'searchNext', () => {
+          return self.profileTracker.readyPromise.then(() => {
+            const trackerModule = self.profileTracker.trackerModule;
+            if (!trackerModule) {
+              const err = new Error('MODULE_NOT_FOUND');
+              err.code = 'MODULE_NOT_FOUND';
+              throw err;
+            }
+            return trackerModule.worker.searchNext(nextQuery);
+          });
+        });
       } else {
         return Promise.resolve();
       }

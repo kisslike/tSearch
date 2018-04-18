@@ -45,7 +45,7 @@ import {observer} from "mobx-react/index";
     let icon = null;
     const iconClassList = [];
 
-    const trackerSearch = store.searchFrag && store.searchFrag.getSearchTrackerByTracker(profileTracker.trackerModule);
+    const trackerSearch = store.searchFrag && store.searchFrag.getSearchTrackerByTracker(profileTracker);
     if (trackerSearch) {
       if (trackerSearch.readyState === 'loading') {
         iconClassList.push('tracker__icon-loading');
