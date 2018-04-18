@@ -88,9 +88,9 @@ const indexModel = types.model('indexModel', {
         }).then(storage => storage[key]);
         if (!module) {
           module = await loadTrackerModule(id);
-          /*if (module) {
+          if (module) {
             await promisifyApi(chrome.storage.local.set)({[key]: module});
-          }*/
+          }
         }
         if (module) {
           self.putTrackerModule(module);
