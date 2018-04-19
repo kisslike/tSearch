@@ -235,44 +235,24 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       }
     },
     search() {
-      return wrapSearchPromise(self.profileTrackerId, 'search', () => {
-        return self.profileTracker.readyPromise.then(() => {
-          if (self.profileTracker) {
-            const trackerModule = self.trackerModule;
-            if (!trackerModule) {
-              const err = new Error('MODULE_NOT_FOUND');
-              err.code = 'MODULE_NOT_FOUND';
-              throw err;
-            }
-            return trackerModule.worker.search(self.query);
-          } else {
-            const err = new Error('PROFILE_IS_DEAD');
-            err.code = 'PROFILE_IS_DEAD';
-            throw err;
-          }
-        });
+      return self.profileTracker.readyPromise.then(() => {
+        if (self.profileTracker && self.trackerModule) {
+          return wrapSearchPromise(self.trackerModule.id, 'search', () => {
+            return self.trackerModule.worker.search(self.query);
+          });
+        }
       });
     },
     searchNext() {
       const nextQuery = self.nextQuery;
       self.setNextQuery(null);
       if (nextQuery) {
-        return wrapSearchPromise(self.profileTrackerId, 'searchNext', () => {
-          return self.profileTracker.readyPromise.then(() => {
-            if (self.profileTracker) {
-              const trackerModule = self.trackerModule;
-              if (!trackerModule) {
-                const err = new Error('MODULE_NOT_FOUND');
-                err.code = 'MODULE_NOT_FOUND';
-                throw err;
-              }
-              return trackerModule.worker.searchNext(nextQuery);
-            } else {
-              const err = new Error('PROFILE_IS_DEAD');
-              err.code = 'PROFILE_IS_DEAD';
-              throw err;
-            }
-          });
+        return self.profileTracker.readyPromise.then(() => {
+          if (self.profileTracker && self.trackerModule) {
+            return wrapSearchPromise(self.trackerModule.id, 'searchNext', () => {
+              return self.trackerModule.worker.searchNext(nextQuery);
+            });
+          }
         });
       } else {
         return Promise.resolve();
