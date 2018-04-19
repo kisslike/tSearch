@@ -236,7 +236,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
     },
     search() {
       return self.profileTracker.readyPromise.then(() => {
-        if (self.profileTracker && self.trackerModule) {
+        if (isAlive(self) && self.profileTracker && self.trackerModule) {
           return wrapSearchPromise(self.trackerModule.id, 'search', () => {
             return self.trackerModule.worker.search(self.query);
           });
@@ -248,7 +248,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       self.setNextQuery(null);
       if (nextQuery) {
         return self.profileTracker.readyPromise.then(() => {
-          if (self.profileTracker && self.trackerModule) {
+          if (isAlive(self) && self.profileTracker && self.trackerModule) {
             return wrapSearchPromise(self.trackerModule.id, 'searchNext', () => {
               return self.trackerModule.worker.searchNext(nextQuery);
             });
