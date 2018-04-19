@@ -41,7 +41,7 @@ const searchFragModel = types.model('searchFragModel', {
         const trackerSearch = trackerSearchModel.create({
           id: self.id + '_' + profileTracker.id,
           query: self.query,
-          profileTrackerId: profileTracker.id
+          trackerId: profileTracker.id
         });
         self.trackerSearchList.push(trackerSearch);
         trackerSearch.search();

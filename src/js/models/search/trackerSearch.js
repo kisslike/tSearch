@@ -16,7 +16,7 @@ moment.locale(chrome.i18n.getUILanguage());
  * Model:
  * @property {string} id
  * @property {string} query
- * @property {string} profileTrackerId
+ * @property {string} trackerId
  * @property {string} readyState
  * @property {{url:string}} authRequired
  * @property {string} url
@@ -111,7 +111,7 @@ const trackerResultModel = types.model('trackerResultModel', {
 const trackerSearchModel = types.model('trackerSearchModel', {
   id: types.identifier(types.string),
   query: types.string,
-  profileTrackerId: types.string,
+  trackerId: types.string,
   readyState: types.optional(types.string, 'idle'), // idle, loading, success, error
   authRequired: types.maybe(types.model({
     url: types.string
@@ -216,10 +216,10 @@ const trackerSearchModel = types.model('trackerSearchModel', {
 
   return {
     get profileTracker() {
-      return resolveIdentifier(profileTrackerModel, self, self.profileTrackerId)
+      return resolveIdentifier(profileTrackerModel, self, self.trackerId)
     },
     get trackerModule() {
-      return resolveIdentifier(trackerModel, self, self.profileTrackerId);
+      return resolveIdentifier(trackerModel, self, self.trackerId);
     },
     getQueryHighlightMap() {
       return highlight.getMap(self.query);
