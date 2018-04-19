@@ -95,7 +95,7 @@ class Transport {
         callback(message);
       };
       cbMap.set(msg.callbackId, wrappedCallback);
-      if (promiseCallbackMap.get(callback)) {
+      if (promiseCallbackMap.has(callback)) {
         promiseCallbackMap.delete(callback);
         promiseCallbackMap.set(wrappedCallback, true);
       }
@@ -193,7 +193,7 @@ class Transport {
 
   destroy() {
     this.cbMap.forEach(cb => {
-      if (promiseCallbackMap.get(cb)) {
+      if (promiseCallbackMap.has(cb)) {
         cb({err: serializeError(new Error('Destroyed'))});
       } else {
         cb();
