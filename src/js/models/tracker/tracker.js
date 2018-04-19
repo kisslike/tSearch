@@ -84,9 +84,7 @@ const trackerModel = types.model('trackerModel', {
     }
   };
 }).views(/**TrackerM*/self => {
-  return {
-    afterCreate() {}
-  };
+  return {};
 });
 
 export default trackerModel;

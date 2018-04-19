@@ -1,4 +1,4 @@
-import trackerModel from '../tracker';
+import trackerModel from '../tracker/tracker';
 import {types, resolveIdentifier, destroy, getParent, getRoot, isAlive} from "mobx-state-tree";
 
 const debug = require('debug')('profileTracker');

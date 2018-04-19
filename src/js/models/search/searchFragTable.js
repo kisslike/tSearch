@@ -1,4 +1,4 @@
-import sortResults from "../tools/sortResults";
+import sortResults from "../../tools/sortResults";
 import {types, getParent, isAlive, detach, unprotect} from "mobx-state-tree";
 
 const debug = require('debug')('searchFragTable');

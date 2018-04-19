@@ -1,10 +1,10 @@
-import trackerModel from "./tracker";
+import trackerModel from "../tracker/tracker";
 import moment from "moment/moment";
 import filesize from 'filesize';
-import highlight from "../tools/highlight";
-import rate from "../tools/rate";
+import highlight from "../../tools/highlight";
+import rate from "../../tools/rate";
 import {types, isAlive} from "mobx-state-tree";
-import profileTrackerModel from "./profile/profileTracker";
+import profileTrackerModel from "../profile/profileTracker";
 
 const debug = require('debug')('trackerSearch');
 
