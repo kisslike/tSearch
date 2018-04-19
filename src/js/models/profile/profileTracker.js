@@ -1,5 +1,4 @@
 import trackerModel from '../tracker';
-import blankSvg from '../../../img/blank.svg';
 import {types, resolveIdentifier, destroy, getParent, getRoot} from "mobx-state-tree";
 
 const debug = require('debug')('profileTracker');
@@ -65,7 +64,6 @@ const profileTrackerModel = types.model('profileTrackerModel', {
   };
 }).views(/**ProfileTrackerM*/self => {
   let readyPromise = null;
-  let styleNode = null;
   return {
     get readyPromise() {
       return readyPromise;
@@ -81,37 +79,7 @@ const profileTrackerModel = types.model('profileTrackerModel', {
       };
     },
     getIconClassName() {
-      const className = 'icon_' + self.id;
-      if (!styleNode) {
-        let icon = null;
-        if (self.trackerModule) {
-          if (self.trackerModule.meta.icon64) {
-            icon = JSON.stringify(self.trackerModule.meta.icon64);
-          }
-          if (self.trackerModule.meta.icon) {
-            icon = JSON.stringify(self.trackerModule.meta.icon);
-          }
-        }
-        if (!icon) {
-          icon = blankSvg;
-        }
-
-        styleNode = document.createElement('style');
-        styleNode.textContent = `.${className} {
-          background-image:url(${icon});
-        }`;
-
-        document.body.appendChild(styleNode);
-      }
-      return className;
-    },
-    beforeDestroy() {
-      if (styleNode) {
-        if (styleNode.parentNode) {
-          styleNode.parentNode.removeChild(styleNode);
-        }
-        styleNode = null;
-      }
+      return 'icon_' + self.id;
     },
     afterCreate() {
       self.setState('loading');

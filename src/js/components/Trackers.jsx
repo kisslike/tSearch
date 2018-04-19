@@ -1,5 +1,6 @@
 import React from "react";
 import {observer} from "mobx-react/index";
+import blankSvg from '../../img/blank.svg';
 
 
 @observer class Trackers extends React.Component {
@@ -91,16 +92,30 @@ import {observer} from "mobx-react/index";
       )
     }
 
+    let iconUrl = null;
+    if (profileTracker.trackerModule) {
+      if (profileTracker.trackerModule.meta.icon64) {
+        iconUrl = JSON.stringify(profileTracker.trackerModule.meta.icon64);
+      } else
+      if (profileTracker.trackerModule.meta.icon) {
+        iconUrl = JSON.stringify(profileTracker.trackerModule.meta.icon);
+      }
+    }
+    if (!iconUrl) {
+      iconUrl = blankSvg;
+    }
+
     const classList = ['tracker'];
     if (profileTracker.selected) {
       classList.push('tracker-selected');
     }
     return (
-      <div className={classList.join(' ')}>
+      <div ref={this.refTracker} className={classList.join(' ')}>
         {icon}
         <a className="tracker__name" href={'#' + profileTracker.id}
            onClick={this.handleClick}>{profileTracker.meta.name}</a>
         {extraInfo}
+        <style>{`.${profileTracker.getIconClassName()}{background-image:url(${iconUrl})}`}</style>
       </div>
     );
   }

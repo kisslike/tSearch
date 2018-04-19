@@ -32,9 +32,6 @@ const profileModel = types.model('profileModel', {
       }
       return result;
     },
-    getTrackers() {
-      return self.trackers.map(tracker => tracker.trackerModule).filter(a => !!a);
-    },
     getProfileTrackerById(id) {
       let result = null;
       self.trackers.some(tracker => {
