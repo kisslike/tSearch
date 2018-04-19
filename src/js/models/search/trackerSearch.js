@@ -4,6 +4,8 @@ import highlight from "../../tools/highlight";
 import rate from "../../tools/rate";
 import {types, isAlive, resolveIdentifier} from "mobx-state-tree";
 import profileTrackerModel from "../profile/profileTracker";
+import trackerModel from "../tracker/tracker";
+import getTrackerIconClassName from "../../tools/getTrackerIconClassName";
 
 const debug = require('debug')('trackerSearch');
 
@@ -28,6 +30,7 @@ moment.locale(chrome.i18n.getUILanguage());
  * @property {function} clearNextQuery
  * Views:
  * @property {ProfileTrackerM} profileTracker
+ * @property {TrackerM} trackerModule
  * @property {function:Object} getQueryHighlightMap
  * @property {function:Object} getQueryRateScheme
  * @property {function(number):TrackerResultM[]} getResultsPage
@@ -69,7 +72,7 @@ const unixTimeToFromNow = function (unixtime) {
 };
 
 /**
- * @typedef {{}} ProfileTrackerInfoM
+ * @typedef {{}} TrackerResultModelTrackerInfoM
  * Model:
  * @property {string} id
  * @property {string} name
@@ -78,7 +81,7 @@ const unixTimeToFromNow = function (unixtime) {
  * Views:
  */
 
-const profileTrackerInfoModel = types.model('profileTrackerInfoModel', {
+const trackerResultModelTrackerInfoModel = types.model('trackerResultModelTrackerInfoModel', {
   id: types.string,
   name: types.string,
   iconClassName: types.string,
@@ -86,7 +89,7 @@ const profileTrackerInfoModel = types.model('profileTrackerInfoModel', {
 
 const trackerResultModel = types.model('trackerResultModel', {
   id: types.identifier(types.string),
-  trackerInfo: profileTrackerInfoModel,
+  trackerInfo: trackerResultModelTrackerInfoModel,
   title: types.string,
   titleHighlightMap: types.frozen,
   url: types.string,
@@ -135,7 +138,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       let index = 0;
       const results = result.results.filter(result => {
         if (!result.title || !result.url) {
-          debug('[' + self.profileTrackerId + ']', 'Skip torrent:', result);
+          debug('[' + trackerId + ']', 'Skip torrent:', result);
           return false;
         } else {
           ['size', 'seed', 'peer', 'date'].forEach(key => {
@@ -149,7 +152,11 @@ const trackerSearchModel = types.model('trackerSearchModel', {
             }
           });
           result.id = self.id + '_' + pageIndex + '_' + index++;
-          result.trackerInfo = self.profileTracker.getInfo();
+          result.trackerInfo = {
+            id: self.trackerModule.id,
+            name: self.trackerModule.meta.name,
+            iconClassName: getTrackerIconClassName(self.trackerModule.id),
+          };
           result.titleHighlightMap = highlight.getTextMap(result.title, queryHighlightMap);
           result.rate = rate.getRate(result, queryRateScheme);
           result.quality = result.rate.sum;
@@ -211,6 +218,9 @@ const trackerSearchModel = types.model('trackerSearchModel', {
     get profileTracker() {
       return resolveIdentifier(profileTrackerModel, self, self.profileTrackerId)
     },
+    get trackerModule() {
+      return resolveIdentifier(trackerModel, self, self.profileTrackerId);
+    },
     getQueryHighlightMap() {
       return highlight.getMap(self.query);
     },
@@ -228,7 +238,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       return wrapSearchPromise(self.profileTrackerId, 'search', () => {
         return self.profileTracker.readyPromise.then(() => {
           if (self.profileTracker) {
-            const trackerModule = self.profileTracker.trackerModule;
+            const trackerModule = self.trackerModule;
             if (!trackerModule) {
               const err = new Error('MODULE_NOT_FOUND');
               err.code = 'MODULE_NOT_FOUND';
@@ -250,7 +260,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
         return wrapSearchPromise(self.profileTrackerId, 'searchNext', () => {
           return self.profileTracker.readyPromise.then(() => {
             if (self.profileTracker) {
-              const trackerModule = self.profileTracker.trackerModule;
+              const trackerModule = self.trackerModule;
               if (!trackerModule) {
                 const err = new Error('MODULE_NOT_FOUND');
                 err.code = 'MODULE_NOT_FOUND';

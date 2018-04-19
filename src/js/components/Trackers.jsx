@@ -1,6 +1,7 @@
 import React from "react";
 import {observer} from "mobx-react/index";
 import blankSvg from '../../img/blank.svg';
+import getTrackerIconClassName from "../tools/getTrackerIconClassName";
 
 
 @observer class Trackers extends React.Component {
@@ -56,12 +57,12 @@ import blankSvg from '../../img/blank.svg';
     }
 
     if (tracker && tracker.meta.trackerURL) {
-      const classList = iconClassList.concat(['tracker__icon', profileTracker.getIconClassName(), 'tracker__link']);
+      const classList = iconClassList.concat(['tracker__icon', getTrackerIconClassName(profileTracker.id), 'tracker__link']);
       icon = (
         <a className={classList.join(' ')} target="_blank" href={tracker.meta.trackerURL}/>
       );
     } else {
-      const classList = iconClassList.concat(['tracker__icon', profileTracker.getIconClassName()]);
+      const classList = iconClassList.concat(['tracker__icon', getTrackerIconClassName(profileTracker.id)]);
       icon = (
         <div className={classList.join(' ')}/>
       );
@@ -115,7 +116,7 @@ import blankSvg from '../../img/blank.svg';
         <a className="tracker__name" href={'#' + profileTracker.id}
            onClick={this.handleClick}>{profileTracker.meta.name}</a>
         {extraInfo}
-        <style>{`.${profileTracker.getIconClassName()}{background-image:url(${iconUrl})}`}</style>
+        <style>{`.${getTrackerIconClassName(profileTracker.id)}{background-image:url(${iconUrl})}`}</style>
       </div>
     );
   }

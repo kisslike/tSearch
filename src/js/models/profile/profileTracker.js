@@ -16,7 +16,6 @@ const debug = require('debug')('profileTracker');
  * Views:
  * @property {Promise} readyPromise
  * @property {TrackerM} trackerModule
- * @property {function:ProfileTrackerInfoM} getInfo
  * @property {function(number):TrackerResultM[]} getSearchResultsPage
  * @property {function:number} getSearchPageCount
  * @property {function:string} getIconClassName
@@ -70,16 +69,6 @@ const profileTrackerModel = types.model('profileTrackerModel', {
     },
     get trackerModule() {
       return resolveIdentifier(trackerModel, self, self.id);
-    },
-    getInfo() {
-      return {
-        id: self.id,
-        name: self.meta.name,
-        iconClassName: self.getIconClassName()
-      };
-    },
-    getIconClassName() {
-      return 'icon_' + self.id;
     },
     beforeDestroy() {
       if (self.trackerModule) {
