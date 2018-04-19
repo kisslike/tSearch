@@ -90,13 +90,14 @@ class Transport {
 
     if (callback) {
       msg.callbackId = this.transportId + '_' + (++this.callbackIndex);
-      cbMap.set(msg.callbackId, message => {
+      const wrappedCallback = message => {
         cbMap.delete(msg.callbackId);
         callback(message);
-      });
+      };
+      cbMap.set(msg.callbackId, wrappedCallback);
       if (promiseCallbackMap.get(callback)) {
         promiseCallbackMap.delete(callback);
-        promiseCallbackMap.set(cbMap.get(msg.callbackId), true);
+        promiseCallbackMap.set(wrappedCallback, true);
       }
     }
 
