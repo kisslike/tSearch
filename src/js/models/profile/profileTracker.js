@@ -1,5 +1,5 @@
 import trackerModel from '../tracker';
-import {types, resolveIdentifier, destroy, getParent, getRoot} from "mobx-state-tree";
+import {types, resolveIdentifier, destroy, getParent, getRoot, isAlive} from "mobx-state-tree";
 
 const debug = require('debug')('profileTracker');
 
@@ -89,7 +89,11 @@ const profileTrackerModel = types.model('profileTrackerModel', {
     afterCreate() {
       self.setState('loading');
       const indexModel = /**IndexM*/getRoot(self);
-      readyPromise = indexModel.loadTrackerModule(self.id).catch(err => {
+      readyPromise = indexModel.loadTrackerModule(self.id).then(() => {
+        if (isAlive(self) && self.trackerModule) {
+          self.trackerModule.createWorker();
+        }
+      }, err => {
         debug('loadTrackerModule error', self.id, err);
       }).then(() => {
         self.setState('done');

@@ -85,9 +85,7 @@ const trackerModel = types.model('trackerModel', {
   };
 }).views(/**TrackerM*/self => {
   return {
-    afterCreate() {
-      self.createWorker();
-    }
+    afterCreate() {}
   };
 });
 
