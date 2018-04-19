@@ -81,6 +81,11 @@ const profileTrackerModel = types.model('profileTrackerModel', {
     getIconClassName() {
       return 'icon_' + self.id;
     },
+    beforeDestroy() {
+      if (self.trackerModule) {
+        self.trackerModule.destroyWorker();
+      }
+    },
     afterCreate() {
       self.setState('loading');
       const indexModel = /**IndexM*/getRoot(self);
