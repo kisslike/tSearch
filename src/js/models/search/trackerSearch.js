@@ -2,7 +2,7 @@ import moment from "moment/moment";
 import filesize from 'filesize';
 import highlight from "../../tools/highlight";
 import rate from "../../tools/rate";
-import {types, isAlive} from "mobx-state-tree";
+import {types, isAlive, resolveIdentifier} from "mobx-state-tree";
 import profileTrackerModel from "../profile/profileTracker";
 
 const debug = require('debug')('trackerSearch');
@@ -14,7 +14,7 @@ moment.locale(chrome.i18n.getUILanguage());
  * Model:
  * @property {string} id
  * @property {string} query
- * @property {ProfileTrackerM} profileTracker
+ * @property {string} profileTrackerId
  * @property {string} readyState
  * @property {{url:string}} authRequired
  * @property {string} url
@@ -27,6 +27,7 @@ moment.locale(chrome.i18n.getUILanguage());
  * @property {function(string, Object)} setResult
  * @property {function} clearNextQuery
  * Views:
+ * @property {ProfileTrackerM} profileTracker
  * @property {function:Object} getQueryHighlightMap
  * @property {function:Object} getQueryRateScheme
  * @property {function(number):TrackerResultM[]} getResultsPage
@@ -107,7 +108,7 @@ const trackerResultModel = types.model('trackerResultModel', {
 const trackerSearchModel = types.model('trackerSearchModel', {
   id: types.identifier(types.string),
   query: types.string,
-  profileTracker: types.reference(profileTrackerModel),
+  profileTrackerId: types.string,
   readyState: types.optional(types.string, 'idle'), // idle, loading, success, error
   authRequired: types.maybe(types.model({
     url: types.string
@@ -134,7 +135,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       let index = 0;
       const results = result.results.filter(result => {
         if (!result.title || !result.url) {
-          debug('[' + self.profileTracker.id + ']', 'Skip torrent:', result);
+          debug('[' + self.profileTrackerId + ']', 'Skip torrent:', result);
           return false;
         } else {
           ['size', 'seed', 'peer', 'date'].forEach(key => {
@@ -207,6 +208,9 @@ const trackerSearchModel = types.model('trackerSearchModel', {
   };
 
   return {
+    get profileTracker() {
+      return resolveIdentifier(profileTrackerModel, self, self.profileTrackerId)
+    },
     getQueryHighlightMap() {
       return highlight.getMap(self.query);
     },
@@ -221,9 +225,9 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       }
     },
     search() {
-      return wrapSearchPromise(self.profileTracker.id, 'search', () => {
+      return wrapSearchPromise(self.profileTrackerId, 'search', () => {
         return self.profileTracker.readyPromise.then(() => {
-          if (isAlive(self.profileTracker)) {
+          if (self.profileTracker) {
             const trackerModule = self.profileTracker.trackerModule;
             if (!trackerModule) {
               const err = new Error('MODULE_NOT_FOUND');
@@ -243,9 +247,9 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       const nextQuery = self.nextQuery;
       self.setNextQuery(null);
       if (nextQuery) {
-        return wrapSearchPromise(self.profileTracker.id, 'searchNext', () => {
+        return wrapSearchPromise(self.profileTrackerId, 'searchNext', () => {
           return self.profileTracker.readyPromise.then(() => {
-            if (isAlive(self.profileTracker)) {
+            if (self.profileTracker) {
               const trackerModule = self.profileTracker.trackerModule;
               if (!trackerModule) {
                 const err = new Error('MODULE_NOT_FOUND');
