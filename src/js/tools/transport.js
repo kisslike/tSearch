@@ -5,6 +5,8 @@ import serializeError from 'serialize-error';
 
 const emptyFn = () => {};
 
+const promiseCallbackMap = new WeakMap();
+
 class Transport {
   /**
    * @param {{onMessage:function(function),postMessage:function(*)}} transport
@@ -92,6 +94,10 @@ class Transport {
         cbMap.delete(msg.callbackId);
         callback(message);
       });
+      if (promiseCallbackMap.get(callback)) {
+        promiseCallbackMap.delete(callback);
+        promiseCallbackMap.set(cbMap.get(msg.callbackId), true);
+      }
     }
 
     try {
@@ -119,7 +125,7 @@ class Transport {
           return resolve(response.result);
         }
       };
-      cb.__promise = true;
+      promiseCallbackMap.set(cb, true);
       this.sendMessage(msg, cb);
     });
   }
@@ -186,8 +192,8 @@ class Transport {
 
   destroy() {
     this.cbMap.forEach(cb => {
-      if (cb.__promise) {
-        cb(new Error('Destroyed'));
+      if (promiseCallbackMap.get(cb)) {
+        cb({err: serializeError(new Error('Destroyed'))});
       } else {
         cb();
       }
