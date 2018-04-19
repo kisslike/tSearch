@@ -82,6 +82,7 @@ const indexModel = types.model('indexModel', {
     async loadTrackerModule(id) {
       let module = self.trackers.get(id);
       if (!module) {
+        // await new Promise(resolve => setTimeout(resolve, 3000));
         const key = `trackerModule_${id}`;
         module = await promisifyApi(chrome.storage.local.get)({
           [key]: null

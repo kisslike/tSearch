@@ -168,6 +168,44 @@ const trackerSearchModel = types.model('trackerSearchModel', {
     }
   };
 }).views(/**TrackerSearchM*/self => {
+  const wrapSearchPromise = (trackerId, type, fn) => {
+    self.setReadyState('loading');
+    return fn().then(result => {
+      if (!result.success) {
+        const err = new Error('Error');
+        err.code = 'NOT_SUCCESS';
+        err.result = result;
+        throw err;
+      }
+      return result;
+    }).then(result => {
+      if (isAlive(self)) {
+        self.setReadyState('success');
+        self.setAuthRequired(null);
+        self.setResult(trackerId, result);
+      } else {
+        debug('%s skip, dead', type, trackerId, result);
+      }
+    }, err => {
+      if (isAlive(self)) {
+        if (err.code === 'NOT_SUCCESS') {
+          const result = err.result;
+          if (result.error === 'AUTH') {
+            self.setAuthRequired({
+              url: result.url
+            });
+            self.setReadyState('idle');
+          } else {
+            self.setReadyState('error');
+          }
+        } else {
+          self.setReadyState('error');
+        }
+      }
+      debug('%s error', type, trackerId, err);
+    });
+  };
+
   return {
     getQueryHighlightMap() {
       return highlight.getMap(self.query);
@@ -182,45 +220,8 @@ const trackerSearchModel = types.model('trackerSearchModel', {
         return self.pages[index].results;
       }
     },
-    wrapSearchPromise(trackerId, type, fn) {
-      self.setReadyState('loading');
-      return fn().then(result => {
-        if (!result.success) {
-          const err = new Error('Error');
-          err.code = 'NOT_SUCCESS';
-          err.result = result;
-          throw err;
-        }
-        return result;
-      }).then(result => {
-        if (isAlive(self)) {
-          self.setReadyState('success');
-          self.setAuthRequired(null);
-          self.setResult(trackerId, result);
-        } else {
-          debug('%s skip, dead', type, trackerId, result);
-        }
-      }, err => {
-        if (isAlive(self)) {
-          if (err.code === 'NOT_SUCCESS') {
-            const result = err.result;
-            if (result.error === 'AUTH') {
-              self.setAuthRequired({
-                url: result.url
-              });
-              self.setReadyState('idle');
-            } else {
-              self.setReadyState('error');
-            }
-          } else {
-            self.setReadyState('error');
-          }
-        }
-        debug('%s error', type, trackerId, err);
-      });
-    },
     search() {
-      return self.wrapSearchPromise(self.profileTracker.id, 'search', () => {
+      return wrapSearchPromise(self.profileTracker.id, 'search', () => {
         return self.profileTracker.readyPromise.then(() => {
           if (isAlive(self.profileTracker)) {
             const trackerModule = self.profileTracker.trackerModule;
@@ -242,7 +243,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       const nextQuery = self.nextQuery;
       self.setNextQuery(null);
       if (nextQuery) {
-        return self.wrapSearchPromise(self.profileTracker.id, 'searchNext', () => {
+        return wrapSearchPromise(self.profileTracker.id, 'searchNext', () => {
           return self.profileTracker.readyPromise.then(() => {
             if (isAlive(self.profileTracker)) {
               const trackerModule = self.profileTracker.trackerModule;

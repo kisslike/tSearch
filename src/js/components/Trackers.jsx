@@ -110,7 +110,7 @@ import blankSvg from '../../img/blank.svg';
       classList.push('tracker-selected');
     }
     return (
-      <div ref={this.refTracker} className={classList.join(' ')}>
+      <div className={classList.join(' ')}>
         {icon}
         <a className="tracker__name" href={'#' + profileTracker.id}
            onClick={this.handleClick}>{profileTracker.meta.name}</a>

@@ -96,7 +96,9 @@ const profileTrackerModel = types.model('profileTrackerModel', {
       }, err => {
         debug('loadTrackerModule error', self.id, err);
       }).then(() => {
-        self.setState('done');
+        if (isAlive(self)) {
+          self.setState('done');
+        }
       });
     }
   };
