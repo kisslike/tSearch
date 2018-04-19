@@ -1,4 +1,3 @@
-import trackerModel from "../tracker/tracker";
 import moment from "moment/moment";
 import filesize from 'filesize';
 import highlight from "../../tools/highlight";
@@ -223,13 +222,19 @@ const trackerSearchModel = types.model('trackerSearchModel', {
     search() {
       return self.wrapSearchPromise(self.profileTracker.id, 'search', () => {
         return self.profileTracker.readyPromise.then(() => {
-          const trackerModule = self.profileTracker.trackerModule;
-          if (!trackerModule) {
-            const err = new Error('MODULE_NOT_FOUND');
-            err.code = 'MODULE_NOT_FOUND';
+          if (isAlive(self.profileTracker)) {
+            const trackerModule = self.profileTracker.trackerModule;
+            if (!trackerModule) {
+              const err = new Error('MODULE_NOT_FOUND');
+              err.code = 'MODULE_NOT_FOUND';
+              throw err;
+            }
+            return trackerModule.worker.search(self.query);
+          } else {
+            const err = new Error('PROFILE_IS_DEAD');
+            err.code = 'PROFILE_IS_DEAD';
             throw err;
           }
-          return trackerModule.worker.search(self.query);
         });
       });
     },
@@ -239,13 +244,19 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       if (nextQuery) {
         return self.wrapSearchPromise(self.profileTracker.id, 'searchNext', () => {
           return self.profileTracker.readyPromise.then(() => {
-            const trackerModule = self.profileTracker.trackerModule;
-            if (!trackerModule) {
-              const err = new Error('MODULE_NOT_FOUND');
-              err.code = 'MODULE_NOT_FOUND';
+            if (isAlive(self.profileTracker)) {
+              const trackerModule = self.profileTracker.trackerModule;
+              if (!trackerModule) {
+                const err = new Error('MODULE_NOT_FOUND');
+                err.code = 'MODULE_NOT_FOUND';
+                throw err;
+              }
+              return trackerModule.worker.searchNext(nextQuery);
+            } else {
+              const err = new Error('PROFILE_IS_DEAD');
+              err.code = 'PROFILE_IS_DEAD';
               throw err;
             }
-            return trackerModule.worker.searchNext(nextQuery);
           });
         });
       } else {
