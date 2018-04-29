@@ -51,7 +51,7 @@ const exploreModel = types.model('exploreModel', {
     saveSections() {
       return limitOne(() => {
         const sections = getSnapshot(self.sections);
-        return promisifyApi(chrome.storage.local.set)({explorerSections: sections});
+        return promisifyApi('chrome.storage.local.set')({explorerSections: sections});
       });
     },
     moveSection(index, prevIndex, nextIndex) {
@@ -86,13 +86,13 @@ const exploreModel = types.model('exploreModel', {
       let module = self.modules.get(id);
       if (!module) {
         const key = `exploreModule_${id}`;
-        module = await promisifyApi(chrome.storage.local.get)({
+        module = await promisifyApi('chrome.storage.local.get')({
           [key]: null
         }).then(storage => storage[key]);
         if (!module) {
           module = await loadExploreModule(id);
           if (module) {
-            await promisifyApi(chrome.storage.local.set)({[key]: module});
+            await promisifyApi('chrome.storage.local.set')({[key]: module});
           }
         }
         if (module) {
@@ -103,7 +103,7 @@ const exploreModel = types.model('exploreModel', {
     },
     afterCreate() {
       self.setState('loading');
-      return promisifyApi(chrome.storage.local.get)({
+      return promisifyApi('chrome.storage.local.get')({
         explorerSections: []
       }).then(async storage => {
         if (!storage.explorerSections.length) {
@@ -128,7 +128,7 @@ const exploreModel = types.model('exploreModel', {
           }, {
             id: 'ggGamesTop'
           }];
-          await promisifyApi(chrome.storage.local.set)({explorerSections: storage.explorerSections});
+          await promisifyApi('chrome.storage.local.set')({explorerSections: storage.explorerSections});
         }
         applySnapshot(self, Object.assign({}, {
           sections: storage.explorerSections

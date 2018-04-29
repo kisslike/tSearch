@@ -35,7 +35,7 @@ class Cache {
    * @private
    */
   loadCache(defaultValue) {
-    return promisifyApi(chrome.storage[this._storageType].get)({
+    return promisifyApi(`chrome.storage.${this._storageType}.get`)({
       [this.getKey()]: {
         data: defaultValue,
         insertTime: 0
@@ -80,7 +80,7 @@ class Cache {
     };
 
     return limitOne(() => {
-      return promisifyApi(chrome.storage[this._storageType].set)({
+      return promisifyApi(`chrome.storage.${this._storageType}.set`)({
         [this.getKey()]: this._cache
       });
     }).then(() => this._cache);

@@ -84,13 +84,13 @@ const indexModel = types.model('indexModel', {
       if (!module) {
         // await new Promise(resolve => setTimeout(resolve, 3000));
         const key = `trackerModule_${id}`;
-        module = await promisifyApi(chrome.storage.local.get)({
+        module = await promisifyApi('chrome.storage.local.get')({
           [key]: null
         }).then(storage => storage[key]);
         if (!module) {
           module = await loadTrackerModule(id);
           if (module) {
-            await promisifyApi(chrome.storage.local.set)({[key]: module});
+            await promisifyApi('chrome.storage.local.set')({[key]: module});
           }
         }
         if (module) {
@@ -101,7 +101,7 @@ const indexModel = types.model('indexModel', {
     },
     afterCreate() {
       self.setState('loading');
-      promisifyApi(chrome.storage.local.get)({
+      promisifyApi('chrome.storage.local.get')({
         profile: null,
         profiles: [],
       }).then(storage => {
