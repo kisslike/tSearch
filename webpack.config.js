@@ -37,6 +37,18 @@ const config = {
     filename: '[name].js'
   },
   devtool: 'source-map',
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        commons: {
+          name: "commons",
+          chunks: chunk => ['bg', 'popup', 'index', 'options', 'history', 'editor', 'magic'].indexOf(chunk.name) !== -1,
+          minChunks: 2,
+          priority: -10
+        },
+      }
+    }
+  },
   module: {
     rules: [
       {
@@ -93,17 +105,17 @@ const config = {
     new HtmlWebpackPlugin({
       filename: 'popup.html',
       template: './src/popup.html',
-      chunks: ['popup']
+      chunks: ['commons', 'popup']
     }),
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: './src/index.html',
-      chunks: ['index']
+      chunks: ['commons', 'index']
     }),
     new HtmlWebpackPlugin({
       filename: 'options.html',
       template: './src/options.html',
-      chunks: ['options']
+      chunks: ['commons', 'options']
     }),
     new HtmlWebpackPlugin({
       filename: 'sandbox.html',
@@ -113,17 +125,17 @@ const config = {
     new HtmlWebpackPlugin({
       filename: 'history.html',
       template: './src/history.html',
-      chunks: ['history']
+      chunks: ['commons', 'history']
     }),
     new HtmlWebpackPlugin({
       filename: 'editor.html',
       template: './src/editor.html',
-      chunks: ['editor']
+      chunks: ['commons', 'editor']
     }),
     new HtmlWebpackPlugin({
       filename: 'magic.html',
       template: './src/magic.html',
-      chunks: ['magic']
+      chunks: ['commons', 'magic']
     }),
   ]
 };
