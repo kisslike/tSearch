@@ -21,7 +21,7 @@ const getPort = (port, scheme) => {
 };
 
 const hostnameToRePatten = (scheme, hostname, port) => {
-  return '^' + getScheme(scheme) + _escapeRegExp(hostname.toLowerCase()).replace(/\\\*/g, '.+') + getPort(port, scheme) + '$';
+  return '^' + getScheme(scheme) + _escapeRegExp(hostname.toLowerCase()).replace(/\\\*\\\./g, '.+\\\.') + getPort(port, scheme) + '$';
 };
 
 const normalizePattern = pattern => {
