@@ -63,11 +63,6 @@ const profileTrackerModel = types.model('profileTrackerModel', {
     get trackerModule() {
       return resolveIdentifier(trackerModel, self, self.id);
     },
-    beforeDestroy() {
-      if (self.trackerModule) {
-        self.trackerModule.destroyWorker();
-      }
-    },
     afterCreate() {
       self.setState('loading');
       const indexModel = /**IndexM*/getRoot(self);
@@ -82,7 +77,12 @@ const profileTrackerModel = types.model('profileTrackerModel', {
           self.setState('done');
         }
       });
-    }
+    },
+    beforeDestroy() {
+      if (self.trackerModule) {
+        self.trackerModule.destroyWorker();
+      }
+    },
   };
 });
 
