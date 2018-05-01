@@ -10,7 +10,7 @@ const qs = require('querystring');
     this.search(params.query);
   }
   componentWillUnmount() {
-    this.clearSearch();
+    // this.clearSearch();
   }
   componentWillReceiveProps(nextProps) {
     if (this.props.location !== nextProps.location) {
