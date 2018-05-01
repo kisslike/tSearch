@@ -235,7 +235,11 @@ const Sortable = require('sortablejs');
     const module = /**ExploreModuleM*/section.module;
 
     const displayItemCount = this.getDisplayItemCount();
-    const items = module.getItems();
+
+    let items = [];
+    if (!section.collapsed || section.id === 'favorites') {
+      items = module.getItems();
+    }
 
     let pages = null;
     let content = null;
