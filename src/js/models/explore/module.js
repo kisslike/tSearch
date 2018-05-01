@@ -1,8 +1,8 @@
-import exploreSectionWorkerModel from "./sectionWorker";
 import {types, destroy, getSnapshot} from "mobx-state-tree";
 import exploreModuleMetaModel from "./moduleMeta";
 import sectionItemMode from "./sectionItem";
 import Cache from "../../tools/cache";
+import SectionWorker from "../../tools/sectionWorker";
 
 const debug = require('debug')('exploreModuleModel');
 
@@ -14,10 +14,10 @@ const debug = require('debug')('exploreModuleModel');
  * @property {ExploreModuleInfoM} info
  * @property {{url: string}} [authRequired]
  * @property {string} code
- * @property {ExploreSectionWorkerM} worker
  * @property {ExploreSectionItemM[]} items
  * Actions:
- * @property {function} createWorker
+ * @property {ExploreSectionWorkerM} worker
+ * @property {function:ExploreSectionWorkerM} getWorker
  * @property {function} destroyWorker
  * @property {function(string)} setState
  * @property {function(ExploreSectionItemM[])} setItems
@@ -52,20 +52,9 @@ const exploreModuleModel = types.model('exploreModuleModel', {
     url: types.string
   })),
   code: types.string,
-  worker: types.maybe(exploreSectionWorkerModel),
   items: types.optional(types.array(sectionItemMode), []),
 }).actions(/**ExploreModuleM*/self => {
   return {
-    createWorker() {
-      if (!self.worker) {
-        self.worker = {};
-      }
-    },
-    destroyWorker() {
-      if (self.worker) {
-        destroy(self.worker);
-      }
-    },
     setState(value) {
       self.state = value;
     },
@@ -78,8 +67,21 @@ const exploreModuleModel = types.model('exploreModuleModel', {
   };
 }).views(/**ExploreModuleM*/self => {
   const cache = new Cache(self.id);
+  let worker = null;
 
   return {
+    getWorker() {
+      if (!worker) {
+        worker = new SectionWorker(getSnapshot(self));
+      }
+      return worker;
+    },
+    destroyWorker() {
+      if (worker) {
+        worker.destroy();
+        worker = null;
+      }
+    },
     getCache() {
       return cache;
     },
@@ -104,8 +106,7 @@ const exploreModuleModel = types.model('exploreModuleModel', {
         if (!cache.isExpire(cacheData)) {
           self.setItems(cacheData.data);
         } else {
-          self.createWorker();
-          return self.worker.getItems().finally(() => {
+          return self.getWorker().getItems().finally(() => {
             self.destroyWorker();
           }).then(async response => {
             const {items} = response;
@@ -128,8 +129,7 @@ const exploreModuleModel = types.model('exploreModuleModel', {
     sendCommand(command) {
       self.setAuthRequired(null);
 
-      self.createWorker();
-      return self.worker.sendCommand(command).finally(() => {
+      return self.getWorker().sendCommand(command).finally(() => {
         self.destroyWorker();
       }).then(async result => {
         debug('Command result', command, result);
@@ -148,10 +148,12 @@ const exploreModuleModel = types.model('exploreModuleModel', {
     postProcessSnapshot(snapshot) {
       snapshot.state = undefined;
       snapshot.authRequired = undefined;
-      snapshot.worker = undefined;
       snapshot.items = undefined;
       return snapshot;
     },
+    beforeDestroy() {
+      this.destroyWorker();
+    }
   };
 });
 
