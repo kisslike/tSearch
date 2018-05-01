@@ -109,7 +109,7 @@ const Sortable = require('sortablejs');
   componentWillMount() {
     const section = /**ExploreSectionM*/this.props.section;
     const module = /**ExploreModuleM*/section.module;
-    if (!section.collapsed || section.id === 'favorites') {
+    if (!section.collapsed || section.id === 'favorite') {
       module.preloadItems();
     }
   }
