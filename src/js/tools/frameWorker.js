@@ -59,7 +59,11 @@ class FrameWorker {
     if (!this.isLoaded) {
       this.messageStack.push(msg);
     } else {
-      this.frame.contentWindow.postMessage(msg, '*');
+      if (this.frame.contentWindow) {
+        this.frame.contentWindow.postMessage(msg, '*');
+      } else {
+        throw new Error('Window is closed');
+      }
     }
   }
   destroyFrame() {
