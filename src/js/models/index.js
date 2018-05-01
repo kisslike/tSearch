@@ -6,10 +6,11 @@ import filterModel from "./filters";
 import getSearchFragModelId from "../tools/getSearchFragModelId";
 import exploreModel from "./explore/explore";
 import page from "./page";
-import {types, destroy, resolveIdentifier, getSnapshot} from "mobx-state-tree";
+import {types, destroy, resolveIdentifier, getSnapshot, getRoot} from "mobx-state-tree";
 import promisifyApi from "../tools/promisifyApi";
 import loadTrackerModule from "../tools/loadTrackerModule";
 import profileTemplateModel from "./profile/profileTemplate";
+import historyModel from "./history";
 
 const debug = require('debug')('indexModel');
 
@@ -24,6 +25,7 @@ const debug = require('debug')('indexModel');
  * @property {FilterM} filter
  * @property {ExploreM} explore
  * @property {PageM[]} page
+ * @property {HistoryM[]} history
  * Actions:
  * @property {function(string)} setState
  * @property {function(ProfileM[])} setProfiles
@@ -48,6 +50,7 @@ const indexModel = types.model('indexModel', {
   filter: types.optional(filterModel, {}),
   explore: types.optional(exploreModel, {}),
   page: types.optional(page, {}),
+  history: types.optional(historyModel, {}),
 }).actions(/**IndexM*/self => {
   return {
     setState(value) {
@@ -57,6 +60,7 @@ const indexModel = types.model('indexModel', {
       self.profiles = profiles;
     },
     createSearch(query) {
+      self.history.onQuery(query);
       self.searchFrag = {
         id: getSearchFragModelId(),
         query: query

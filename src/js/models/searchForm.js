@@ -1,6 +1,7 @@
 import {StatusCodeError, AbortError} from '../tools/errors';
 import escapeRegExp from 'lodash.escaperegexp';
-import {types, isAlive} from "mobx-state-tree";
+import {types, isAlive, getRoot} from "mobx-state-tree";
+import promisifyApi from "../tools/promisifyApi";
 
 const popsicle = require('popsicle');
 const debug = require('debug')('searchForm');
@@ -23,7 +24,7 @@ const debug = require('debug')('searchForm');
 
 const searchFormModel = types.model('searchFormModel', {
   query: types.optional(types.string, ''),
-  suggestions: types.optional(types.array(types.string), [])
+  suggestions: types.optional(types.array(types.string), []),
 }).actions(/**SearchFormM*/self => ({
   setQuery(value) {
     self.query = value;
@@ -65,14 +66,25 @@ const searchFormModel = types.model('searchFormModel', {
 
   const fetchHistorySuggestions = value => {
     let aborted = false;
-    const promise = new Promise(r => chrome.storage.local.get({
-      history: []
-    }, r)).then(({history}) => {
+    let promise = null;
+    const history = getRoot(self).history;
+    if (history) {
+      promise = history.readyPromise.then(() => {
+        return {history: history.getHistory()};
+      });
+    } else {
+      promise = promisifyApi('chrome.storage.local.get')({
+        history: {}
+      }).then(({history}) => {
+        return {history: Array.from(Object.values(history))};
+      });
+    }
+    promise = promise.then(({history}) => {
       history.sort(({count: a}, {count: b}) => {
         return a === b ? 0 : a < b ? 1 : -1;
       });
 
-      let suggestions = history.map(item => item.query).filter(item => item.length);
+      let suggestions = history.map(item => item.query).filter(query => query.length);
 
       if (value) {
         const queryRe = new RegExp('^' + escapeRegExp(value), 'i');
