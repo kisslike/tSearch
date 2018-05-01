@@ -27,6 +27,11 @@ const hostnameToRePatten = (scheme, hostname, port) => {
 const urlPatternToStrRe = function (pattern) {
   const result = [];
 
+  const m1 = /^(.+)\/\*$/.exec(pattern);
+  if (m1) {
+    pattern = m1[1];
+  }
+
   const m = /^(?:([^:]+:)\/\/)?(?:(.+):([0-9]+)|(.+))$/.exec(pattern);
   if (m) {
     const scheme = m[1];

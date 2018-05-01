@@ -6,8 +6,10 @@ const exKitRequest = (tracker, options) => {
     throw new Error('Incorrect options');
   }
 
-  if (!tracker.connectRe || !tracker.connectRe.test(options.url)) {
-    const err = new Error(`Connection is not allowed! ${options.url} Add url patter in @connect!`);
+  const {origin} = new URL(options.url);
+
+  if (!tracker.connectRe || !tracker.connectRe.test(origin)) {
+    const err = new Error(`Connection is not allowed! ${origin} Add url patter in @connect!`);
     throw err;
   }
 
