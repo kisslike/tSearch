@@ -106,6 +106,13 @@ const Sortable = require('sortablejs');
     this.bodyNode = null;
     this.sortable = null;
   }
+  componentWillMount() {
+    const section = /**ExploreSectionM*/this.props.section;
+    const module = /**ExploreModuleM*/section.module;
+    if (!section.collapsed || section.id === 'favorites') {
+      module.preloadItems();
+    }
+  }
   getDisplayItemCount() {
     const store = /**IndexM*/this.props.store;
     const section = /**ExploreSectionM*/this.props.section;
@@ -128,6 +135,10 @@ const Sortable = require('sortablejs');
       e.preventDefault();
       const section = /**ExploreSectionM*/this.props.section;
       section.toggleCollapse();
+      const module = /**ExploreModuleM*/section.module;
+      if (!section.collapsed) {
+        module.preloadItems();
+      }
     }
   }
   handleOptionsClick(e) {
@@ -236,10 +247,7 @@ const Sortable = require('sortablejs');
 
     const displayItemCount = this.getDisplayItemCount();
 
-    let items = [];
-    if (!section.collapsed || section.id === 'favorites') {
-      items = module.getItems();
-    }
+    const items = module.getItems();
 
     let pages = null;
     let content = null;

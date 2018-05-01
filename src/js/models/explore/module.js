@@ -26,6 +26,7 @@ const debug = require('debug')('exploreModuleModel');
  * @property {function:Cache} getCache
  * @property {function:Promise} saveItems
  * @property {function:ExploreSectionItemM[]} getItems
+ * @property {function} preloadItems
  * @property {function} loadItems
  * @property {function(string)} sendCommand
  */
@@ -86,10 +87,12 @@ const exploreModuleModel = types.model('exploreModuleModel', {
       return cache.setData(getSnapshot(self.items));
     },
     getItems() {
+      return self.items;
+    },
+    preloadItems() {
       if (!cache.isLoaded()) {
         self.loadItems();
       }
-      return self.items;
     },
     loadItems() {
       self.setState('loading');
