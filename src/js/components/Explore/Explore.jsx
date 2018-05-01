@@ -131,7 +131,10 @@ const Sortable = require('sortablejs');
     });
   }
   handleCollapse(e) {
-    if (e.target.classList.contains('section__head') || e.target.classList.contains('section__collapses')) {
+    if (e.target.classList.contains('section__head') ||
+      e.target.classList.contains('section__collapses') ||
+      e.target.classList.contains('section__title')
+    ) {
       e.preventDefault();
       const section = /**ExploreSectionM*/this.props.section;
       section.toggleCollapse();
@@ -171,7 +174,7 @@ const Sortable = require('sortablejs');
     const module = /**ExploreModuleM*/section.module;
 
     let openSite = null;
-    let actions = null;
+    let moduleActions = null;
     let options = null;
     if (!section.collapsed) {
       if (module.meta.siteURL) {
@@ -181,7 +184,7 @@ const Sortable = require('sortablejs');
         );
       }
 
-      actions = module.meta.actions.map((action, i) => {
+      moduleActions = module.meta.actions.map((action, i) => {
         const classList = ['action'];
         if (action.isLoading) {
           classList.push('loading');
@@ -227,16 +230,23 @@ const Sortable = require('sortablejs');
       }
     }
 
+    let actionsCtr = null;
+    if (!section.collapsed) {
+      actionsCtr = (
+        <div className="section__actions">
+          {openSite}
+          {moduleActions}
+          <a href={"#"} onClick={this.handleOptionsClick} className="action action__setup" title={chrome.i18n.getMessage('setupView')}/>
+          {options}
+        </div>
+      );
+    }
+
     return (
       <div className="section__head" onClick={this.handleCollapse}>
         <div className="section__move"/>
         <div className="section__title">{module.meta.getName()}</div>
-        <div className="section__actions">
-          {openSite}
-          {actions}
-          <a href={"#"} onClick={this.handleOptionsClick} className="action action__setup" title={chrome.i18n.getMessage('setupView')}/>
-          {options}
-        </div>
+        {actionsCtr}
         <div className="section__collapses"/>
       </div>
     );
