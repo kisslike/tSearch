@@ -235,24 +235,22 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       }
     },
     search() {
-      return self.profileTracker.readyPromise.then(() => {
-        if (isAlive(self) && self.profileTracker && self.trackerModule) {
-          return wrapSearchPromise(self.trackerModule.id, 'search', () => {
-            return self.trackerModule.worker.search(self.query);
-          });
-        }
+      if (!self.trackerModule) {
+        return Promise.resolve();
+      }
+      return wrapSearchPromise(self.trackerModule.id, 'search', () => {
+        return self.trackerModule.worker.search(self.query);
       });
     },
     searchNext() {
+      if (!self.trackerModule) {
+        return Promise.resolve();
+      }
       const nextQuery = self.nextQuery;
       self.setNextQuery(null);
       if (nextQuery) {
-        return self.profileTracker.readyPromise.then(() => {
-          if (isAlive(self) && self.profileTracker && self.trackerModule) {
-            return wrapSearchPromise(self.trackerModule.id, 'searchNext', () => {
-              return self.trackerModule.worker.searchNext(nextQuery);
-            });
-          }
+        return wrapSearchPromise(self.trackerModule.id, 'searchNext', () => {
+          return self.trackerModule.worker.searchNext(nextQuery);
         });
       } else {
         return Promise.resolve();

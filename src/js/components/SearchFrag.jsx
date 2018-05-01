@@ -40,6 +40,12 @@ const qs = require('querystring');
       );
     }
 
+    if (store.searchFrag.state === 'loading') {
+      return (
+        'Loading...'
+      );
+    }
+
     return (
       store.searchFrag.tables.map(table => {
         return (

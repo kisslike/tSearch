@@ -7,11 +7,13 @@ const debug = require('debug')('searchFrag');
 /**
  * @typedef {{}} SearchFragM
  * Model:
+ * @property {string} state
  * @property {number} id
  * @property {string} query
  * @property {TrackerSearchM[]} trackerSearchList
  * @property {SearchFragTableM[]} tables
  * Actions:
+ * @property {function(string)} setState
  * @property {function} search
  * @property {function} searchNext
  * @property {function} clearSearch
@@ -25,13 +27,24 @@ const debug = require('debug')('searchFrag');
  */
 
 const searchFragModel = types.model('searchFragModel', {
+  state: types.optional(types.string, 'idle'), // idle, loading, done
   id: types.identifier(types.number),
   query: types.string,
   trackerSearchList: types.optional(types.array(trackerSearchModel), []),
   tables: types.optional(types.array(searchFragTableModel), []),
 }).actions(/**SearchFragM*/self => {
+  const isReady = () => {
+    if (self.state !== 'done') {
+      throw new Error('SearchFrag is not ready');
+    }
+  };
+
   return {
+    setState(value) {
+      self.state = value;
+    },
     search() {
+      isReady();
       self.clearSearch();
       self.tables.push(searchFragTableModel.create({
         id: self.getTableId(),
@@ -48,6 +61,7 @@ const searchFragModel = types.model('searchFragModel', {
       });
     },
     searchNext() {
+      isReady();
       self.tables.push(searchFragTableModel.create({
         id: self.getTableId(),
         index: self.tables.length
@@ -66,7 +80,12 @@ const searchFragModel = types.model('searchFragModel', {
     },
   };
 }).views(/**SearchFragM*/self => {
+  let readyPromise = null;
+
   return {
+    get readyPromise() {
+      return readyPromise;
+    },
     get profile() {
       return getParent(self, 1).profile;
     },
@@ -91,6 +110,19 @@ const searchFragModel = types.model('searchFragModel', {
     getSearchTrackerByTracker(profile) {
       return resolveIdentifier(trackerSearchModel, self, self.id + '_' + profile.id);
     },
+    afterCreate() {
+      self.setState('loading');
+      readyPromise = self.profile.readyPromise.then(() => {
+        if (isAlive(self)) {
+          self.setState('done');
+          self.search();
+        } else {
+          debug('skip, dead');
+        }
+      }).catch(err => {
+        debug('afterCreate error', err);
+      });
+    }
   };
 });
 

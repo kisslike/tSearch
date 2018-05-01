@@ -56,11 +56,10 @@ const indexModel = types.model('indexModel', {
       self.profiles = profiles;
     },
     createSearch(query) {
-      self.searchFrag = searchFragModel.create({
+      self.searchFrag = {
         id: getSearchFragModelId(),
         query: query
-      });
-      self.searchFrag.search(query);
+      };
     },
     clearSearch() {
       if (self.searchFrag) {
