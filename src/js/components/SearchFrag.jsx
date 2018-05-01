@@ -5,12 +5,12 @@ import Table from './Table';
 const qs = require('querystring');
 
 @observer class SearchFrag extends React.Component {
-  componentWillMount() {
+  componentDidMount() {
     const params = qs.parse(this.props.location.search.substr(1));
     this.search(params.query);
   }
   componentWillUnmount() {
-    // this.clearSearch();
+    this.clearSearch();
   }
   componentWillReceiveProps(nextProps) {
     if (this.props.location !== nextProps.location) {
