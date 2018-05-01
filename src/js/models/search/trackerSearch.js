@@ -4,7 +4,7 @@ import highlight from "../../tools/highlight";
 import rate from "../../tools/rate";
 import {types, isAlive, resolveIdentifier} from "mobx-state-tree";
 import profileTrackerModel from "../profile/profileTracker";
-import trackerModel from "../tracker/tracker";
+import trackerModel from "../tracker";
 import getTrackerIconClassName from "../../tools/getTrackerIconClassName";
 
 const debug = require('debug')('trackerSearch');

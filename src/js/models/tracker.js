@@ -1,5 +1,5 @@
 import {types, getSnapshot} from "mobx-state-tree";
-import TrackerWorker from "../../tools/trackerWorker";
+import TrackerWorker from "../tools/trackerWorker";
 
 /**
  * @typedef {{}} TrackerM

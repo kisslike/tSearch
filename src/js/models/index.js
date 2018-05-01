@@ -1,5 +1,5 @@
 import profileModel from './profile/profile';
-import trackerModel from './tracker/tracker';
+import trackerModel from './tracker';
 import searchFormModel from "./searchForm";
 import searchFragModel from "./search/searchFrag";
 import filterModel from "./filters";
