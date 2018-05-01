@@ -11,6 +11,7 @@ const debug = require('debug')('profileTracker');
  * @property {ProfileTrackerMetaM} meta
  * @property {boolean} selected
  * Actions:
+ * @property {function} toggleSelect
  * @property {function(boolean)} setSelected
  * @property {function(boolean)} applySelected
  * Views:
@@ -43,22 +44,14 @@ const profileTrackerModel = types.model('profileTrackerModel', {
   selected: types.optional(types.boolean, false),
 }).actions(/**ProfileTrackerM*/self => {
   return {
+    toggleSelect() {
+      self.selected = !self.selected;
+    },
     setSelected(value) {
       self.selected = value;
     },
     setState(value) {
       self.state = value;
-    },
-    applySelected(value) {
-      /**@type {ProfileM}*/
-      const profile = getParent(self, 2);
-      profile.trackers.forEach(profileTracker => {
-        if (value) {
-          profileTracker.setSelected(profileTracker === self);
-        } else {
-          profileTracker.setSelected(false);
-        }
-      });
     }
   };
 }).views(/**ProfileTrackerM*/self => {

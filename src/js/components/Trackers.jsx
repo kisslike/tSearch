@@ -33,9 +33,11 @@ import getTrackerIconClassName from "../tools/getTrackerIconClassName";
   handleClick(e) {
     e.preventDefault();
 
+    /**@type {IndexM}*/
+    const store = this.props.store;
     /**@type {ProfileTrackerM}*/
     const profileTracker = this.props.profileTracker;
-    profileTracker.applySelected(!profileTracker.selected);
+    store.profile.selectTracker(profileTracker.id);
   }
   render() {
     /**@type {IndexM}*/

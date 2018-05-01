@@ -11,7 +11,6 @@ import {types} from "mobx-state-tree";
  * @property {string} state
  * @property {function:ProfileTrackerM[]} getSelectedProfileTrackers
  * @property {function:TrackerM[]} getTrackers
- * @property {function(string):ProfileTrackerM} getProfileTrackerById
  * @property {function} start
  * @property {function} stop
  */
@@ -25,20 +24,23 @@ const profileModel = types.model('profileModel', {
   };
 }).views(/**ProfileM*/self => {
   return {
+    get readyPromise() {
+      return Promise.all(self.trackers.map(profileTracker => profileTracker.readyPromise));
+    },
+    selectTracker(trackerId) {
+      self.trackers.forEach(profileTracker => {
+        if (trackerId === profileTracker.id) {
+          profileTracker.toggleSelect();
+        } else {
+          profileTracker.setSelected(false);
+        }
+      });
+    },
     getSelectedProfileTrackers() {
       let result = self.trackers.filter(a => a.selected);
       if (result.length === 0) {
         result = self.trackers;
       }
-      return result;
-    },
-    getProfileTrackerById(id) {
-      let result = null;
-      self.trackers.some(tracker => {
-        if (tracker.id === id) {
-          result = tracker;
-        }
-      });
       return result;
     },
   };
