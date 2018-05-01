@@ -24,13 +24,19 @@ const hostnameToRePatten = (scheme, hostname, port) => {
   return '^' + getScheme(scheme) + _escapeRegExp(hostname.toLowerCase()).replace(/\\\*/g, '.+') + getPort(port, scheme) + '$';
 };
 
+const normalizePattern = pattern => {
+  const m1 = /^((?:[^:]+:\/\/)?[^\/]+)/.exec(pattern);
+  if (m1) {
+    return m1[1];
+  } else {
+    return pattern;
+  }
+};
+
 const urlPatternToStrRe = function (pattern) {
   const result = [];
 
-  const m1 = /^(.+)\/\*$/.exec(pattern);
-  if (m1) {
-    pattern = m1[1];
-  }
+  pattern = normalizePattern(pattern);
 
   const m = /^(?:([^:]+:)\/\/)?(?:(.+):([0-9]+)|(.+))$/.exec(pattern);
   if (m) {
