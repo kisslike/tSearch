@@ -1,6 +1,6 @@
 import searchFragTableModel from "./searchFragTable";
 import trackerSearchModel from "./trackerSearch";
-import {types, getParent, isAlive, destroy, resolveIdentifier} from "mobx-state-tree";
+import {types, getParent, isAlive, getRoot, destroy, resolveIdentifier} from "mobx-state-tree";
 
 const debug = require('debug')('searchFrag');
 
@@ -48,7 +48,8 @@ const searchFragModel = types.model('searchFragModel', {
       self.clearSearch();
       self.tables.push(searchFragTableModel.create({
         id: self.getTableId(),
-        index: self.tables.length
+        index: self.tables.length,
+        sortByList: getRoot(self).localStore.sortByList,
       }));
       self.profile.getSelectedProfileTrackers().forEach(profileTracker => {
         const trackerSearch = trackerSearchModel.create({
@@ -64,7 +65,8 @@ const searchFragModel = types.model('searchFragModel', {
       isReady();
       self.tables.push(searchFragTableModel.create({
         id: self.getTableId(),
-        index: self.tables.length
+        index: self.tables.length,
+        sortByList: getRoot(self).localStore.sortByList,
       }));
       self.trackerSearchList.forEach(trackerSearch => {
         trackerSearch.searchNext();

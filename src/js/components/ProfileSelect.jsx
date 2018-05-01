@@ -12,7 +12,7 @@ import {observer} from "mobx-react/index";
   handleSelect() {
     const store = this.props.store;
     const value = this.refs.select.value;
-    store.setProfile(value);
+    store.changeProfile(value);
   }
 
   render() {
@@ -25,7 +25,7 @@ import {observer} from "mobx-react/index";
     });
 
     return (
-      <select ref="select" className="profile__select" defaultValue={store.profile} onChange={this.handleSelect}>
+      <select ref="select" className="profile__select" defaultValue={store.profile.name} onChange={this.handleSelect}>
         {options}
       </select>
     );

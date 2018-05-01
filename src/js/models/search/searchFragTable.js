@@ -1,5 +1,5 @@
 import sortResults from "../../tools/sortResults";
-import {types, getParent, isAlive, detach, unprotect} from "mobx-state-tree";
+import {types, getParent, isAlive, detach, unprotect, getRoot, getSnapshot} from "mobx-state-tree";
 
 const debug = require('debug')('searchFragTable');
 
@@ -38,10 +38,10 @@ const debug = require('debug')('searchFragTable');
 const searchFragTableModel = types.model('searchFragTableModel', {
   id: types.identifier(types.string),
   index: types.number,
-  sortByList: types.optional(types.array(types.model('sortBy', {
+  sortByList: types.array(types.model('sortBy', {
     by: types.string,
     direction: types.optional(types.number, 0),
-  })), [{by: 'title'}]),
+  })),
 }).actions(/**SearchFragTableM*/self => {
   return {
     sortBy(by) {
@@ -52,6 +52,8 @@ const searchFragTableModel = types.model('searchFragTableModel', {
         item.direction = item.direction === 0 ? 1 : 0;
       }
       self.sortByList = [item];
+
+      getRoot(self).localStore.set('sortByList', getSnapshot(self.sortByList));
     },
     subSortBy(by) {
       let item = self.getSortBy(by);
@@ -65,6 +67,8 @@ const searchFragTableModel = types.model('searchFragTableModel', {
         item.direction = item.direction === 0 ? 1 : 0;
       }
       self.sortByList.push(item);
+
+      getRoot(self).localStore.set('sortByList', getSnapshot(self.sortByList));
     }
   };
 }).views(/**SearchFragTableM*/self => {

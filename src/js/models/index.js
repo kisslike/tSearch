@@ -32,6 +32,7 @@ const debug = require('debug')('indexModel');
  * @property {function(string)} setProfile
  * @property {function(TrackerM)} putTrackerModule
  * Views:
+ * @property {Object} localStore
  * @property {function} onProfileChange
  * @property {function(string)} loadTrackerModule
  * @property {function} afterCreate
@@ -77,7 +78,19 @@ const indexModel = types.model('indexModel', {
     }
   };
 }).views(/**IndexM*/self => {
+  const localStore = {
+    set(key, value) {
+      this[key] = value;
+      promisifyApi('chrome.storage.local.set')({
+        [key]: value,
+      });
+    }
+  };
+
   return {
+    get localStore() {
+      return localStore;
+    },
     async loadTrackerModule(id) {
       let module = self.trackers.get(id);
       if (!module) {
@@ -103,7 +116,10 @@ const indexModel = types.model('indexModel', {
       promisifyApi('chrome.storage.local.get')({
         profile: null,
         profiles: [],
+        sortByList: [{by: 'quality'}]
       }).then(storage => {
+        self.localStore.sortByList = storage.sortByList;
+
         if (!storage.profiles.length) {
           storage.profiles.push({
             name: 'Default',
@@ -148,6 +164,13 @@ const indexModel = types.model('indexModel', {
       }).catch(err => {
         debug('index load error', err);
         self.setState('error');
+      });
+    },
+    changeProfile(name) {
+      self.setProfile(name);
+
+      promisifyApi('chrome.storage.local.set')({
+        profile: name
       });
     }
   };
