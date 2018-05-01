@@ -73,7 +73,7 @@ const profileTrackerModel = types.model('profileTrackerModel', {
       const indexModel = /**IndexM*/getRoot(self);
       readyPromise = indexModel.loadTrackerModule(self.id).then(() => {
         if (isAlive(self) && self.trackerModule) {
-          self.trackerModule.createWorker();
+          self.trackerModule.getWorker();
         }
       }, err => {
         debug('loadTrackerModule error', self.id, err);

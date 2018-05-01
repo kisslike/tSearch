@@ -16,8 +16,7 @@ const debug = require('debug')('exploreModuleModel');
  * @property {string} code
  * @property {ExploreSectionItemM[]} items
  * Actions:
- * @property {ExploreSectionWorkerM} worker
- * @property {function:ExploreSectionWorkerM} getWorker
+ * @property {function:SectionWorker} getWorker
  * @property {function} destroyWorker
  * @property {function(string)} setState
  * @property {function(ExploreSectionItemM[])} setItems

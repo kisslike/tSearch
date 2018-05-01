@@ -239,7 +239,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
         return Promise.resolve();
       }
       return wrapSearchPromise(self.trackerModule.id, 'search', () => {
-        return self.trackerModule.worker.search(self.query);
+        return self.trackerModule.getWorker().search(self.query);
       });
     },
     searchNext() {
@@ -250,7 +250,7 @@ const trackerSearchModel = types.model('trackerSearchModel', {
       self.setNextQuery(null);
       if (nextQuery) {
         return wrapSearchPromise(self.trackerModule.id, 'searchNext', () => {
-          return self.trackerModule.worker.searchNext(nextQuery);
+          return self.trackerModule.getWorker().searchNext(nextQuery);
         });
       } else {
         return Promise.resolve();

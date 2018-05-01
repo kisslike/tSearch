@@ -1,5 +1,5 @@
-import trackerWorkerModel from './trackerWorker';
-import {types, destroy} from "mobx-state-tree";
+import {types, getSnapshot} from "mobx-state-tree";
+import TrackerWorker from "../../tools/trackerWorker";
 
 /**
  * @typedef {{}} TrackerM
@@ -8,9 +8,8 @@ import {types, destroy} from "mobx-state-tree";
  * @property {TrackerMetaM} meta
  * @property {TrackerInfoM} info
  * @property {string} code
- * @property {TrackerWorkerM} worker
  * Actions:
- * @property {function} createWorker
+ * @property {function:TrackerWorker} getWorker
  * @property {function} destroyWorker
  * Views:
  */
@@ -69,22 +68,28 @@ const trackerModel = types.model('trackerModel', {
     disableAutoUpdate: types.optional(types.boolean, false),
   }),
   code: types.string,
-  worker: types.maybe(trackerWorkerModel)
 }).actions(/**TrackerM*/self => {
+  return {};
+}).views(/**TrackerM*/self => {
+  let worker = null;
+
   return {
-    createWorker() {
-      if (!self.worker) {
-        self.worker = {};
+    getWorker() {
+      if (!worker) {
+        worker = new TrackerWorker(getSnapshot(self));
       }
+      return worker;
     },
     destroyWorker() {
-       if (self.worker) {
-         destroy(self.worker);
-       }
-    }
+      if (worker) {
+        worker.destroy();
+        worker = null;
+      }
+    },
+    beforeDestroy() {
+      this.destroyWorker();
+    },
   };
-}).views(/**TrackerM*/self => {
-  return {};
 });
 
 export default trackerModel;
