@@ -58,9 +58,59 @@ const debug = require('debug')('Table');
   getHeaderColumns() {
     return this.columns.map(type => this.getHeaderColumn(type));
   }
-  getRow(/**TrackerResultM*/result) {
+  getRows(results) {
+    return results.map(result => (
+      <TableRow key={result.id} row={result} searchFrag={this.props.searchFrag} store={this.props.store} columns={this.columns}/>
+    ));
+  }
+  render() {
+    /**@type {SearchFragTableM}*/
+    const table = this.props.table;
+
+    let moreBtn = null;
+    if (table.hasMoreBtn()) {
+      moreBtn = (
+        <a className="loadMore search__submit footer__loadMore" href="#more" onClick={table.handleMoreBtn}>{
+          chrome.i18n.getMessage('loadMore')
+        }</a>
+      );
+    }
+
     return (
-      <div key={result.id} className="row body__row">{this.columns.map(type => {
+      <div className="table table-results">
+        <div className="table__head">
+          <div className="row head__row">
+            {this.getHeaderColumns()}
+          </div>
+          <div className="body table__body">
+            {this.getRows(table.getSortedFilteredResults())}
+          </div>
+          <div className="footer table__footer">
+            {moreBtn}
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+@observer class TableRow extends React.Component {
+  constructor() {
+    super();
+
+    this.handleClick = this.handleClick.bind(this);
+  }
+  handleClick() {
+    /**@type {IndexM}*/
+    const store = this.props.store;
+    const /**SearchFragM*/searchFrag = this.props.searchFrag;
+    const /**TrackerResultM*/row = this.props.row;
+    store.history.onClick(searchFrag.query, row.title, row.url, row.trackerInfo.id);
+  }
+  render() {
+    const /**TrackerResultM*/result = this.props.row;
+    return (
+      <div className="row body__row">{this.props.columns.map(type => {
         switch (type) {
           case 'date': {
             return (
@@ -110,7 +160,7 @@ const debug = require('debug')('Table');
             }
 
             return (
-              <div key="title" className={`cell row__cell cell-${type}`}>
+              <div key="title" className={`cell row__cell cell-${type}`} onClick={this.handleClick}>
                 <div className="cell__title">
                   {highlight.getReactComponent('a', {
                     className: 'title',
@@ -159,38 +209,6 @@ const debug = require('debug')('Table');
           }
         }
       })}</div>
-    );
-  }
-  getRows(results) {
-    return results.map(result => this.getRow(result));
-  }
-  render() {
-    /**@type {SearchFragTableM}*/
-    const table = this.props.table;
-
-    let moreBtn = null;
-    if (table.hasMoreBtn()) {
-      moreBtn = (
-        <a className="loadMore search__submit footer__loadMore" href="#more" onClick={table.handleMoreBtn}>{
-          chrome.i18n.getMessage('loadMore')
-        }</a>
-      );
-    }
-
-    return (
-      <div className="table table-results">
-        <div className="table__head">
-          <div className="row head__row">
-            {this.getHeaderColumns()}
-          </div>
-          <div className="body table__body">
-            {this.getRows(table.getSortedFilteredResults())}
-          </div>
-          <div className="footer table__footer">
-            {moreBtn}
-          </div>
-        </div>
-      </div>
     );
   }
 }
