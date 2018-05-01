@@ -1,37 +1,55 @@
-import escapeRegexp from 'lodash.escaperegexp';
+import _escapeRegExp from 'lodash.escaperegexp';
+import getPortSchemes from "./getPortSchemes";
 
+const required = require('requires-port');
 
-const urlPatternToStrRe = function (value) {
-  const m = /^(\*|http|https):\/\/([^\/]+)(?:\/(.*))?$/.exec(value);
-  if (!m) {
-    throw new Error("Invalid url-pattern");
+const getScheme = scheme => {
+  if (!scheme || scheme === '*:') {
+    return '[^:]+:\/\/';
   }
+  return _escapeRegExp(scheme.toLowerCase()) + '\/\/';
+};
 
-  let scheme = m[1];
-  if (scheme === '*') {
-    scheme = 'https?';
+const getPort = (port, scheme) => {
+  if (!port) {
+    return '(?::\\\d+)?';
   }
-
-  let host = m[2];
-  host = escapeRegexp(host);
-  host = host.replace(/^\\\*\\\./, '(?:[^\/]+\\.)?');
-
-  const pattern = ['^', scheme, ':\\/\\/', host];
-
-  let path = m[3];
-  if (!path) {
-    pattern.push('$');
-  } else if (path === '*') {
-    path = '(?:|\/.*)';
-    pattern.push(path, '$');
-  } else if (path) {
-    path = '\/' + path;
-    path = escapeRegexp(path);
-    path = path.replace(/\\\*/g, '.*');
-    pattern.push(path, '$');
+  if (scheme && !required(port, scheme)) {
+    return '';
   }
+  return _escapeRegExp(':' + port);
+};
 
-  return pattern.join('');
+const hostnameToRePatten = (scheme, hostname, port) => {
+  return '^' + getScheme(scheme) + _escapeRegExp(hostname.toLowerCase()).replace(/\\\*/g, '.+') + getPort(port, scheme) + '$';
+};
+
+const urlPatternToStrRe = function (pattern) {
+  const result = [];
+
+  const m = /^(?:([^:]+:)\/\/)?(?:(.+):([0-9]+)|(.+))$/.exec(pattern);
+  if (m) {
+    const scheme = m[1];
+    const hostnameOrIpLiteral = m[2] || m[4];
+    const port = m[3];
+    const schemes = [scheme, ...getPortSchemes(port)];
+    schemes.forEach(scheme => {
+      let hostname = hostnameOrIpLiteral;
+      if (/^\./.test(hostname)) {
+        hostname = '*' + hostname;
+      }
+      const hostnameList = [hostname];
+      if (/^\*\./.test(hostname)) {
+        hostnameList.push(hostname.substr(2));
+      }
+      hostnameList.forEach(hostname => {
+        result.push(hostnameToRePatten(scheme, hostname, port));
+      });
+    });
+  } else {
+    throw new Error('Invalid url-pattern');
+  }
+  return result;
 };
 
 export default urlPatternToStrRe;

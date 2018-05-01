@@ -6,7 +6,7 @@ const exKitBuildConnectRe = connect => {
   if (connect) {
     connect.forEach(function (patter) {
       try {
-        connectRe.push(urlPatternToStrRe(patter));
+        connectRe.push(...urlPatternToStrRe(patter));
       } catch (err) {
         console.error('Connect pattern error!', patter, err);
       }
