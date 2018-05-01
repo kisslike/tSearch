@@ -12,7 +12,7 @@ const debug = require('debug')('pageModel');
  * Views:
  */
 
-const pageModel = types.model('pageModel', {
+const page = types.model('pageModel', {
   id: types.optional(types.identifier(types.string), 'page'),
   width: types.optional(types.number, 0)
 }).actions(/**PageM*/self => {
@@ -37,4 +37,4 @@ const pageModel = types.model('pageModel', {
   };
 });
 
-export default pageModel;
+export default page;

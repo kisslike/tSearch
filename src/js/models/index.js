@@ -5,7 +5,7 @@ import searchFragModel from "./search/searchFrag";
 import filterModel from "./filters";
 import getSearchFragModelId from "../tools/getSearchFragModelId";
 import exploreModel from "./explore/explore";
-import pageModel from "./pageModel";
+import page from "./page";
 import {types, destroy, resolveIdentifier, getSnapshot} from "mobx-state-tree";
 import promisifyApi from "../tools/promisifyApi";
 import loadTrackerModule from "../tools/loadTrackerModule";
@@ -46,7 +46,7 @@ const indexModel = types.model('indexModel', {
   searchFrag: types.maybe(searchFragModel),
   filter: types.optional(filterModel, {}),
   explore: types.optional(exploreModel, {}),
-  page: types.optional(pageModel, {}),
+  page: types.optional(page, {}),
 }).actions(/**IndexM*/self => {
   return {
     setState(value) {
