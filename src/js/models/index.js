@@ -119,7 +119,7 @@ const indexModel = types.model('indexModel', {
       });
     },
     getProfileTemplate(name) {
-      return resolveIdentifier(profileTemplateModel, self, name);
+      return name && resolveIdentifier(profileTemplateModel, self, name);
     },
     get localStore() {
       return localStore;
@@ -185,13 +185,11 @@ const indexModel = types.model('indexModel', {
         }
         self.setProfiles(storage.profiles);
 
-        const profileFound = self.profiles.some(profile => {
-          return storage.profile === profile.name;
-        });
-        if (!profileFound) {
-          storage.profile = storage.profiles[0].name;
+        let profile = self.getProfileTemplate(storage.profile);
+        if (!profile) {
+          profile = self.profiles[0];
         }
-        self.setProfile(storage.profile);
+        self.setProfile(profile.name);
       }).then(() => {
         self.setState('ready');
       }).catch(err => {
