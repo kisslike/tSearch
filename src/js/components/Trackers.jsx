@@ -97,12 +97,7 @@ import getTrackerIconClassName from "../tools/getTrackerIconClassName";
 
     let iconUrl = null;
     if (profileTracker.trackerModule) {
-      if (profileTracker.trackerModule.meta.icon64) {
-        iconUrl = JSON.stringify(profileTracker.trackerModule.meta.icon64);
-      } else
-      if (profileTracker.trackerModule.meta.icon) {
-        iconUrl = JSON.stringify(profileTracker.trackerModule.meta.icon);
-      }
+      iconUrl = JSON.stringify(profileTracker.trackerModule.getIconUrl());
     }
     if (!iconUrl) {
       iconUrl = blankSvg;

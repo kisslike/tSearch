@@ -62,8 +62,6 @@ const qs = require('querystring');
               <div className="parameter parameter-profile">
                 <div className="profile_box">
                   <ProfileSelect store={this.props.store}/>
-                  <a href="#manageProfiles" title={chrome.i18n.getMessage('manageProfiles')}
-                     className="button-manage-profile"/>
                 </div>
               </div>
               <div className="parameter parameter-tracker">

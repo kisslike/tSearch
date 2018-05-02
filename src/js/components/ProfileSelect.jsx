@@ -1,12 +1,32 @@
 import React from "react";
 import {observer} from "mobx-react/index";
+import ProfileConfig from "./ProfileConfig";
 
 
 @observer class ProfileSelect extends React.Component {
   constructor() {
     super();
 
+    this.state = {
+      editing: false
+    };
+
     this.handleSelect = this.handleSelect.bind(this);
+    this.handleEdit = this.handleEdit.bind(this);
+    this.handleEditClose = this.handleEditClose.bind(this);
+  }
+
+  handleEdit(e) {
+    e.preventDefault();
+    this.setState({
+      editing: true
+    });
+  }
+
+  handleEditClose() {
+    this.setState({
+      editing: false
+    });
   }
 
   handleSelect() {
@@ -24,11 +44,23 @@ import {observer} from "mobx-react/index";
       );
     });
 
-    return (
-      <select ref="select" className="profile__select" defaultValue={store.profile.name} onChange={this.handleSelect}>
+    let editor = null;
+    if (this.state.editing) {
+      editor = (
+        <ProfileConfig key={'editor'} store={this.props.store} onClose={this.handleEditClose}/>
+      );
+    }
+
+    return [
+      <select key={'select'} ref="select" className="profile__select" defaultValue={store.profile.name} onChange={this.handleSelect}>
         {options}
-      </select>
-    );
+      </select>,
+      <a key={'manageBtn'}
+         onClick={this.handleEdit}
+         href="#manageProfiles" title={chrome.i18n.getMessage('manageProfiles')}
+         className="button-manage-profile"/>,
+      editor
+    ];
   }
 }
 

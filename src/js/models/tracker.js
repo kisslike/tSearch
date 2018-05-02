@@ -9,9 +9,10 @@ import TrackerWorker from "../tools/trackerWorker";
  * @property {TrackerInfoM} info
  * @property {string} code
  * Actions:
+ * Views:
+ * @property {function:string} getIconUrl
  * @property {function:TrackerWorker} getWorker
  * @property {function} destroyWorker
- * Views:
  */
 
 /**
@@ -85,6 +86,15 @@ const trackerModel = types.model('trackerModel', {
         worker.destroy();
         worker = null;
       }
+    },
+    getIconUrl() {
+      if (self.meta.icon64) {
+        return self.meta.icon64;
+      } else
+      if (self.meta.icon) {
+        return self.meta.icon;
+      }
+      return '';
     },
     beforeDestroy() {
       this.destroyWorker();
