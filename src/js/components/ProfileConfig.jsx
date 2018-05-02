@@ -11,12 +11,13 @@ const Sortable = require('sortablejs');
     super();
 
     this.state = {
-      page: 'profiles', // profile
+      page: 'profiles', // profiles, edit
       profile: null
     };
 
     this.handleClose = this.handleClose.bind(this);
     this.handleBodyClick = this.handleBodyClick.bind(this);
+    this.handleEdit = this.handleEdit.bind(this);
   }
   componentWillMount() {
     document.body.addEventListener('click', this.handleBodyClick);
@@ -29,6 +30,12 @@ const Sortable = require('sortablejs');
       this.props.onClose();
     }
   }
+  handleEdit(profile) {
+    this.setState({
+      page: 'edit',
+      profile: profile
+    });
+  }
   handleClose(e) {
     e.preventDefault();
     this.props.onClose();
@@ -38,13 +45,16 @@ const Sortable = require('sortablejs');
     switch (this.state.page) {
       case 'profiles': {
         body = (
-          <ProfileChooser ref={'page'} {...this.props} profiles={this.props.store.profiles} onClose={this.handleClose}/>
+          <ProfileChooser ref={'page'} {...this.props} profiles={this.props.store.profiles}
+                          onClose={this.handleClose}
+                          onEdit={this.handleEdit}/>
         );
         break;
       }
-      case 'profile': {
+      case 'edit': {
         body = (
-          <ProfileEditor ref={'page'} {...this.props} profile={this.state.profile} onClose={this.handleClose}/>
+          <ProfileEditor ref={'page'} {...this.props} profile={this.state.profile}
+                         onClose={this.handleClose}/>
         );
         break;
       }
@@ -100,7 +110,7 @@ const Sortable = require('sortablejs');
   }
   render() {
     const profiles = this.props.profiles.map((/**ProfileM*/profile, index) => (
-      <ProfileItem key={index} index={index} profile={profile} store={this.props.store}/>
+      <ProfileItem key={index} index={index} profile={profile} store={this.props.store} onEdit={this.props.onEdit}/>
     ));
 
     return (
@@ -130,6 +140,11 @@ const Sortable = require('sortablejs');
     super();
 
     this.handleRemove = this.handleRemove.bind(this);
+    this.handleEdit = this.handleEdit.bind(this);
+  }
+  handleEdit(e) {
+    e.preventDefault();
+    this.props.onEdit(this.props.profile);
   }
   handleRemove(e) {
     e.preventDefault();
@@ -144,7 +159,9 @@ const Sortable = require('sortablejs');
       <div key={profile.name} data-index={this.props.index} className="item">
         <div className="item__move"/>
         <div className="item__name">{profile.name}</div>
-        <a className="item__cell item__button button-edit" href="#edit" title={chrome.i18n.getMessage('edit')}/>
+        <a className="item__cell item__button button-edit"
+           onClick={this.handleEdit}
+           href="#edit" title={chrome.i18n.getMessage('edit')}/>
         <a className="item__cell item__button button-remove"
            onClick={this.handleRemove}
            href="#remove" title={chrome.i18n.getMessage('remove')}/>
@@ -155,7 +172,8 @@ const Sortable = require('sortablejs');
 
 @observer class ProfileEditor extends React.Component {
   render() {
-    const profile = this.props.profile;
+    const store = /**@type IndexM*/this.props.store;
+    const profile = /**@type ProfileTemplateM*/this.props.profile;
 
     const filterItems = ['all', 'withoutList', 'selected'].map(type => {
       const classList = ['filter__item'];
@@ -163,7 +181,7 @@ const Sortable = require('sortablejs');
         classList.push('item__selected');
       }
       return (
-        <a className={classList.join(' ')} href={'#' + type}>
+        <a key={type} className={classList.join(' ')} href={'#' + type}>
           {chrome.i18n.getMessage('filter_' + type)}
           {' '}
           <span className="item__count">0</span>
@@ -171,8 +189,8 @@ const Sortable = require('sortablejs');
       );
     });
 
-    const trackers = profile.trackes.map(/**ProfileTrackerM*/profileTracker => {
-      const /**TrackerM*/module = profileTracker.trackerModule;
+    const trackers = profile.trackers.map(profileTracker => {
+      const /**TrackerM*/module = store.getTrackerModel(profileTracker.id);
       const classList = ['item'];
       if (0) {
         classList.push('item__selected');
@@ -210,10 +228,10 @@ const Sortable = require('sortablejs');
       }
 
       return (
-        <div className={classList.join(' ')}>
+        <div key={profileTracker.id} className={classList.join(' ')}>
           <div className="item__move"/>
           <div className="item__checkbox">
-            <input type="checkbox" checked={true}/>
+            <input type="checkbox" defaultChecked={true}/>
           </div>
           <img className="item__icon" src={module && module.getIconUrl() || blankSvg}/>
           <div className="item__name">{module && module.meta.name || profileTracker.meta.name}</div>
@@ -237,7 +255,7 @@ const Sortable = require('sortablejs');
         <div className="manager__body">
           <div className="manager__sub_header sub_header__profile">
             <div className="profile__input">
-              <input className="input__input" type="text" value={profile.name}/>
+              <input className="input__input" type="text" defaultValue={profile.name}/>
             </div>
           </div>
           <div className="manager__sub_header sub_header__filter">

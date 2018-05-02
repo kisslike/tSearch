@@ -121,6 +121,9 @@ const indexModel = types.model('indexModel', {
     getProfileTemplate(name) {
       return name && resolveIdentifier(profileTemplateModel, self, name);
     },
+    getTrackerModel(id) {
+      return resolveIdentifier(trackerModel, self, id);
+    },
     get localStore() {
       return localStore;
     },
