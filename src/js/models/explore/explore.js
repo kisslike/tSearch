@@ -73,6 +73,8 @@ const exploreModel = types.model('exploreModel', {
         if (pos !== -1) {
           sections.splice(pos, 0, item);
         }
+      } else {
+        sections.push(item);
       }
 
       self.setSections(sections);
