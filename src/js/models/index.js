@@ -13,6 +13,9 @@ import profileTemplateModel from "./profile/profileTemplate";
 import historyModel from "./history";
 
 const debug = require('debug')('indexModel');
+const promiseLimit = require('promise-limit');
+
+const oneLimit = promiseLimit(1);
 
 /**
  * @typedef {{}} IndexM
@@ -34,10 +37,14 @@ const debug = require('debug')('indexModel');
  * @property {function(string)} setProfile
  * @property {function(TrackerM)} putTrackerModule
  * Views:
+ * @property {function:Promise} saveProfile
+ * @property {function:Promise} saveProfiles
  * @property {Object} localStore
  * @property {function} onProfileChange
  * @property {function(string)} loadTrackerModule
  * @property {function} afterCreate
+ * @property {function(string)} changeProfile
+ * @property {function(string, string, string)} moveProfile
  */
 
 const indexModel = types.model('indexModel', {
@@ -92,6 +99,16 @@ const indexModel = types.model('indexModel', {
   };
 
   return {
+    saveProfile() {
+      return oneLimit(() => {
+        promisifyApi('chrome.storage.local.set')({profile: self.profile.name});
+      });
+    },
+    saveProfiles() {
+      return oneLimit(() => {
+        promisifyApi('chrome.storage.local.set')({profiles: getSnapshot(self.profiles)});
+      });
+    },
     get localStore() {
       return localStore;
     },
@@ -172,10 +189,33 @@ const indexModel = types.model('indexModel', {
     },
     changeProfile(name) {
       self.setProfile(name);
+      return self.saveProfile();
+    },
+    moveProfile(index, prevIndex, nextIndex) {
+      const profiles = self.profiles.slice(0);
+      const item = profiles[index];
+      const prevItem = profiles[prevIndex];
+      const nextItem = profiles[nextIndex];
 
-      promisifyApi('chrome.storage.local.set')({
-        profile: name
-      });
+      profiles.splice(index, 1);
+
+      if (prevItem) {
+        const pos = profiles.indexOf(prevItem);
+        if (pos !== -1) {
+          profiles.splice(pos + 1, 0, item);
+        }
+      } else
+      if (nextItem) {
+        const pos = profiles.indexOf(nextItem);
+        if (pos !== -1) {
+          profiles.splice(pos, 0, item);
+        }
+      } else {
+        profiles.push(item);
+      }
+
+      self.setProfiles(profiles);
+      return self.saveProfiles();
     }
   };
 });

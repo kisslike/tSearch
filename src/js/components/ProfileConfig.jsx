@@ -1,10 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import blankSvg from '../../img/blank.svg';
+import {observer} from "mobx-react/index";
 
 const debug = require('debug')('profileConfig');
+const Sortable = require('sortablejs');
 
-class ProfileConfig extends React.Component {
+@observer class ProfileConfig extends React.Component {
   constructor() {
     super();
 
@@ -36,7 +38,7 @@ class ProfileConfig extends React.Component {
     switch (this.state.page) {
       case 'profiles': {
         body = (
-          <ProfilesChooser ref={'page'} {...this.props} profiles={this.props.store.profiles} onClose={this.handleClose}/>
+          <ProfileChooser ref={'page'} {...this.props} profiles={this.props.store.profiles} onClose={this.handleClose}/>
         );
         break;
       }
@@ -51,11 +53,55 @@ class ProfileConfig extends React.Component {
   }
 }
 
-class ProfilesChooser extends React.Component {
+@observer class ProfileChooser extends React.Component {
+  constructor() {
+    super();
+
+    this.refProfiles = this.refProfiles.bind(this);
+
+    this.sortable = null;
+  }
+  refProfiles(node) {
+    if (!node) {
+      if (this.sortable) {
+        this.sortable.destroy();
+        this.sortable = null;
+        // debug('destroy');
+      }
+    } else
+    if (this.sortable) {
+      // debug('update');
+    } else {
+      // debug('create');
+      const self = this;
+      this.sortable = new Sortable(node, {
+        group: 'profiles',
+        handle: '.item__move',
+        draggable: '.item',
+        animation: 150,
+        onStart() {
+          node.classList.add('sorting');
+        },
+        onEnd(e) {
+          node.classList.remove('sorting');
+
+          const itemNode = e.item;
+          const prevNode = itemNode.previousElementSibling;
+          const nextNode = itemNode.nextElementSibling;
+          const index = parseInt(itemNode.dataset.index, 10);
+          const prev = prevNode && parseInt(prevNode.dataset.index, 10);
+          const next = nextNode && parseInt(nextNode.dataset.index, 10);
+
+          const store = /**IndexM*/self.props.store;
+          store.moveProfile(index, prev, next);
+        }
+      });
+    }
+  }
   render() {
-    const profiles = this.props.profiles.map(/**ProfileM*/profile => {
+    const profiles = this.props.profiles.map((/**ProfileM*/profile, index) => {
       return (
-        <div key={profile.name} className="item">
+        <div key={profile.name} data-index={index} className="item">
           <div className="item__move"/>
           <div className="item__name">{profile.name}</div>
           <a className="item__cell item__button button-edit" href="#edit" title={chrome.i18n.getMessage('edit')}/>
@@ -74,7 +120,7 @@ class ProfilesChooser extends React.Component {
           <div className="manager__sub_header manager__sub_header-profiles">
             <a className="manager__new_profile" href="#new_profile">{chrome.i18n.getMessage('newProfile')}</a>
           </div>
-          <div className="manager__profiles">
+          <div ref={this.refProfiles} className="manager__profiles">
             {profiles}
           </div>
         </div>
@@ -86,7 +132,7 @@ class ProfilesChooser extends React.Component {
   }
 }
 
-class ProfileEditor extends React.Component {
+@observer class ProfileEditor extends React.Component {
   render() {
     const profile = this.props.profile;
 
