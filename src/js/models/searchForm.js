@@ -70,16 +70,16 @@ const searchFormModel = types.model('searchFormModel', {
     const history = getRoot(self).history;
     if (history) {
       promise = history.readyPromise.then(() => {
-        return {history: history.getHistory()};
+        return history.getHistory();
       });
     } else {
       promise = promisifyApi('chrome.storage.local.get')({
         history: {}
       }).then(({history}) => {
-        return {history: Array.from(Object.values(history))};
+        return Array.from(Object.values(history));
       });
     }
-    promise = promise.then(({history}) => {
+    promise = promise.then(history => {
       history.sort(({count: a}, {count: b}) => {
         return a === b ? 0 : a < b ? 1 : -1;
       });
