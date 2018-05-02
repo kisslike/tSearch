@@ -2,6 +2,9 @@ import {types, getSnapshot} from "mobx-state-tree";
 import promisifyApi from "../tools/promisifyApi";
 
 const debug = require('debug')('historyModel');
+const promiseLimit = require('promise-limit');
+
+const oneLimit = promiseLimit(1);
 
 /**
  * @typedef {{}} HistoryM
@@ -85,7 +88,6 @@ const historyModel = types.model('historyModel', {
   };
 }).views(self => {
   let readyPromise = null;
-  let lastSave = Promise.resolve();
   return {
     get readyPromise() {
       return readyPromise;
@@ -100,11 +102,9 @@ const historyModel = types.model('historyModel', {
       return q;
     },
     save() {
-      return lastSave = lastSave.then(() => {
+      return oneLimit(() => {
         return promisifyApi('chrome.storage.local.set')({
           history: getSnapshot(self.history)
-        }).catch(err => {
-          debug('save error', err);
         });
       });
     },
