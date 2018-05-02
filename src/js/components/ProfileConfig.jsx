@@ -240,8 +240,8 @@ const Sortable = require('sortablejs');
           {supportBtn}
           {homepageBtn}
           {author}
-          <a className="item__cell item__button button-edit" href="#edit">{chrome.i18n.getMessage('edit')}</a>
-          <a className="item__cell item__button button-remove" href="#remove">{chrome.i18n.getMessage('remove')}</a>
+          <a className="item__cell item__button button-edit" href="#edit" title={chrome.i18n.getMessage('edit')}/>
+          <a className="item__cell item__button button-remove" href="#remove" title={chrome.i18n.getMessage('remove')}/>
         </div>
       );
     });
