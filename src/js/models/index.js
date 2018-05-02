@@ -36,9 +36,11 @@ const oneLimit = promiseLimit(1);
  * @property {function} clearSearch
  * @property {function(string)} setProfile
  * @property {function(TrackerM)} putTrackerModule
+ * @property {function(string)} removeProfile
  * Views:
  * @property {function:Promise} saveProfile
  * @property {function:Promise} saveProfiles
+ * @property {function(string):ProfileM} getProfileTemplate
  * @property {Object} localStore
  * @property {function} onProfileChange
  * @property {function(string)} loadTrackerModule
@@ -79,14 +81,21 @@ const indexModel = types.model('indexModel', {
       }
     },
     setProfile(name) {
-      const profileItem = resolveIdentifier(profileTemplateModel, self, name);
+      const profileItem = self.getProfileTemplate(name);
       if (profileItem) {
         self.profile = getSnapshot(profileItem);
       }
     },
     putTrackerModule(module) {
       self.trackers.put(module);
-    }
+    },
+    removeProfile(name) {
+      const profile = self.getProfileTemplate(name);
+      if (profile) {
+        destroy(profile);
+      }
+      self.saveProfiles();
+    },
   };
 }).views(/**IndexM*/self => {
   const localStore = {
@@ -108,6 +117,9 @@ const indexModel = types.model('indexModel', {
       return oneLimit(() => {
         promisifyApi('chrome.storage.local.set')({profiles: getSnapshot(self.profiles)});
       });
+    },
+    getProfileTemplate(name) {
+      return resolveIdentifier(profileTemplateModel, self, name);
     },
     get localStore() {
       return localStore;
@@ -216,7 +228,7 @@ const indexModel = types.model('indexModel', {
 
       self.setProfiles(profiles);
       return self.saveProfiles();
-    }
+    },
   };
 });
 

@@ -99,16 +99,9 @@ const Sortable = require('sortablejs');
     }
   }
   render() {
-    const profiles = this.props.profiles.map((/**ProfileM*/profile, index) => {
-      return (
-        <div key={profile.name} data-index={index} className="item">
-          <div className="item__move"/>
-          <div className="item__name">{profile.name}</div>
-          <a className="item__cell item__button button-edit" href="#edit" title={chrome.i18n.getMessage('edit')}/>
-          <a className="item__cell item__button button-remove" href="#remove" title={chrome.i18n.getMessage('remove')}/>
-        </div>
-      );
-    });
+    const profiles = this.props.profiles.map((/**ProfileM*/profile, index) => (
+      <ProfileItem key={index} index={index} profile={profile} store={this.props.store}/>
+    ));
 
     return (
       <div ref={'body'} className="manager">
@@ -127,6 +120,34 @@ const Sortable = require('sortablejs');
         <div className="manager__footer">
           <a className="button manager__footer__btn">{chrome.i18n.getMessage('save')}</a>
         </div>
+      </div>
+    );
+  }
+}
+
+@observer class ProfileItem extends React.Component {
+  constructor() {
+    super();
+
+    this.handleRemove = this.handleRemove.bind(this);
+  }
+  handleRemove(e) {
+    e.preventDefault();
+    const /**@type IndexM*/store = this.props.store;
+    const /**@type ProfileM*/profile = this.props.profile;
+    store.removeProfile(profile.name);
+  }
+  render() {
+    const /**@type ProfileM*/profile = this.props.profile;
+
+    return (
+      <div key={profile.name} data-index={this.props.index} className="item">
+        <div className="item__move"/>
+        <div className="item__name">{profile.name}</div>
+        <a className="item__cell item__button button-edit" href="#edit" title={chrome.i18n.getMessage('edit')}/>
+        <a className="item__cell item__button button-remove"
+           onClick={this.handleRemove}
+           href="#remove" title={chrome.i18n.getMessage('remove')}/>
       </div>
     );
   }

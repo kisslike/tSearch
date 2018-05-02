@@ -36,13 +36,22 @@ import ProfileConfig from "./ProfileConfig";
   }
 
   render() {
-    const store = this.props.store;
+    const /**@type IndexM*/store = this.props.store;
     const options = [];
+    let foundActive = false;
     store.profiles.forEach(profile => {
+      if (!foundActive && profile.name === store.profile.name) {
+        foundActive = true;
+      }
       options.push(
         <option key={profile.name} value={profile.name}>{profile.name}</option>
       );
     });
+    if (!foundActive) {
+      options.push(
+        <option key={store.profile.name} value={store.profile.name}>{store.profile.name}</option>
+      );
+    }
 
     let editor = null;
     if (this.state.editing) {
